@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tinyCUCM"
+version = "0.1.2"
+authors = [
+  { name="Luarvick", email="lu.luarvick@gmail.com" },
+]
+description = "Cisco Unified Call Manager 11.5 AXL Methods Collection."
+readme = "README.md"
+dependencies = [
+    "zeep==4.2.1",
+    "pydantic==2.4.2"
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/luarvick/tinyCUCM"
+Issues = "https://github.com/luarvick/tinyCUCM/issues"
