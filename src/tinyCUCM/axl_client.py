@@ -163,6 +163,100 @@ class CucmAxlClient(CucmSettings):
 
         return serialize_object(self._axl.getTransPattern(**kwargs)["return"]["transPattern"], dict)
 
+    @cucm_logging
+    def axlRemoveDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"name": "name"}`
+        :return:
+        """
+
+        return self._axl.removeDeviceProfile(**kwargs)
+
+    @cucm_logging
+    def axlRemoveLine(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"pattern": "pattern"}`
+                            or
+                            `kwargs = {
+                                "pattern": "pattern",
+                                "routePartitionName": "routePartitionName"
+                            }`
+        :return:
+        """
+
+        return self._axl.removeLine(**kwargs)
+
+    @cucm_logging
+    def axlRemovePhone(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"name": "name"}`
+        :return:
+        """
+
+        return self._axl.removePhone(**kwargs)
+
+    @cucm_logging
+    def axlRemoveRemoteDestination(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"destination": "destination"}`
+        :return:
+        """
+
+        return self._axl.removeRemoteDestination(**kwargs)
+
+    @cucm_logging
+    def axlRemoveRemoteDestinationProfile(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"name": "name"}`
+        :return:
+        """
+
+        return self._axl.removeRemoteDestinationProfile(**kwargs)
+
+    @cucm_logging
+    def axlRemoveTranslationPattern(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"pattern": "pattern"}`
+                            or
+                            `kwargs = {
+                                "pattern": "pattern",
+                                "routePartitionName": "routePartitionName"
+                            }`
+        :return:
+        """
+
+        return self._axl.removeTransPattern(**kwargs)
+
     def sqlExecuteQuery(self, sql_query: str) -> Union[tuple[dict, ...], None]:
 
         """

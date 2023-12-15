@@ -149,9 +149,21 @@ print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-..........
 
 #### Remove Methods
 
+Common `Remove` Methods:
+* `axlRemoveDeviceProfile` -  expected: `uuid` or `name`
+* `axlRemoveLine` - expected: `uuid` or `pattern` or `pattern` and `routePartitionName`
+* `axlRemovePhone` - expected: `uuid` or `name`
+* `axlRemoveRemoteDestination` - expected: `uuid` or `destination`
+* `axlRemoveRemoteDestinationProfile` - expected: `uuid` or `name`
+* `axlRemoveTranslationPattern` - expected: `uuid` or `pattern` or `pattern` and `routePartitionName`
+
 ```python
 cucm = ...
-print("Result:", cucm)
+print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-............"}))
+# Result: {
+#     'return': '{........-....-....-....-............}',
+#     'sequence': None
+# }
 # Result: {"uuid": "...", ..., "": ""} 
 ```
 
