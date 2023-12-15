@@ -21,11 +21,18 @@
                 <li><a href="#instance-create">Instance Create</a></li>
                 <li><a href="#axl-collection">AXL Collection</a></li>
                 <ul>
+                    <li><a href="#add-methods">Add Methods</a></li>
+                    <li><a href="#do-methods">Do Methods</a></li>
                     <li><a href="#get-methods">Get Methods</a></li>
                     <li><a href="#remove-methods">Remove Methods</a></li>
                     <li><a href="#update-methods">Update Methods</a></li>
                 </ul>
                 <li><a href="#sql-collection">SQL Collection</a></li>
+                <ul>
+                    <li><a href="#execute-query">Execute Query</a></li>
+                    <li><a href="#update-query">Update Query</a></li>
+                    <li><a href="#predefined-queries">Predefined Queries</a></li>
+                </ul>
                 <li><a href="#create-yor-own-methods">Create Your Own Methods</a></li>
             </ul>
         </li>
@@ -40,7 +47,8 @@
 ## About The Project
 
 This project is for informational purposes only and is intended to study the capabilities of the Cisco Unified Call Manager's API. 
-Methods have been tested on CUCM ver. 11.5.
+Methods have been tested on CUCM ver. 11.5.\
+[Cisco UCM AXL Schemas & SQL Data Dictionaries Documentation](https://developer.cisco.com/docs/axl/#!archived-references)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -63,10 +71,10 @@ Installation is as simple as:
 ## Usage
 
 
-
 ### Instance Create
 
-Download `Cisco AXL Toolkit` from the station (`Application` -> `Plugins`) and put it into the folder with your project.
+Download `Cisco AXL Toolkit` from the station (`Application` -> `Plugins`) and put it into the folder with your project.\
+Create an Cisco UCM application account or local end user with `Standard CCM Super Users` privileges (Assing Access Control Group to `Your-CUCM-Account`).\
 Create a new instance of the `CucmAxlClient` class and assigns this object to the local variable `cucm`.
 
 <span style="color:#ff0000">**Don't store sensitive information in source code. For example use ".env" file.**</span>
@@ -112,6 +120,20 @@ if __name__ == "__main__":
 
 ### AXL Collection
 
+#### Add Methods
+
+Common `Add` Methods:
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+#### Do Methods
+
+Common `Do` Methods:
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 #### Get Methods
 
 Common `Get` Methods:
@@ -147,6 +169,9 @@ print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-..........
 # }
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 #### Remove Methods
 
 Common `Remove` Methods:
@@ -164,15 +189,19 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 #     'return': '{........-....-....-....-............}',
 #     'sequence': None
 # }
-# Result: {"uuid": "...", ..., "": ""} 
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 #### Update Methods
+
+Common `Update` Methods:
 
 ```python
 cucm = ...
 print("Result:", cucm)
-# Result: {"uuid": "...", ..., "": ""} 
+# Result: {"uuid": "........-....-....-....-............", ...,} 
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -180,10 +209,133 @@ print("Result:", cucm)
 
 ### SQL Collection
 
+
+#### Execute Query
+
+```python
+cucm = ...
+sql_query = """
+    SELECT d.pkid, d.name, d.description
+    FROM device d
+    WHERE d.name LIKE '%your_value%'
+"""
+print(cucm.sqlExecuteQuery(sql_query=sql_query))
+# Result: (
+#     {'pkid': '........-....-....-....-............', 'name': 'SEP...', 'description': '...'},
+#     {'pkid': '........-....-....-....-............', 'name': 'RDP...', 'description': '...'}, 
+#     {'pkid': '........-....-....-....-............', 'name': 'UDP...', 'description': '...'},
+#     {'pkid': '........-....-....-....-............', 'name': 'TCT...', 'description': '...'},
+#     {'pkid': '........-....-....-....-............', 'name': 'BOT...', 'description': '...'},
+#     {'pkid': '........-....-....-....-............', 'name': 'CSF...', 'description': '...'},
+#     {'pkid': '........-....-....-....-............', 'name': 'TAB...', 'description': '...'},
+#     {'pkid': '........-....-....-....-............', 'name': 'CIPC...', 'description': '...'},
+# )
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+#### Update Query
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+#### Predefined Queries
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ### Create Your Own Methods
+
+<span style="color:#ff0000">**Don't store sensitive information in source code. For example use ".env" file.**</span>
+
+```python
+from pathlib import Path
+from typing import Union
+from tinyCUCM import CucmSettings, cucm_logging
+
+
+BASE_DIR = Path(__file__).resolve().parent
+settings = {
+    "pub_fqdn": "cucm.example.com",
+    "pub_version": "11.5",
+    "user_login": "Your-CUCM-Account",
+    "user_password": "You%wILL#&neVeR!gUEss",
+    "toolkit_path": BASE_DIR / "axlsqltoolkit",
+    "cert_path": BASE_DIR / "cucm.crt",
+    "session_verify": False,
+    "session_timeout": 15,
+}
+
+
+class CucmAxlCustom(CucmSettings):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+    @cucm_logging
+    def axlYourOwnGetMethod(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Your Own Get Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"name": "name"}`
+        :return:
+        """
+
+        return self._axl.getCallManager(**kwargs)["return"]
+
+if __name__ == "__main__":
+    cucm = CucmAxlCustom(**settings)
+    print("Result:", cucm.axlYourOwnGetMethod(**{"uuid": "........-....-....-....-............"}))
+    # Result: {
+    #     'callManager': {
+    #         'name': 'CM_...',
+    #         'description': '...',
+    #         'autoRegistration': {
+    #             'startDn': None,
+    #             'endDn': None,
+    #             'nextDn': None,
+    #             'routePartitionName': {
+    #                 '_value_1': None,
+    #                 'uuid': None
+    #             },
+    #             'e164Mask': None,
+    #             'autoRegistrationEnabled': None,
+    #             'universalDeviceTemplate': {
+    #                 '_value_1': None,
+    #                 'uuid': None
+    #             },
+    #             'lineTemplate': {
+    #                 '_value_1': None,
+    #                 'uuid': None
+    #             }
+    #         },
+    #         'ports': {
+    #             'ethernetPhonePort': ...,
+    #             'mgcpPorts': {
+    #                 'listen': ...,
+    #                 'keepAlive': ...
+    #             },
+    #             'sipPorts': {
+    #                 'sipPhonePort': ...,
+    #                 'sipPhoneSecurePort': ...
+    #             }
+    #         },
+    #         'processNodeName': {
+    #             '_value_1': '...',
+    #             'uuid': '{........-....-....-....-............}'
+    #         },
+    #         'lbmGroup': {
+    #             '_value_1': None,
+    #             'uuid': None
+    #         },
+    #         'ctiid': ...,
+    #         'uuid': '{........-....-....-....-............}'
+    #     }
+    # }
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
