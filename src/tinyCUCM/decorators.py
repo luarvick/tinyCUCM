@@ -59,8 +59,9 @@ def cucm_logging(cucm_method):
                 raise CucmUnauthorizedError("Unauthorized error occurred.")
             elif "<axlcode>5003</axlcode>" in history or "<axlcode>5007</axlcode>" in history:
                 # Only for AXL Requests - 404 Not Found
-                # Get Request - AXLCode: <axlcode>5007</axlcode> ("Item not valid: The specified {{CUCM Object}} was not found")
-                # Update Request - AXLCode: <axlcode>5003</axlcode> ("{{CUCM Object}} not found")
+                # Do or Get Request - AXLCode: <axlcode>5007</axlcode>
+                # ("Item not valid: The specified {{CUCM Object}} was not found")
+                # UpdateRequest - AXLCode: <axlcode>5003</axlcode> ("{{CUCM Object}} not found")
                 logging.warning(log_message.format(message=f"Error Detail:\n{err}."))
                 return None
             else:

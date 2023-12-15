@@ -1,4 +1,5 @@
 from typing import Iterable, Union
+from uuid import UUID
 from zeep.helpers import serialize_object
 from .decorators import cucm_logging
 from .settings import CucmSettings
@@ -69,14 +70,71 @@ class CucmAxlClient(CucmSettings):
         return tuple(sorted([str(method[0]) for method in self._axl]))
 
     @cucm_logging
+    def axlDoAuthenticateUser(self, **kwargs: dict):
+
+        """
+        AXL Do Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"userid": "str", "password": "str"}`
+                            or
+                            `kwargs = {"userid": "str", "pin": "str"}`
+        :return:
+        """
+
+        return self._axl.doAuthenticateUser(**kwargs)
+
+    @cucm_logging
+    def axlDoDeviceLogin(self, **kwargs: dict):
+
+        """
+        AXL Do Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {
+                                "deviceName": "str",
+                                "loginDuration": "str",
+                                "profileName": "str",
+                                "userid": "str"
+                            }`
+        :return:
+        """
+
+        return self._axl.doDeviceLogin(**kwargs)
+
+    @cucm_logging
+    def axlDoDeviceLogout(self, **kwargs: dict):
+
+        """
+        AXL Do Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"deviceName": "str"}`
+        :return:
+        """
+
+        return self._axl.doDeviceLogout(**kwargs)
+
+    @cucm_logging
+    def axlDoLdapSync(self, **kwargs: dict):
+
+        """
+        AXL Do Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid.UUID", "sync": "bool"}`
+                            or
+                            `kwargs = {"name": "str", "sync": "bool"}`
+        :return:
+        """
+
+        return self._axl.doLdapSync(**kwargs)
+
+    @cucm_logging
     def axlGetDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"name": "name"}`
+                            `kwargs = {"name": "str"}`
         :return:
         """
 
@@ -88,13 +146,13 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Get Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"pattern": "pattern"}`
+                            `kwargs = {"pattern": "str"}`
                             or
                             `kwargs = {
-                                "pattern": "pattern",
-                                "routePartitionName": "routePartitionName"
+                                "pattern": "str",
+                                "routePartitionName": "str"
                             }`
         :return:
         """
@@ -107,9 +165,9 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Get Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"name": "name"}`
+                            `kwargs = {"name": "str"}`
         :return:
         """
 
@@ -121,9 +179,9 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Get Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"destination": "destination"}`
+                            `kwargs = {"destination": "str"}`
         :return:
         """
 
@@ -135,9 +193,9 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Get Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"name": "name"}`
+                            `kwargs = {"name": "str"}`
         :return:
         """
 
@@ -150,13 +208,13 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Get Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"pattern": "pattern"}`
+                            `kwargs = {"pattern": "str"}`
                             or
                             `kwargs = {
-                                "pattern": "pattern",
-                                "routePartitionName": "routePartitionName"
+                                "pattern": "str",
+                                "routePartitionName": "str"
                             }`
         :return:
         """
@@ -169,9 +227,9 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Remove Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"name": "name"}`
+                            `kwargs = {"name": "str"}`
         :return:
         """
 
@@ -183,13 +241,13 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Remove Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"pattern": "pattern"}`
+                            `kwargs = {"pattern": "str"}`
                             or
                             `kwargs = {
-                                "pattern": "pattern",
-                                "routePartitionName": "routePartitionName"
+                                "pattern": "str",
+                                "routePartitionName": "str"
                             }`
         :return:
         """
@@ -202,9 +260,9 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Remove Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"name": "name"}`
+                            `kwargs = {"name": "str"}`
         :return:
         """
 
@@ -216,9 +274,9 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Remove Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"destination": "destination"}`
+                            `kwargs = {"destination": "str"}`
         :return:
         """
 
@@ -230,9 +288,9 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Remove Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"name": "name"}`
+                            `kwargs = {"name": "str"}`
         :return:
         """
 
@@ -244,13 +302,13 @@ class CucmAxlClient(CucmSettings):
         """
         AXL Remove Object Method.
         :param kwargs:      Expected Fields:
-                            `kwargs = {"uuid": "uuid"}`
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            `kwargs = {"pattern": "pattern"}`
+                            `kwargs = {"pattern": "str"}`
                             or
                             `kwargs = {
-                                "pattern": "pattern",
-                                "routePartitionName": "routePartitionName"
+                                "pattern": "str",
+                                "routePartitionName": "str"
                             }`
         :return:
         """

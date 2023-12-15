@@ -130,6 +130,30 @@ Common `Add` Methods:
 #### Do Methods
 
 Common `Do` Methods:
+* `axlDoAuthenticateUser` -  expected keys: (`userid`, `password`) or (`userid`, `pin`)
+* `axlDoDeviceLogin` -  expected keys: (`deviceName`, `loginDuration`, `profileName`, `userId`)\
+    Key `loginDuration: str = "0"` - Logout disabled\
+    Key `loginDuration: str = "36000"` - Logout after 10h
+* `axlDoDeviceLogout` -  expected keys: `deviceName`
+* `axlDoLdapSync` -  expected keys: (`uuid`, `sync`) or (`name`, `sync`)\
+    Key `sync: bool = True` - Start Synchronization\
+    Key `sync: bool = False` - Cancel the Synchronization which is currently under process
+
+```python
+cucm = ...
+print("Result:", cucm.axlDoAuthenticateUser(**{"userid": "...", "password": "..."}))
+# Result: {'return': {'userAuthenticated': 'true', 'code': 0, 'daysToExpiry': 0, 'isWarningNeeded': 'false'}, 'sequence': None}
+# Result: {'return': {'userAuthenticated': 'false', 'code': 1, 'daysToExpiry': 0, 'isWarningNeeded': 'false'}, 'sequence': None}
+
+print("Result:", cucm.axlDoDeviceLogin(**{"deviceName": "SEP...", "loginDuration": "...", "profileName":"...", "userid": "..."}))
+# Result {'return': '{........-....-....-....-............}', 'sequence': None}
+
+print("Result:", cucm.axlDoDeviceLogout(**{"deviceName": "SEP..."}))
+# Result {'return': '{........-....-....-....-............}', 'sequence': None}
+
+print("Result:", cucm.axlDoLdapSync(**{"uuid": "........-....-....-....-............", "sync": True}))
+# Result: {'return': 'Sync initiated successfully', 'sequence': None}
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -137,12 +161,12 @@ Common `Do` Methods:
 #### Get Methods
 
 Common `Get` Methods:
-* `axlGetDeviceProfile` -  expected: `uuid` or `name`
-* `axlGetLine` - expected: `uuid` or `pattern` or `pattern` and `routePartitionName`
-* `axlGetPhone` - expected: `uuid` or `name`
-* `axlGetRemoteDestination` - expected: `uuid` or `destination`
-* `axlGetRemoteDestinationProfile` - expected: `uuid` or `name`
-* `axlGetTranslationPattern` - expected: `uuid` or `pattern` or `pattern` and `routePartitionName`
+* `axlGetDeviceProfile` -  expected keys: `uuid` or `name`
+* `axlGetLine` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlGetPhone` - expected keys: `uuid` or `name`
+* `axlGetRemoteDestination` - expected keys: `uuid` or `destination`
+* `axlGetRemoteDestinationProfile` - expected keys: `uuid` or `name`
+* `axlGetTranslationPattern` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
 
 ```python
 cucm = ...
@@ -175,12 +199,12 @@ print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-..........
 #### Remove Methods
 
 Common `Remove` Methods:
-* `axlRemoveDeviceProfile` -  expected: `uuid` or `name`
-* `axlRemoveLine` - expected: `uuid` or `pattern` or `pattern` and `routePartitionName`
-* `axlRemovePhone` - expected: `uuid` or `name`
-* `axlRemoveRemoteDestination` - expected: `uuid` or `destination`
-* `axlRemoveRemoteDestinationProfile` - expected: `uuid` or `name`
-* `axlRemoveTranslationPattern` - expected: `uuid` or `pattern` or `pattern` and `routePartitionName`
+* `axlRemoveDeviceProfile` -  expected keys: `uuid` or `name`
+* `axlRemoveLine` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlRemovePhone` - expected keys: `uuid` or `name`
+* `axlRemoveRemoteDestination` - expected keys: `uuid` or `destination`
+* `axlRemoveRemoteDestinationProfile` - expected keys: `uuid` or `name`
+* `axlRemoveTranslationPattern` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
 
 ```python
 cucm = ...

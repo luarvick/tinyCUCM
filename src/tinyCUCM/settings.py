@@ -51,7 +51,7 @@ class CucmSettings:
         :return:
         """
 
-        history_error = "Unexpected history error occurred."
+        history_error = "Unexpected history error occurred"
         try:
             for item in [self.__cucm_history.last_sent, self.__cucm_history.last_received]:
                 try:
