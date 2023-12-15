@@ -62,11 +62,106 @@ class CucmAxlClient(CucmSettings):
     def axlAllMethods(self) -> Union[tuple[str, ...], None]:
 
         """
-        All Methods Collection.
+        AXL All Methods Collection.
         :return:
         """
 
         return tuple(sorted([str(method[0]) for method in self._axl]))
+
+    @cucm_logging
+    def axlGetDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"name": "name"}`
+        :return:
+        """
+
+        return serialize_object(self._axl.getDeviceProfile(**kwargs)["return"]["deviceProfile"], dict)
+
+    @cucm_logging
+    def axlGetLine(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"pattern": "pattern"}`
+                            or
+                            `kwargs = {
+                                "pattern": "pattern",
+                                "routePartitionName": "routePartitionName"
+                            }`
+        :return:
+        """
+
+        return serialize_object(self._axl.getLine(**kwargs)["return"]["line"], dict)
+
+    @cucm_logging
+    def axlGetPhone(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"name": "name"}`
+        :return:
+        """
+
+        return serialize_object(self._axl.getPhone(**kwargs)["return"]["phone"], dict)
+
+    @cucm_logging
+    def axlGetRemoteDestination(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"destination": "destination"}`
+        :return:
+        """
+
+        return serialize_object(self._axl.getRemoteDestination(**kwargs)["return"]["remoteDestination"], dict)
+
+    @cucm_logging
+    def axlGetRemoteDestinationProfile(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"name": "name"}`
+        :return:
+        """
+
+        return serialize_object(
+            self._axl.getRemoteDestinationProfile(**kwargs)["return"]["remoteDestinationProfile"], dict)
+
+    @cucm_logging
+    def axlGetTranslationPattern(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid"}`
+                            or
+                            `kwargs = {"pattern": "pattern"}`
+                            or
+                            `kwargs = {
+                                "pattern": "pattern",
+                                "routePartitionName": "routePartitionName"
+                            }`
+        :return:
+        """
+
+        return serialize_object(self._axl.getTransPattern(**kwargs)["return"]["transPattern"], dict)
 
     def sqlExecuteQuery(self, sql_query: str) -> Union[tuple[dict, ...], None]:
 
