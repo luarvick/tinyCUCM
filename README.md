@@ -25,6 +25,8 @@
                     <li><a href="#do-methods">Do Methods</a></li>
                     <li><a href="#get-methods">Get Methods</a></li>
                     <li><a href="#remove-methods">Remove Methods</a></li>
+                    <li><a href="#reset-methods">Reset Methods</a></li>
+                    <li><a href="#restart-methods">Restart Methods</a></li>
                     <li><a href="#update-methods">Update Methods</a></li>
                 </ul>
                 <li><a href="#sql-collection">SQL Collection</a></li>
@@ -122,22 +124,22 @@ if __name__ == "__main__":
 
 #### Add Methods
 
-Common `Add` Methods:
+`Add` Methods:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Do Methods
 
-Common `Do` Methods:
+`Do` Methods:
 * `axlDoAuthenticateUser` -  expected keys: (`userid`, `password`) or (`userid`, `pin`)
 * `axlDoDeviceLogin` -  expected keys: (`deviceName`, `loginDuration`, `profileName`, `userId`)\
-    Key `loginDuration: str = "0"` - Logout disabled\
-    Key `loginDuration: str = "36000"` - Logout after 10h
+  * Key `loginDuration: str = "0"` - Logout disabled\
+  * Key `loginDuration: str = "36000"` - Logout after 10h
 * `axlDoDeviceLogout` -  expected keys: `deviceName`
 * `axlDoLdapSync` -  expected keys: (`uuid`, `sync`) or (`name`, `sync`)\
-    Key `sync: bool = True` - Start Synchronization\
-    Key `sync: bool = False` - Cancel the Synchronization which is currently under process
+  * Key `sync: bool = True` - Start Synchronization\
+  * Key `sync: bool = False` - Cancel the Synchronization which is currently under process
 
 ```python
 cucm = ...
@@ -160,7 +162,7 @@ print("Result:", cucm.axlDoLdapSync(**{"uuid": "........-....-....-....-........
 
 #### Get Methods
 
-Common `Get` Methods:
+`Get` Methods:
 * `axlGetDeviceProfile` -  expected keys: `uuid` or `name`
 * `axlGetLine` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
 * `axlGetPhone` - expected keys: `uuid` or `name`
@@ -198,7 +200,7 @@ print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-..........
 
 #### Remove Methods
 
-Common `Remove` Methods:
+`Remove` Methods:
 * `axlRemoveDeviceProfile` -  expected keys: `uuid` or `name`
 * `axlRemoveLine` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
 * `axlRemovePhone` - expected keys: `uuid` or `name`
@@ -218,9 +220,26 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+#### Reset Methods
+
+`Reset` Methods:
+* `axlResetPhone` - expected keys: `uuid` or `name`
+
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+#### Restart Methods
+
+`Restart` Methods:
+* `axlRestartPhone` - expected keys: `uuid` or `name`
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 #### Update Methods
 
-Common `Update` Methods:
+`Update` Methods:
 
 ```python
 cucm = ...
@@ -265,6 +284,13 @@ print(cucm.sqlExecuteQuery(sql_query=sql_query))
 
 
 #### Predefined Queries
+
+`Search` Methods:
+* `sqlSearchCallPickupGroup`
+* `sqlSearchDevice`
+* `sqlSearchEndUser`
+* `sqlSearchLineGroup`
+* `sqlSearchTranspationPattern`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

@@ -1,8 +1,14 @@
 from typing import Iterable, Union
-from uuid import UUID
 from zeep.helpers import serialize_object
 from .decorators import cucm_logging
 from .settings import CucmSettings
+from .sql_models import (
+    CucmSqlSearchCallPickupGroupModel,
+    CucmSqlSearchDeviceModel,
+    CucmSqlSearchEndUserModel,
+    CucmSqlSearchLineGroupModel,
+    CucmSqlSearchTranslationPatternModel,
+)
 
 
 """ ######################################################### """
@@ -49,7 +55,7 @@ class CucmAxlClient(CucmSettings):
         return resp_result
 
     @cucm_logging
-    def __cucm_sql_execute(self, sql_query: str) -> Union[tuple, None]:
+    def __cucm_sql_execute(self, sql_query: str) -> Union[tuple[dict, ...], None]:
 
         """
         Base AXL SQL Execute method for request to the Cisco UCM DB Informix.
@@ -315,6 +321,34 @@ class CucmAxlClient(CucmSettings):
 
         return self._axl.removeTransPattern(**kwargs)
 
+    @cucm_logging
+    def axlResetPhone(self, **kwargs: dict):
+
+        """
+        AXL Reset Object Method.
+        :param kwargs:      Minimum Required Parameters:
+                            param = {"uuid": "uuid.UUID"}
+                            or
+                            param = {"name": "str"}
+        :return:
+        """
+
+        return self._axl.resetPhone(**kwargs)
+
+    @cucm_logging
+    def axlRestartPhone(self, **kwargs: dict):
+
+        """
+        AXL Restart Object Method.
+        :param kwargs:      Minimum Required Parameters:
+                            param = {"uuid": "uuid.UUID"}
+                            or
+                            param = {"name": "str"}
+        :return:
+        """
+
+        return self._axl.restartPhone(**kwargs)
+
     def sqlExecuteQuery(self, sql_query: str) -> Union[tuple[dict, ...], None]:
 
         """
@@ -323,4 +357,175 @@ class CucmAxlClient(CucmSettings):
         :return:
         """
 
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchCallPickupGroup(self, **kwargs) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Search Object Method.
+
+        * criterion: `Name`, `Description`, `Pattern`, `Member Line Number`, `Member Line Description`
+        * value: Search Value String
+
+        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :return:
+        """
+
+        validated_data = CucmSqlSearchCallPickupGroupModel(**kwargs).model_dump()
+        sql_query = """SELECT cpg.pkid AS uuid,
+                              cpg.name,
+                              npg.description,
+                              npg.dnorpattern AS pattern,
+                              rp.name AS partition,
+                              npm.dnorpattern AS line,
+                              rpm.name AS line_partition,
+                              npm.description AS line_description
+                         FROM pickupgroup cpg
+                    LEFT JOIN numplan npg ON cpg.fknumplan_pickup = npg.pkid
+                    LEFT JOIN routepartition rp ON npg.fkroutepartition = rp.pkid
+                    LEFT JOIN pickupgrouplinemap pglm ON pglm.fkpickupgroup = cpg.pkid
+                    LEFT JOIN numplan npm ON pglm.fknumplan_line = npm.pkid
+                    LEFT JOIN routepartition rpm ON npm.fkroutepartition = rpm.pkid
+                        WHERE LOWER({obj}) LIKE '%{val}%'
+                          AND npg.tkpatternusage = '4'
+                     ORDER BY cpg.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchDevice(self, **kwargs: dict) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Search Object Method.
+
+        * criterion:Search By: `Name`, `Description`, `Line Number`, `Line Description`, `Userid`, `Device Pool`,
+          `Device Type`
+        * value: Search Value String
+
+        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :return:
+        """
+
+        validated_data = CucmSqlSearchDeviceModel(**kwargs).model_dump()
+        sql_query = """SELECT d.pkid,
+                              d.name,
+                              d.description,
+                              dp.name AS device_pool,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description,
+                              tc.name AS class,
+                              tm.name AS model,
+                              eu.pkid AS pkid_end_user,
+                              eu.userid, 
+                              eu.displayname AS display_name,
+                              eu_rdp.pkid AS pkid_end_user_rdp,
+                              eu_rdp.userid AS userid_rdp,
+                              eu_rdp.displayname AS display_name_rdp
+                         FROM device d
+                    LEFT JOIN devicenumplanmap dnpm ON dnpm.fkdevice = d.pkid
+                    LEFT JOIN numplan np ON dnpm.fknumplan = np.pkid
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN devicepool dp ON d.fkdevicepool = dp.pkid
+                    LEFT JOIN typemodel tm ON d.tkmodel=tm.enum
+                    LEFT JOIN typeclass tc ON d.tkclass=tc.enum
+                    LEFT JOIN typeproduct tprod ON tprod.tkmodel = d.tkmodel
+                    LEFT JOIN enduser eu ON d.fkenduser=eu.pkid
+                    LEFT JOIN enduser eu_rdp ON d.fkenduser_mobility=eu_rdp.pkid
+                        WHERE LOWER({obj}) LIKE '%{val}%'
+                          AND (d.tkclass = '1' OR d.tkclass = '20' OR d.tkclass = '254')
+                          AND d.name NOT LIKE 'ModelProfile%'
+                     ORDER BY d.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchEndUser(self, **kwargs: dict) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Search Object Method.
+
+        * criterion: Search By: `Userid`, `Display Name`, `Last Name`, `First Name`, `Phone Number`, `Mobile Number`,
+          `Email`, `Directory URI`
+        * value: Search Value String
+
+        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :return:
+        """
+
+        validated_data = CucmSqlSearchEndUserModel(**kwargs).model_dump()
+        sql_query = """SELECT eu.pkid,
+                              eu.userid,
+                              eu.displayname AS display_name,
+                              eu.telephonenumber AS phone_number,
+                              eu.mobile AS mobile_number,
+                              eu.mailid,
+                              eu.department,
+                              eu.title,
+                              eu.fkdirectorypluginconfig AS user_type,
+                              eu.status AS user_status
+                         FROM enduser eu
+                        WHERE LOWER({obj}) LIKE '%{val}%' 
+                     ORDER BY eu.userid""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchLineGroup(self, **kwargs: dict) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Search Object Method.
+
+        * criterion: `Name`, `Member Line Number`, `Member Line Description`
+        * value: Search Value String
+
+        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :return:
+        """
+
+        validated_data = CucmSqlSearchLineGroupModel(**kwargs).model_dump()
+        sql_query = """SELECT lg.pkid,
+                              lg.name,
+                              tda.name AS algorithm,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description,
+                              lgnpm.lineselectionorder AS line_index
+                         FROM linegroup lg
+                    LEFT JOIN linegroupnumplanmap lgnpm ON lgnpm.fklinegroup = lg.pkid
+                    LEFT JOIN typedistributealgorithm tda ON lg.tkdistributealgorithm = tda.enum
+                    LEFT JOIN numplan np ON lgnpm.fknumplan = np.pkid
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                        WHERE LOWER({obj}) LIKE '%{val}%' 
+                     ORDER BY lg.name, lgnpm.lineselectionorder""".format(
+            obj=validated_data["criterion"], val=validated_data["value"].lower()
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchTranslationPattern(self, **kwargs: dict) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Search Object Method.
+
+        * criterion: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Called Party Transform Mask`,
+          `Prefix Digits Out`
+        * value: Search Value String
+
+        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :return:
+        """
+
+        validated_data = CucmSqlSearchTranslationPatternModel(**kwargs).model_dump()
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS pattern,
+                              np.description,
+                              rp.name AS partition,
+                              css.name AS css,
+                              np.calledpartytransformationmask AS called_tmask,
+                              np.prefixdigitsout AS called_prefix,
+                              rc.name AS route_class,
+                              np.blockenable AS block_enable
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN callingsearchspace css ON np.fkcallingsearchspace_translation = css.pkid
+                    LEFT JOIN typepatternrouteclass rc ON np.tkpatternrouteclass = rc.enum
+                        WHERE LOWER({obj}) LIKE '%{val}%'
+                          AND np.tkpatternusage = '3'
+                     ORDER BY np.dnorpattern""".format(
+            obj=validated_data["criterion"], val=validated_data["value"].lower()
+        )
         return self.__cucm_sql_execute(sql_query=sql_query)
