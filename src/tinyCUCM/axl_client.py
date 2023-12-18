@@ -166,6 +166,20 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getLine(**kwargs)["return"]["line"], dict)
 
     @cucm_logging
+    def axlGetLineGroup(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+        :return:
+        """
+
+        return serialize_object(self._axl.getLineGroup(**kwargs)["return"]["lineGroup"], dict)
+
+    @cucm_logging
     def axlGetPhone(self, **kwargs: dict) -> Union[dict, None]:
 
         """
@@ -259,6 +273,20 @@ class CucmAxlClient(CucmSettings):
         """
 
         return self._axl.removeLine(**kwargs)
+
+    @cucm_logging
+    def axlRemoveLineGroup(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+        :return:
+        """
+
+        return self._axl.removeLineGroup(**kwargs)
 
     @cucm_logging
     def axlRemovePhone(self, **kwargs: dict) -> Union[dict, None]:
