@@ -242,6 +242,20 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getTransPattern(**kwargs)["return"]["transPattern"], dict)
 
     @cucm_logging
+    def axlGetUser(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"userid": "str"}`
+        :return:
+        """
+
+        return serialize_object(self._axl.getUser(**kwargs)["return"]["user"], dict)
+
+    @cucm_logging
     def axlRemoveDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
 
         """
@@ -348,6 +362,20 @@ class CucmAxlClient(CucmSettings):
         """
 
         return self._axl.removeTransPattern(**kwargs)
+
+    @cucm_logging
+    def axlRemoveUser(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Expected Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"userid": "str"}`
+        :return:
+        """
+
+        return self._axl.removeUser(**kwargs)
 
     @cucm_logging
     def axlResetPhone(self, **kwargs: dict):
