@@ -80,7 +80,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Do Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"userid": "str", "password": "str"}`
                             or
                             `kwargs = {"userid": "str", "pin": "str"}`
@@ -94,7 +94,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Do Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {
                                 "deviceName": "str",
                                 "loginDuration": "str",
@@ -111,7 +111,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Do Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"deviceName": "str"}`
         :return:
         """
@@ -123,7 +123,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Do Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID", "sync": "bool"}`
                             or
                             `kwargs = {"name": "str", "sync": "bool"}`
@@ -133,11 +133,32 @@ class CucmAxlClient(CucmSettings):
         return self._axl.doLdapSync(**kwargs)
 
     @cucm_logging
+    def axlGetCallPickupGroup(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Get Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+                            or
+                            `kwargs = {"pattern": "str"}`
+                            or
+                            `kwargs = {
+                                "pattern": "str",
+                                "routePartitionName": "str"
+                            }`
+        :return:
+        """
+
+        return serialize_object(self._axl.getCallPickupGroup(**kwargs)["return"]["callPickupGroup"], dict)
+
+    @cucm_logging
     def axlGetDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"name": "str"}`
@@ -151,7 +172,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Get Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"pattern": "str"}`
@@ -170,7 +191,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Get Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"name": "str"}`
@@ -184,7 +205,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Get Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"name": "str"}`
@@ -198,7 +219,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Get Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"destination": "str"}`
@@ -212,7 +233,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Get Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"name": "str"}`
@@ -227,7 +248,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Get Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"pattern": "str"}`
@@ -246,7 +267,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Get Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"userid": "str"}`
@@ -256,11 +277,32 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getUser(**kwargs)["return"]["user"], dict)
 
     @cucm_logging
+    def axlRemoveCallPickupGroup(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Remove Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+                            or
+                            `kwargs = {"pattern": "str"}`
+                            or
+                            `kwargs = {
+                                "pattern": "str",
+                                "routePartitionName": "str"
+                            }`
+        :return:
+        """
+
+        return self._axl.removeCallPickupGroup(**kwargs)
+
+    @cucm_logging
     def axlRemoveDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"name": "str"}`
@@ -274,7 +316,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Remove Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"pattern": "str"}`
@@ -293,7 +335,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Remove Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"name": "str"}`
@@ -307,7 +349,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Remove Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"name": "str"}`
@@ -321,7 +363,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Remove Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"destination": "str"}`
@@ -335,7 +377,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Remove Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"name": "str"}`
@@ -349,7 +391,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Remove Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"pattern": "str"}`
@@ -368,7 +410,7 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Remove Object Method.
-        :param kwargs:      Expected Fields:
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid.UUID"}`
                             or
                             `kwargs = {"userid": "str"}`
@@ -382,10 +424,10 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Reset Object Method.
-        :param kwargs:      Minimum Required Parameters:
-                            param = {"uuid": "uuid.UUID"}
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            param = {"name": "str"}
+                            `kwargs = {"name": "str"}`
         :return:
         """
 
@@ -396,10 +438,10 @@ class CucmAxlClient(CucmSettings):
 
         """
         AXL Restart Object Method.
-        :param kwargs:      Minimum Required Parameters:
-                            param = {"uuid": "uuid.UUID"}
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
                             or
-                            param = {"name": "str"}
+                            `kwargs = {"name": "str"}`
         :return:
         """
 
@@ -423,7 +465,7 @@ class CucmAxlClient(CucmSettings):
         * criterion: `Name`, `Description`, `Pattern`, `Member Line Number`, `Member Line Description`
         * value: Search Value String
 
-        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
         :return:
         """
 
@@ -456,7 +498,7 @@ class CucmAxlClient(CucmSettings):
           `Device Type`
         * value: Search Value String
 
-        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
         :return:
         """
 
@@ -501,7 +543,7 @@ class CucmAxlClient(CucmSettings):
           `Email`, `Directory URI`
         * value: Search Value String
 
-        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
         :return:
         """
 
@@ -529,7 +571,7 @@ class CucmAxlClient(CucmSettings):
         * criterion: `Name`, `Member Line Number`, `Member Line Description`
         * value: Search Value String
 
-        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
         :return:
         """
 
@@ -561,7 +603,7 @@ class CucmAxlClient(CucmSettings):
           `Prefix Digits Out`
         * value: Search Value String
 
-        :param kwargs:  Expected Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
         :return:
         """
 
