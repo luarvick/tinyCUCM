@@ -447,6 +447,149 @@ class CucmAxlClient(CucmSettings):
 
         return self._axl.restartPhone(**kwargs)
 
+    @cucm_logging
+    def axlUpdateCallPickupGroup(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+                            or
+                            `kwargs = {"pattern": "str"}`
+                            or
+                            `kwargs = {
+                                "pattern": "str",
+                                "routePartitionName": "str"
+                            }`
+        :return:
+        """
+
+        return self._axl.updateCallPickupGroup(**kwargs)
+
+    @cucm_logging
+    def axlUpdateDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+        :return:
+        """
+
+        return self._axl.updateDeviceProfile(**kwargs)
+
+    @cucm_logging
+    def axlUpdateLine(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"pattern": "str"}`
+                            or
+                            `kwargs = {
+                                "pattern": "str",
+                                "routePartitionName": "str"
+                            }`
+        :return:
+        """
+
+        return self._axl.updateLine(**kwargs)
+
+    @cucm_logging
+    def axlUpdateLineGroup(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+        :return:
+        """
+
+        return self._axl.updateLineGroup(**kwargs)
+
+    @cucm_logging
+    def axlUpdatePhone(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+        :return:
+        """
+
+        return self._axl.updatePhone(**kwargs)
+
+    @cucm_logging
+    def axlUpdateRemoteDestination(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"destination": "str"}`
+        :return:
+        """
+
+        return self._axl.updateRemoteDestination(**kwargs)
+
+    @cucm_logging
+    def axlUpdateRemoteDestinationProfile(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+        :return:
+        """
+
+        return self._axl.updateRemoteDestinationProfile(**kwargs)
+
+    @cucm_logging
+    def axlUpdateTranslationPattern(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"pattern": "str"}`
+                            or
+                            `kwargs = {
+                                "pattern": "str",
+                                "routePartitionName": "str"
+                            }`
+        :return:
+        """
+
+        return self._axl.updateTransPattern(**kwargs)
+
+    @cucm_logging
+    def axlUpdateUser(self, **kwargs: dict) -> Union[dict, None]:
+
+        """
+        AXL Update Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"userid": "str"}`
+        :return:
+        """
+
+        return self._axl.updateUser(**kwargs)
+
     def sqlExecuteQuery(self, sql_query: str) -> Union[tuple[dict, ...], None]:
 
         """
@@ -456,6 +599,203 @@ class CucmAxlClient(CucmSettings):
         """
 
         return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlListCallingSearchSpace(self) -> tuple:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT css.pkid, css.name, css.description FROM callingsearchspace css ORDER BY css.name"
+        )
+
+    def sqlListCredentialPolicy(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT cp.pkid, cp.displayname AS name FROM credentialpolicy cp ORDER BY cp.displayname"
+        )
+
+    def sqlListDevicePool(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(sql_query="SELECT dp.pkid, dp.name FROM devicepool dp ORDER BY dp.name")
+
+    def sqlListDirGroup(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(sql_query="SELECT dg.pkid, dg.name FROM dirgroup dg ORDER BY dg.name")
+
+    def sqlListMediaResourceGroup(self) -> tuple:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT mrg.pkid, mrg.name, mrg.description FROM mediaresourcegroup mrg ORDER BY mrg.name"
+        )
+
+    def sqlListMediaResourceList(self) -> tuple:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT mrl.pkid, mrl.name FROM mediaresourcelist mrl ORDER BY mrl.name"
+        )
+
+    def sqlListPhoneTemplate(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(sql_query="SELECT pt.pkid, pt.name FROM phonetemplate pt ORDER BY pt.name")
+
+    def sqlListProcessNode(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="""
+                SELECT pn.pkid, pn.name, pn.description 
+                FROM processnode pn 
+                WHERE pn.name NOT LIKE 'EnterpriseWideData'
+                ORDER BY pn.name
+            """)
+
+    def sqlListRecordingProfile(self) -> tuple:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(sql_query="SELECT rp.pkid, rp.name FROM recordingprofile rp ORDER BY rp.name")
+
+    def sqlListRegion(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(sql_query="SELECT r.pkid, r.name FROM region r ORDER BY r.name")
+
+    def sqlListRoutePartition(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT rp.pkid, rp.name, rp.description FROM routepartition rp ORDER BY rp.name"
+        )
+
+    def sqlListSoftkeyTemplate(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT skt.pkid, skt.name, skt.description FROM softkeytemplate skt ORDER BY skt.name"
+        )
+
+    def sqlListTelecasterService(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT ts.pkid, ts.name, ts.description FROM telecasterservice ts ORDER BY ts.name"
+        )
+
+    def sqlListTypeClass(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(sql_query="SELECT tc.enum AS pkid, tc.name FROM typeclass tc ORDER BY tc.enum")
+
+    def sqlListTypeCountry(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(sql_query="SELECT tc.enum AS pkid, tc.name FROM typecountry tc ORDER BY tc.enum")
+
+    def sqlListTypeModel(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(sql_query="SELECT tm.enum AS pkid, tm.name FROM typemodel tm ORDER BY tm.enum")
+
+    def sqlListTypeUserLocale(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT tul.enum AS pkid, tul.name, tul.nativename FROM typeuserlocale tul ORDER BY tul.enum"
+        )
+
+    def sqlListUcServiceProfile(self) -> tuple:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT ucsp.pkid, ucsp.name, ucsp.description FROM ucserviceprofile ucsp ORDER BY ucsp.name"
+        )
+
+    def sqlListUcUserProfile(self) -> Union[tuple, None]:
+
+        """
+        SQL List Object(s) Method.
+        :return:
+        """
+
+        return self.__cucm_sql_execute(
+            sql_query="SELECT ucup.pkid, ucup.name, ucup.description FROM ucuserprofile ucup ORDER BY ucup.name"
+        )
 
     def sqlSearchCallPickupGroup(self, **kwargs) -> Union[tuple[dict, ...], None]:
 

@@ -11,36 +11,36 @@
 
 <!-- TABLE OF CONTENTS -->
 <details>
-    <summary>Table of Contents</summary>
-    <ol>
-        <li><a href="#about-the-project">About The Project</a></li>
-        <li><a href="#installation">Installation</a></li>
-        <li>
-            <a href="#usage">Usage</a>
-            <ul>
-                <li><a href="#instance-create">Instance Create</a></li>
-                <li><a href="#axl-collection">AXL Collection</a></li>
-                <ul>
-                    <li><a href="#add-methods">Add Methods</a></li>
-                    <li><a href="#do-methods">Do Methods</a></li>
-                    <li><a href="#get-methods">Get Methods</a></li>
-                    <li><a href="#remove-methods">Remove Methods</a></li>
-                    <li><a href="#reset-methods">Reset Methods</a></li>
-                    <li><a href="#restart-methods">Restart Methods</a></li>
-                    <li><a href="#update-methods">Update Methods</a></li>
-                </ul>
-                <li><a href="#sql-collection">SQL Collection</a></li>
-                <ul>
-                    <li><a href="#execute-query">Execute Query</a></li>
-                    <li><a href="#update-query">Update Query</a></li>
-                    <li><a href="#predefined-queries">Predefined Queries</a></li>
-                </ul>
-                <li><a href="#create-yor-own-methods">Create Your Own Methods</a></li>
-            </ul>
-        </li>
-        <li><a href="#license">License</a></li>
-        <li><a href="#contact">Contact</a></li>
-    </ol>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#about-the-project">About The Project</a></li>
+    <li><a href="#installation">Installation</a></li>
+    <li>
+      <a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#instance-create">Instance Create</a></li>
+        <li><a href="#axl-collection">AXL Collection</a></li>
+        <ul>
+          <li><a href="#add-methods">Add Methods</a></li>
+          <li><a href="#do-methods">Do Methods</a></li>
+          <li><a href="#get-methods">Get Methods</a></li>
+          <li><a href="#remove-methods">Remove Methods</a></li>
+          <li><a href="#reset-methods">Reset Methods</a></li>
+          <li><a href="#restart-methods">Restart Methods</a></li>
+          <li><a href="#update-methods">Update Methods</a></li>
+        </ul>
+        <li><a href="#sql-collection">SQL Collection</a></li>
+        <ul>
+          <li><a href="#execute-query">Execute Query</a></li>
+          <li><a href="#update-query">Update Query</a></li>
+          <li><a href="#predefined-queries">Predefined Queries</a></li>
+        </ul>
+        <li><a href="#create-yor-own-methods">Create Your Own Methods</a></li>
+      </ul>
+    </li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
 </details>
 
 ---
@@ -81,6 +81,9 @@ Create a new instance of the `CucmAxlClient` class and assigns this object to th
 
 <span style="color:#ff0000">**Don't store sensitive information in source code. For example use ".env" file.**</span>
 
+<details>
+<summary>Code Example:</summary>
+
 ```python
 from pathlib import Path
 from tinyCUCM import CucmAxlClient
@@ -117,29 +120,41 @@ if __name__ == "__main__":
 # )
 ```
 
+</details>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ### AXL Collection
 
+
 #### Add Methods
 
-`Add` Methods:
+<details>
+<summary>Code Example:</summary>
+
+```python
+
+```
+
+</details>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Do Methods
 
-`Do` Methods:
-* `axlDoAuthenticateUser` -  expected keys: (`userid`, `password`) or (`userid`, `pin`)
-* `axlDoDeviceLogin` -  expected keys: (`deviceName`, `loginDuration`, `profileName`, `userId`)\
+* `axlDoAuthenticateUser` -  required keys: (`userid`, `password`) or (`userid`, `pin`)
+* `axlDoDeviceLogin` -  required keys: (`deviceName`, `loginDuration`, `profileName`, `userId`)\
   * Key `loginDuration: str = "0"` - Logout disabled\
   * Key `loginDuration: str = "36000"` - Logout after 10h
-* `axlDoDeviceLogout` -  expected keys: `deviceName`
-* `axlDoLdapSync` -  expected keys: (`uuid`, `sync`) or (`name`, `sync`)\
+* `axlDoDeviceLogout` -  required keys: `deviceName`
+* `axlDoLdapSync` -  required keys: (`uuid`, `sync`) or (`name`, `sync`)\
   * Key `sync: bool = True` - Start Synchronization\
   * Key `sync: bool = False` - Cancel the Synchronization which is currently under process
+
+<details>
+<summary>Code Example:</summary>
 
 ```python
 cucm = ...
@@ -157,18 +172,25 @@ print("Result:", cucm.axlDoLdapSync(**{"uuid": "........-....-....-....-........
 # Result: {'return': 'Sync initiated successfully', 'sequence': None}
 ```
 
+</details>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Get Methods
 
-`Get` Methods:
-* `axlGetDeviceProfile` -  expected keys: `uuid` or `name`
-* `axlGetLine` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlGetPhone` - expected keys: `uuid` or `name`
-* `axlGetRemoteDestination` - expected keys: `uuid` or `destination`
-* `axlGetRemoteDestinationProfile` - expected keys: `uuid` or `name`
-* `axlGetTranslationPattern` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlGetCallPickupGroup` -  required keys: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlGetDeviceProfile` -  required keys: `uuid` or `name`
+* `axlGetLine` - required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlGetLineGroup` -  required keys: `uuid` or `name`
+* `axlGetPhone` - required keys: `uuid` or `name`
+* `axlGetRemoteDestination` - required keys: `uuid` or `destination`
+* `axlGetRemoteDestinationProfile` - required keys: `uuid` or `name`
+* `axlGetTranslationPattern` - required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlGetUser` -  required keys: `uuid` or `userid`
+
+<details>
+<summary>Code Example:</summary>
 
 ```python
 cucm = ...
@@ -195,18 +217,25 @@ print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-..........
 # }
 ```
 
+</details>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Remove Methods
 
-`Remove` Methods:
-* `axlRemoveDeviceProfile` -  expected keys: `uuid` or `name`
-* `axlRemoveLine` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlRemovePhone` - expected keys: `uuid` or `name`
-* `axlRemoveRemoteDestination` - expected keys: `uuid` or `destination`
-* `axlRemoveRemoteDestinationProfile` - expected keys: `uuid` or `name`
-* `axlRemoveTranslationPattern` - expected keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlRemoveCallPickupGroup` -  required keys: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlRemoveDeviceProfile` -  required keys: `uuid` or `name`
+* `axlRemoveLine` - required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlRemoveLineGroup` -  required keys: `uuid` or `name`
+* `axlRemovePhone` - required keys: `uuid` or `name`
+* `axlRemoveRemoteDestination` - required keys: `uuid` or `destination`
+* `axlRemoveRemoteDestinationProfile` - required keys: `uuid` or `name`
+* `axlRemoveTranslationPattern` - required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlRemoveUser` -  required keys: `uuid` or `userid`
+
+<details>
+<summary>Code Example:</summary>
 
 ```python
 cucm = ...
@@ -217,35 +246,469 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 # }
 ```
 
+</details>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Reset Methods
 
-`Reset` Methods:
-* `axlResetPhone` - expected keys: `uuid` or `name`
+* `axlResetPhone` - required keys: `uuid` or `name`
 
+<details>
+<summary>Code Example:</summary>
+
+```python
+
+```
+
+</details>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Restart Methods
 
-`Restart` Methods:
-* `axlRestartPhone` - expected keys: `uuid` or `name`
+* `axlRestartPhone` - required keys: `uuid` or `name`
+
+<details>
+<summary>Code Example:</summary>
+
+```python
+
+```
+
+</details>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Update Methods
 
-`Update` Methods:
+* `axlUpdateCallPickupGroup` -  required keys: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+  <details>
+  <summary>expected keys:</summary>
+    
+  * `newPattern`
+  * `description`
+  * `newRoutePartitionName`
+  * `removeMembers`
+  * `addMembers`
+  * `members`
+  * `pickupNotification`
+  * `pickupNotificationTimer`
+  * `callInfoForPickupNotification`
+  * `newName`
+  
+  </details>
+* `axlUpdateDeviceProfile` -  required keys: `uuid` or `name`
+  <details>
+  <summary>expected keys:</summary>
+
+  * `newName`
+  * `description`
+  * `userHoldMohAudioSourceId`
+  * `vendorConfig`
+  * `mlppDomainId`
+  * `mlppIndicationStatus`
+  * `preemption`
+  * `lines`
+  * `phoneTemplateName`
+  * `speeddials`
+  * `busyLampFields`
+  * `blfDirectedCallParks`
+  * `addOnModules`
+  * `userLocale`
+  * `singleButtonBarge`
+  * `joinAcrossLines`
+  * `loginUserId`
+  * `ignorePresentationIndicators`
+  * `dndOption`
+  * `dndRingSetting`
+  * `dndStatus`
+  * `emccCallingSearchSpace`
+  * `alwaysUsePrimeLine`
+  * `alwaysUsePrimeLineForVoiceMessage`
+  * `softkeyTemplateName`
+  * `callInfoPrivacyStatus`
+  * `services`
+  * `featureControlPolicy`
+  
+  </details>
+* `axlUpdateLine` -  required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+  <details>
+  <summary>expected keys:</summary>
+
+  * `newPattern`
+  * `description`
+  * `newRoutePartitionName`
+  * `aarNeighborhoodName`
+  * `aarDestinationMask`
+  * `aarKeepCallHistory`
+  * `aarVoiceMailEnabled`
+  * `callForwardAll`
+  * `callForwardBusy`
+  * `callForwardBusyInt`
+  * `callForwardNoAnswer`
+  * `callForwardNoAnswerInt`
+  * `callForwardNoCoverage`
+  * `callForwardNoCoverageInt`
+  * `callForwardOnFailure`
+  * `callForwardAlternateParty`
+  * `callForwardNotRegistered`
+  * `callForwardNotRegisteredInt`
+  * `callPickupGroupName`
+  * `autoAnswer`
+  * `networkHoldMohAudioSourceId`
+  * `userHoldMohAudioSourceId`
+  * `alertingName`
+  * `asciiAlertingName`
+  * `presenceGroupName`
+  * `shareLineAppearanceCssName`
+  * `voiceMailProfileName`
+  * `patternPrecedence`
+  * `releaseClause`
+  * `hrDuration`
+  * `hrInterval`
+  * `cfaCssPolicy`
+  * `defaultActivatedDeviceName`
+  * `parkMonForwardNoRetrieveDn`
+  * `parkMonForwardNoRetrieveIntDn`
+  * `parkMonForwardNoRetrieveVmEnabled`
+  * `parkMonForwardNoRetrieveIntVmEnabled`
+  * `parkMonForwardNoRetrieveCssName`
+  * `parkMonForwardNoRetrieveIntCssName`
+  * `parkMonReversionTimer`
+  * `partyEntranceTone`
+  * `directoryURIs`
+  * `allowCtiControlFlag`
+  * `rejectAnonymousCall`
+  * `patternUrgency`
+  * `confidentialAccess`
+  * `externalCallControlProfile`
+  * `enterpriseAltNum`
+  * `e164AltNum`
+  * `pstnFailover`
+  * `callControlAgentProfile`
+  * `useEnterpriseAltNum`
+  * `useE164AltNum`
+  * `active`
+
+  </details>
+* `axlUpdateLineGroup` -  required keys: `uuid` or `name`
+  <details>
+  <summary>expected keys:</summary>
+
+  * `distributionAlgorithm`
+  * `rnaReversionTimeOut`
+  * `huntAlgorithmNoAnswer`
+  * `huntAlgorithmBusy`
+  * `huntAlgorithmNotAvailable`
+  * `removeMembers`
+  * `addMembers`
+  * `members`
+  * `newName`
+  * `autoLogOffHunt`
+
+  </details>
+* `axlUpdatePhone` -  required keys: `uuid` or `name`
+  <details>
+  <summary>expected keys:</summary>
+
+  * `newName`
+  * `description`
+  * `callingSearchSpaceName`
+  * `devicePoolName`
+  * `commonDeviceConfigName`
+  * `commonPhoneConfigName`
+  * `networkLocation`
+  * `locationName`
+  * `mediaResourceListName`
+  * `networkHoldMohAudioSourceId`
+  * `userHoldMohAudioSourceId`
+  * `automatedAlternateRoutingCssName`
+  * `aarNeighborhoodName`
+  * `loadInformation`
+  * `vendorConfig`
+  * `versionStamp`
+  * `traceFlag`
+  * `mlppDomainId`
+  * `mlppIndicationStatus`
+  * `preemption`
+  * `useTrustedRelayPoint`
+  * `retryVideoCallAsAudio`
+  * `securityProfileName`
+  * `sipProfileName`
+  * `cgpnTransformationCssName`
+  * `useDevicePoolCgpnTransformCss`
+  * `geoLocationName`
+  * `geoLocationFilterName`
+  * `sendGeoLocation`
+  * `removeLines`
+  * `addLines`
+  * `lines`
+  * `phoneTemplateName`
+  * `speeddials`
+  * `busyLampFields`
+  * `primaryPhoneName`
+  * `ringSettingIdleBlfAudibleAlert`
+  * `ringSettingBusyBlfAudibleAlert`
+  * `blfDirectedCallParks`
+  * `addOnModules`
+  * `userLocale`
+  * `networkLocale`
+  * `idleTimeout`
+  * `authenticationUrl`
+  * `directoryUrl`
+  * `idleUrl`
+  * `informationUrl`
+  * `messagesUrl`
+  * `proxyServerUrl`
+  * `servicesUrl`
+  * `services`
+  * `softkeyTemplateName`
+  * `defaultProfileName`
+  * `enableExtensionMobility`
+  * `singleButtonBarge`
+  * `joinAcrossLines`
+  * `builtInBridgeStatus`
+  * `callInfoPrivacyStatus`
+  * `hlogStatus`
+  * `ownerUserName`
+  * `ignorePresentationIndicators`
+  * `packetCaptureMode`
+  * `packetCaptureDuration`
+  * `subscribeCallingSearchSpaceName`
+  * `rerouteCallingSearchSpaceName`
+  * `allowCtiControlFlag`
+  * `presenceGroupName`
+  * `unattendedPort`
+  * `requireDtmfReception`
+  * `rfc2833Disabled`
+  * `certificateOperation`
+  * `authenticationMode`
+  * `keySize`
+  * `keyOrder`
+  * `ecKeySize`
+  * `authenticationString`
+  * `upgradeFinishTime`
+  * `deviceMobilityMode`
+  * `remoteDevice`
+  * `dndOption`
+  * `dndRingSetting`
+  * `dndStatus`
+  * `isActive`
+  * `mobilityUserIdName`
+  * `phoneSuite`
+  * `phoneServiceDisplay`
+  * `isProtected`
+  * `mtpRequired`
+  * `mtpPreferedCodec`
+  * `dialRulesName`
+  * `sshUserId`
+  * `sshPwd`
+  * `digestUser`
+  * `outboundCallRollover`
+  * `hotlineDevice`
+  * `secureInformationUrl`
+  * `secureDirectoryUrl`
+  * `secureMessageUrl`
+  * `secureServicesUrl`
+  * `secureAuthenticationUrl`
+  * `secureIdleUrl`
+  * `alwaysUsePrimeLine`
+  * `alwaysUsePrimeLineForVoiceMessage`
+  * `featureControlPolicy`
+  * `deviceTrustMode`
+  * `earlyOfferSupportForVoiceCall`
+  * `requireThirdPartyRegistration`
+  * `blockIncomingCallsWhenRoaming`
+  * `homeNetworkId`
+  * `AllowPresentationSharingUsingBfcp`
+  * `confidentialAccess`
+  * `requireOffPremiseLocation`
+  * `allowiXApplicableMedia`
+  * `cgpnIngressDN`
+  * `useDevicePoolCgpnIngressDN`
+  * `msisdn`
+  * `enableCallRoutingToRdWhenNoneIsActive`
+  * `wifiHotspotProfile`
+  * `wirelessLanProfileGroup`
+  * `elinGroup`
+
+  </details>
+* `axlUpdateRemoteDestination` -  required keys: `uuid` or `destination`
+  <details>
+  <summary>expected keys:</summary>
+
+  * `newName`
+  * `newDestination`
+  * `answerTooSoonTimer`
+  * `answerTooLateTimer`
+  * `delayBeforeRingingCell`
+  * `ownerUserId`
+  * `enableUnifiedMobility`
+  * `remoteDestinationProfileName`
+  * `enableExtendAndConnect`
+  * `ctiRemoteDeviceName`
+  * `dualModeDeviceName`
+  * `isMobilePhone`
+  * `enableMobileConnect`
+  * `lineAssociations`
+  * `timeZone`
+  * `todAccessName`
+  * `mobileSmartClientName`
+  * `mobilityProfileName`
+  * `singleNumberReachVoicemail`
+  * `dialViaOfficeReverseVoicemail`
+  * `removeRingSchedule`
+  * `addRingSchedule`
+  * `ringSchedule`
+  * `accessListName`
+
+  </details>
+* `axlUpdateRemoteDestinationProfile` -  required keys: `uuid` or `name`
+  <details>
+  <summary>expected keys:</summary>
+
+  * `newName`
+  * `description`
+  * `callingSearchSpaceName`
+  * `devicePoolName`
+  * `networkHoldMohAudioSourceId`
+  * `userHoldMohAudioSourceId`
+  * `lines`
+  * `callInfoPrivacyStatus`
+  * `userId`
+  * `ignorePresentationIndicators`
+  * `rerouteCallingSearchSpaceName`
+  * `cgpnTransformationCssName`
+  * `automatedAlternateRoutingCssName`
+  * `useDevicePoolCgpnTransformCss`
+  * `userLocale`
+  * `networkLocale`
+  * `primaryPhoneName`
+  * `dndOption`
+  * `dndStatus`
+  * `mobileSmartClientProfileName`
+
+  </details>
+* `axlUpdateTranslationPattern` -  required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+  <details>
+  <summary>expected keys:</summary>
+
+  * `dialPlanName`
+  * `routeFilterName`
+  * `newPattern`
+  * `description`
+  * `newRoutePartitionName`
+  * `blockEnable`
+  * `calledPartyTransformationMask`
+  * `callingPartyTransformationMask`
+  * `useCallingPartyPhoneMask`
+  * `callingPartyPrefixDigits`
+  * `newDialPlanName`
+  * `digitDiscardInstructionName`
+  * `patternUrgency`
+  * `prefixDigitsOut`
+  * `newRouteFilterName`
+  * `callingLinePresentationBit`
+  * `callingNamePresentationBit`
+  * `connectedLinePresentationBit`
+  * `connectedNamePresentationBit`
+  * `patternPrecedence`
+  * `provideOutsideDialtone`
+  * `callingPartyNumberingPlan`
+  * `callingPartyNumberType`
+  * `calledPartyNumberingPlan`
+  * `calledPartyNumberType`
+  * `callingSearchSpaceName`
+  * `resourcePriorityNamespaceName`
+  * `routeNextHopByCgpn`
+  * `routeClass`
+  * `callInterceptProfileName`
+  * `releaseClause`
+  * `useOriginatorCss`
+  * `dontWaitForIDTOnSubsequentHops`
+  * `isEmergencyServiceNumber`
+
+  </details>
+* `axlUpdateUser` -  required keys: `uuid` or `userid`
+  <details>
+  <summary>expected keys:</summary>
+
+  * `firstName`
+  * `displayName`
+  * `middleName`
+  * `lastName`
+  * `newUserid`
+  * `password`
+  * `pin`
+  * `mailid`
+  * `department`
+  * `manager`
+  * `userLocale`
+  * `associatedDevices`
+  * `primaryExtension`
+  * `associatedPc`
+  * `associatedGroups`
+  * `enableCti`
+  * `digestCredentials`
+  * `phoneProfiles`
+  * `defaultProfile`
+  * `presenceGroupName`
+  * `subscribeCallingSearchSpaceName`
+  * `enableMobility`
+  * `enableMobileVoiceAccess`
+  * `maxDeskPickupWaitTime`
+  * `remoteDestinationLimit`
+  * `passwordCredentials`
+  * `pinCredentials`
+  * `enableEmcc`
+  * `ctiControlledDeviceProfiles`
+  * `patternPrecedence`
+  * `numericUserId`
+  * `mlppPassword`
+  * `customUserFields`
+  * `homeCluster`
+  * `imAndPresenceEnable`
+  * `serviceProfile`
+  * `lineAppearanceAssociationForPresences`
+  * `directoryUri`
+  * `telephoneNumber`
+  * `title`
+  * `mobileNumber`
+  * `homeNumber`
+  * `pagerNumber`
+  * `removeExtensionsInfo`
+  * `addExtensionsInfo`
+  * `extensionsInfo`
+  * `selfService`
+  * `userProfile`
+  * `calendarPresence`
+  * `ldapDirectoryName`
+  * `userIdentity`
+  * `nameDialing`
+  * `ipccExtension`
+  * `convertUserAccount`
+  * `accountType`
+  * `authenticationType`
+  * `enableUserToHostConferenceNow`
+  * `attendeesAccessCode`
+  * `zeroHop`
+
+  </details>
+
+<details>
+<summary>Code Example:</summary>
 
 ```python
 cucm = ...
 print("Result:", cucm)
 # Result: {"uuid": "........-....-....-....-............", ...,} 
 ```
+
+</details>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -254,6 +717,9 @@ print("Result:", cucm)
 
 
 #### Execute Query
+
+<details>
+<summary>Code Example:</summary>
 
 ```python
 cucm = ...
@@ -275,22 +741,57 @@ print(cucm.sqlExecuteQuery(sql_query=sql_query))
 # )
 ```
 
+</details>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Update Query
+
+<details>
+<summary>Code Example:</summary>
+
+```python
+
+```
+
+</details>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 #### Predefined Queries
 
-`Search` Methods:
-* `sqlSearchCallPickupGroup`
-* `sqlSearchDevice`
-* `sqlSearchEndUser`
-* `sqlSearchLineGroup`
-* `sqlSearchTranspationPattern`
+<details>
+
+* `List` Methods:
+  * `sqlListCallingSearchSpace`
+  * `sqlListCredentialPolicy`
+  * `sqlListDevicePool`
+  * `sqlListDirGroup`
+  * `sqlListMediaResourceGroup`
+  * `sqlListMediaResourceList`
+  * `sqlListPhoneTemplate`
+  * `sqlListProcessNode`
+  * `sqlListRecordingProfile`
+  * `sqlListRegion`
+  * `sqlListRoutePartition`
+  * `sqlListSoftkeyTemplate`
+  * `sqlListTelecasterService`
+  * `sqlListTypeClass`
+  * `sqlListTypeCountry`
+  * `sqlListTypeModel`
+  * `sqlListTypeUserLocale`
+  * `sqlListUcServiceProfile`
+  * `sqlListUcUserProfile`
+* `Search` Methods:
+  * `sqlSearchCallPickupGroup`
+  * `sqlSearchDevice`
+  * `sqlSearchEndUser`
+  * `sqlSearchLineGroup`
+  * `sqlSearchTranspationPattern`
+
+</details>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -298,6 +799,9 @@ print(cucm.sqlExecuteQuery(sql_query=sql_query))
 ### Create Your Own Methods
 
 <span style="color:#ff0000">**Don't store sensitive information in source code. For example use ".env" file.**</span>
+
+<details>
+<summary>Code Example:</summary>
 
 ```python
 from pathlib import Path
@@ -386,6 +890,8 @@ if __name__ == "__main__":
     #     }
     # }
 ```
+
+</details>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
