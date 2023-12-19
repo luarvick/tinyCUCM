@@ -27,6 +27,7 @@
           <li><a href="#remove-methods">Remove Methods</a></li>
           <li><a href="#reset-methods">Reset Methods</a></li>
           <li><a href="#restart-methods">Restart Methods</a></li>
+          <li><a href="#ris-methods">RIS Methods</a></li>
           <li><a href="#update-methods">Update Methods</a></li>
         </ul>
         <li><a href="#sql-collection">SQL Collection</a></li>
@@ -72,11 +73,27 @@ Installation is as simple as:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+Cisco UCM WSDL Services:
+
+| WSDL File              | Path                                                                               |
+|------------------------|------------------------------------------------------------------------------------|
+| SOAPMonitorService     | https://x.x.x.x:8443/realtimeservice/services/SOAPMonitorService?wsdl              |
+| RisPort                | https://x.x.x.x:8443/realtimeservice/services/RisPort?wsdl                         |
+| RisPort70              | https://x.x.x.x:8443/realtimeservice/services/RisPort70?wsdl                       |
+| RisService70           | https://x.x.x.x:8443/realtimeservice2/services/RISService70?wsdl                   |
+| PerfmonPort            | https://x.x.x.x:8443/perfmonservice/services/PerfmonPort?wsdl                      |
+| ControlCenterServices  | https://x.x.x.x:8443/controlcenterservice/services/ControlCenterServicesPort?wsdl  |
+| LogCollectionService   | https://x.x.x.x:8443/logcollectionservice/services/LogCollectionPort?wsdl          |
+| CDRonDemand            | https://x.x.x.x:8443/CDRonDemandService/services/CDRonDemand?wsdl                  |
+| DimeGetFile            | https://x.x.x.x:8443/logcollectionservice/services/DimeGetFileService?wsdl         |
+
+Download `Cisco AXL Toolkit` from the station (`Application` -> `Plugins`) and put it into the folder with your project.\
+Copy `RISService70` and create `RISService70.xml` file, put file it into `axlsqltoolkit` folder.\
+Create an Cisco UCM application account or local end user with `Standard CCM Super Users` privileges
+(Assign access control group to `Your-CUCM-Account`).
 
 ### Instance Create
 
-Download `Cisco AXL Toolkit` from the station (`Application` -> `Plugins`) and put it into the folder with your project.\
-Create an Cisco UCM application account or local end user with `Standard CCM Super Users` privileges (Assing Access Control Group to `Your-CUCM-Account`).\
 Create a new instance of the `CucmAxlClient` class and assigns this object to the local variable `cucm`.
 
 <span style="color:#ff0000">**Don't store sensitive information in source code. For example use ".env" file.**</span>
@@ -99,25 +116,25 @@ settings = {
     "cert_path": BASE_DIR / "cucm.crt",
     "session_verify": False,
     "session_timeout": 15,
+    "ris_wsdl_filename": "wsdlRISService70_test.xml", 
 }
 
 if __name__ == "__main__":
     cucm = CucmAxlClient(**settings)
     # Get All AXL Method Names
-    print(cucm.axlAllMethods())
-
-# (
-#     'addAarGroup', 
-#     'addAdvertisedPatterns', 
-#     'addAnnouncement', 
-#     'addAppServerInfo', 
-#     'addAppUser', 
-#     ...,
-#     'updateWifiHotspot', 
-#     'updateWirelessAccessPointControllers', 
-#     'updateWlanProfileGroup', 
-#     'wipePhone'
-# )
+    print("Result:", cucm.axlAllMethods())
+    # Result: (
+    #     'addAarGroup', 
+    #     'addAdvertisedPatterns', 
+    #     'addAnnouncement', 
+    #     'addAppServerInfo', 
+    #     'addAppUser', 
+    #     ...,
+    #     'updateWifiHotspot', 
+    #     'updateWirelessAccessPointControllers', 
+    #     'updateWlanProfileGroup', 
+    #     'wipePhone'
+    # )
 ```
 
 </details>
@@ -144,14 +161,16 @@ if __name__ == "__main__":
 
 #### Do Methods
 
-* `axlDoAuthenticateUser` -  required keys: (`userid`, `password`) or (`userid`, `pin`)
-* `axlDoDeviceLogin` -  required keys: (`deviceName`, `loginDuration`, `profileName`, `userId`)\
-  * Key `loginDuration: str = "0"` - Logout disabled\
-  * Key `loginDuration: str = "36000"` - Logout after 10h
-* `axlDoDeviceLogout` -  required keys: `deviceName`
-* `axlDoLdapSync` -  required keys: (`uuid`, `sync`) or (`name`, `sync`)\
-  * Key `sync: bool = True` - Start Synchronization\
-  * Key `sync: bool = False` - Cancel the Synchronization which is currently under process
+* `axlDoAuthenticateUser` - required keywords args: (`userid`, `password`) or (`userid`, `pin`)
+* `axlDoDeviceLogin` - required keywords args: (`deviceName`, `loginDuration`, `profileName`, `userId`)
+  * Arg `loginDuration: str` values:
+    * `"0"` - Logout disabled
+    * `"36000"` - Logout after 10h
+* `axlDoDeviceLogout` - required keywords args: `deviceName`
+* `axlDoLdapSync` - required keywords args: (`uuid`, `sync`) or (`name`, `sync`)
+  * Arg `sync: bool` values:
+    * `True` - Start Synchronization
+    * `False` - Cancel the Synchronization which is currently under process
 
 <details>
 <summary>Code Example:</summary>
@@ -179,15 +198,15 @@ print("Result:", cucm.axlDoLdapSync(**{"uuid": "........-....-....-....-........
 
 #### Get Methods
 
-* `axlGetCallPickupGroup` -  required keys: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlGetDeviceProfile` -  required keys: `uuid` or `name`
-* `axlGetLine` - required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlGetLineGroup` -  required keys: `uuid` or `name`
-* `axlGetPhone` - required keys: `uuid` or `name`
-* `axlGetRemoteDestination` - required keys: `uuid` or `destination`
-* `axlGetRemoteDestinationProfile` - required keys: `uuid` or `name`
-* `axlGetTranslationPattern` - required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlGetUser` -  required keys: `uuid` or `userid`
+* `axlGetCallPickupGroup` - required keywords args: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlGetDeviceProfile` - required keywords args: `uuid` or `name`
+* `axlGetLine` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlGetLineGroup` - required keywords args: `uuid` or `name`
+* `axlGetPhone` - required keywords args: `uuid` or `name`
+* `axlGetRemoteDestination` - required keywords args: `uuid` or `destination`
+* `axlGetRemoteDestinationProfile` - required keywords args: `uuid` or `name`
+* `axlGetTranslationPattern` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlGetUser` - required keywords args: `uuid` or `userid`
 
 <details>
 <summary>Code Example:</summary>
@@ -224,15 +243,15 @@ print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-..........
 
 #### Remove Methods
 
-* `axlRemoveCallPickupGroup` -  required keys: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlRemoveDeviceProfile` -  required keys: `uuid` or `name`
-* `axlRemoveLine` - required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlRemoveLineGroup` -  required keys: `uuid` or `name`
-* `axlRemovePhone` - required keys: `uuid` or `name`
-* `axlRemoveRemoteDestination` - required keys: `uuid` or `destination`
-* `axlRemoveRemoteDestinationProfile` - required keys: `uuid` or `name`
-* `axlRemoveTranslationPattern` - required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlRemoveUser` -  required keys: `uuid` or `userid`
+* `axlRemoveCallPickupGroup` - required keywords args: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlRemoveDeviceProfile` - required keywords args: `uuid` or `name`
+* `axlRemoveLine` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlRemoveLineGroup` - required keywords args: `uuid` or `name`
+* `axlRemovePhone` - required keywords args: `uuid` or `name`
+* `axlRemoveRemoteDestination` - required keywords args: `uuid` or `destination`
+* `axlRemoveRemoteDestinationProfile` - required keywords args: `uuid` or `name`
+* `axlRemoveTranslationPattern` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlRemoveUser` - required keywords args: `uuid` or `userid`
 
 <details>
 <summary>Code Example:</summary>
@@ -253,7 +272,7 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 
 #### Reset Methods
 
-* `axlResetPhone` - required keys: `uuid` or `name`
+* `axlResetPhone` - required keywords args: `uuid` or `name`
 
 <details>
 <summary>Code Example:</summary>
@@ -269,7 +288,7 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 
 #### Restart Methods
 
-* `axlRestartPhone` - required keys: `uuid` or `name`
+* `axlRestartPhone` - required keywords args: `uuid` or `name`
 
 <details>
 <summary>Code Example:</summary>
@@ -283,11 +302,103 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+#### RIS Methods
+
+RIS - Real-time Information Server retrieve information stored in all RIS nodes in the cluster.
+https://developer.cisco.com/docs/sxml/#!risport70-api
+
+* `risGetCti` - required keywords args: `collection_name`, `items_collection`, `cti_mgr_class`
+  * Arg `collection_name` values: `DevNames` or `DirNumbers`
+  * Arg `items_collection`: Collection of Dictionaries. Depending on the type of collection, dictionaries should
+    contain the key `name` for `DevNames` or the key `pattern` for `DirNumbers`
+  * Arg `cti_mgr_class` values: `Provider` or `Device` or `Line`
+* `risGetPhone` - required keywords args: `phone_name`
+* `risGetPhones` - required keywords args: `devices_collection`
+  * Arg `devices_collection` - Collection of Dictionaries. Dictionaries should contain the key `name`
+
+<details>
+<summary>Code Example:</summary>
+
+```python
+cucm = ...
+print("Result:", cucm.risGetCti(
+    collection_name="DirNumbers",
+    items_collection=({"pattern": "..."}, {"pattern": "..."}, ...),
+    cti_mgr_class="Line"
+))
+# Result: {
+#     'SelectCtiItemResult': {
+#         'TotalItemsFound': 6,
+#         'CtiNodes': {...}
+#     },
+#     'StateInfo': '<StateInfo><Node Name="cucm.example.com" ...'
+# } 
+
+print("Result:", cucm.risGetPhone(phone_name="CSF...", is_raw_resp=False))
+# Result: {
+#     'DeviceName': 'CSF...',
+#     'Status': 'Registered',
+#     'Model': 503,
+#     'Product': 390,
+#     'IP': 'xxx.xxx.xxx.xxx',
+#     'NodeName': 'cucm.example.com',
+#     'ActiveLoadID': '...',
+#     'InactiveLoadID': '...'
+# }
+
+print("Result:", cucm.risGetPhones(devices_collection=({"name": "TCT..."}, {"name": "CSF..."}, ...), is_raw_resp=False))
+# Result = (
+#     {
+#         'name': 'TCT...',
+#         'ris': {
+#             'DeviceName': 'TCT...',
+#             'Status': 'UnRegistered',
+#             'Model': 562,
+#             'Product': 449,
+#             'IP': 'xxx.xxx.xxx.xxx',
+#             'NodeName': 'cucm.example.com',
+#             'ActiveLoadID': '...',
+#             'InactiveLoadID': '...'
+#         }
+#     },
+#     {
+#         'name': 'CSF...',
+#         'ris': {
+#             'DeviceName': 'CSF...',
+#             'Status': 'Registered',
+#             'Model': 503,
+#             'Product': 390,
+#             'IP': 'xxx.xxx.xxx.xxx',
+#             'NodeName': 'cucm.example.com',
+#             'ActiveLoadID': '...',
+#             'InactiveLoadID': '...'
+#         }
+#     },
+#     {
+#         'name': 'SEP...',
+#         'ris': {'DeviceName': None, 'Status': None, ...}
+#     },
+#     {
+#         'name': 'RDP...',
+#         'ris': {'DeviceName': None, 'Status': None, ...}
+#     },
+#     {
+#         'name': 'UDP...',
+#         'ris': {'DeviceName': None, 'Status': None, ...}
+#     }
+# )
+```
+
+</details>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 #### Update Methods
 
-* `axlUpdateCallPickupGroup` -  required keys: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlUpdateCallPickupGroup` - required keywords args: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
     
   * `newPattern`
   * `description`
@@ -301,9 +412,9 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
   * `newName`
   
   </details>
-* `axlUpdateDeviceProfile` -  required keys: `uuid` or `name`
+* `axlUpdateDeviceProfile` - required keywords args: `uuid` or `name`
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
 
   * `newName`
   * `description`
@@ -335,9 +446,9 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
   * `featureControlPolicy`
   
   </details>
-* `axlUpdateLine` -  required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlUpdateLine` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
 
   * `newPattern`
   * `description`
@@ -395,9 +506,9 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
   * `active`
 
   </details>
-* `axlUpdateLineGroup` -  required keys: `uuid` or `name`
+* `axlUpdateLineGroup` - required keywords args: `uuid` or `name`
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
 
   * `distributionAlgorithm`
   * `rnaReversionTimeOut`
@@ -411,9 +522,9 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
   * `autoLogOffHunt`
 
   </details>
-* `axlUpdatePhone` -  required keys: `uuid` or `name`
+* `axlUpdatePhone` - required keywords args: `uuid` or `name`
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
 
   * `newName`
   * `description`
@@ -537,9 +648,9 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
   * `elinGroup`
 
   </details>
-* `axlUpdateRemoteDestination` -  required keys: `uuid` or `destination`
+* `axlUpdateRemoteDestination` - required keywords args: `uuid` or `destination`
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
 
   * `newName`
   * `newDestination`
@@ -567,9 +678,9 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
   * `accessListName`
 
   </details>
-* `axlUpdateRemoteDestinationProfile` -  required keys: `uuid` or `name`
+* `axlUpdateRemoteDestinationProfile` - required keywords args: `uuid` or `name`
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
 
   * `newName`
   * `description`
@@ -593,9 +704,9 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
   * `mobileSmartClientProfileName`
 
   </details>
-* `axlUpdateTranslationPattern` -  required keys: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlUpdateTranslationPattern` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
 
   * `dialPlanName`
   * `routeFilterName`
@@ -633,9 +744,9 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
   * `isEmergencyServiceNumber`
 
   </details>
-* `axlUpdateUser` -  required keys: `uuid` or `userid`
+* `axlUpdateUser` - required keywords args: `uuid` or `userid`
   <details>
-  <summary>expected keys:</summary>
+  <summary>expected keywords args:</summary>
 
   * `firstName`
   * `displayName`
@@ -704,8 +815,11 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 
 ```python
 cucm = ...
-print("Result:", cucm)
-# Result: {"uuid": "........-....-....-....-............", ...,} 
+print("Result:", cucm.axlUpdatePhone(**{"uuid": "........-....-....-....-............", "description": "New Description"}))
+# Result: {
+#     'return': '{........-....-....-....-............}',
+#     'sequence': None
+# }
 ```
 
 </details>
@@ -789,7 +903,7 @@ print(cucm.sqlExecuteQuery(sql_query=sql_query))
   * `sqlSearchDevice`
   * `sqlSearchEndUser`
   * `sqlSearchLineGroup`
-  * `sqlSearchTranspationPattern`
+  * `sqlSearchTranslationPattern`
 
 </details>
 
@@ -819,6 +933,7 @@ settings = {
     "cert_path": BASE_DIR / "cucm.crt",
     "session_verify": False,
     "session_timeout": 15,
+    "ris_wsdl_filename": "wsdlRISService70_test.xml", 
 }
 
 
@@ -847,44 +962,10 @@ if __name__ == "__main__":
     #     'callManager': {
     #         'name': 'CM_...',
     #         'description': '...',
-    #         'autoRegistration': {
-    #             'startDn': None,
-    #             'endDn': None,
-    #             'nextDn': None,
-    #             'routePartitionName': {
-    #                 '_value_1': None,
-    #                 'uuid': None
-    #             },
-    #             'e164Mask': None,
-    #             'autoRegistrationEnabled': None,
-    #             'universalDeviceTemplate': {
-    #                 '_value_1': None,
-    #                 'uuid': None
-    #             },
-    #             'lineTemplate': {
-    #                 '_value_1': None,
-    #                 'uuid': None
-    #             }
-    #         },
-    #         'ports': {
-    #             'ethernetPhonePort': ...,
-    #             'mgcpPorts': {
-    #                 'listen': ...,
-    #                 'keepAlive': ...
-    #             },
-    #             'sipPorts': {
-    #                 'sipPhonePort': ...,
-    #                 'sipPhoneSecurePort': ...
-    #             }
-    #         },
-    #         'processNodeName': {
-    #             '_value_1': '...',
-    #             'uuid': '{........-....-....-....-............}'
-    #         },
-    #         'lbmGroup': {
-    #             '_value_1': None,
-    #             'uuid': None
-    #         },
+    #         'autoRegistration': {...},
+    #         'ports': {...},
+    #         'processNodeName': {...},
+    #         'lbmGroup': {...},
     #         'ctiid': ...,
     #         'uuid': '{........-....-....-....-............}'
     #     }

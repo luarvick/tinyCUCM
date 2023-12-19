@@ -1,7 +1,9 @@
-from typing import Iterable, Union
+from collections.abc import Iterable
+from typing import Union, Tuple, Unpack
 from zeep.helpers import serialize_object
 from .decorators import cucm_logging
 from .settings import CucmSettings
+from .ris_models import CucmRisGetCtiModel, CucmRisCtiCollectionNameEnum, CucmRisCtiMgrClassEnum
 from .sql_models import (
     CucmSqlSearchCallPickupGroupModel,
     CucmSqlSearchDeviceModel,
@@ -36,6 +38,49 @@ class CucmAxlClient(CucmSettings):
 
         return tuple([{item.tag: item.text for item in row} for row in elements])
 
+    @staticmethod
+    def __cucm_ris_phone_resp_normalizing(resp_raw: dict) -> tuple[dict, ...]:
+
+        """
+        Normalizing RIS (Real-time Information Server) Phone(s) Response Dictionary.
+        :param resp_raw:    RIS Raw Response
+        :return:
+        """
+
+        resp_result = []
+        if resp_raw["SelectCmDeviceResult"]["TotalDevicesFound"] > 0:
+            # Devices can be Registered, UnRegistered, Rejected, PartiallyRegistered, Unknown
+            for item in resp_raw["SelectCmDeviceResult"]["CmNodes"]["item"]:
+                if item["ReturnCode"] == "Ok":
+                    for device in item["CmDevices"]["item"]:
+                        # CTI Remote Device (Type Model d.tkmodel = "635") no IPAddress
+                        resp_result.append(
+                            {
+                                "DeviceName": device["Name"],
+                                "Status": device["Status"],
+                                "Model": device["Model"],
+                                "Product": device["Product"],
+                                "IP": device["IPAddress"]["item"][0]["IP"] if device["IPAddress"] else None,
+                                "NodeName": item["Name"],
+                                "ActiveLoadID": device["ActiveLoadID"],
+                                "InactiveLoadID": device["InactiveLoadID"]
+                            }
+                        )
+        else:
+            # For 'risGetPhone' - Device not found (Not exist, Off-line, Unsupported Class or Type (RDP, UDP and ect.))
+            resp_result.append(
+                {
+                    "DeviceName": None,
+                    "Status": None,
+                    "Model": None,
+                    "Product": None,
+                    "IP": None,
+                    "NodeName": None,
+                    "ActiveLoadID": None,
+                    "InactiveLoadID": None
+                })
+        return tuple(resp_result)
+
     def __cucm_sql_serialize_to_tuple(self, resp_raw) -> Union[tuple[dict, ...], None]:
 
         """
@@ -66,7 +111,7 @@ class CucmAxlClient(CucmSettings):
         return self.__cucm_sql_serialize_to_tuple(self._axl.executeSQLQuery(sql=sql_query))
 
     @cucm_logging
-    def axlAllMethods(self) -> Union[tuple[str, ...], None]:
+    def axlAllMethods(self) -> tuple[str, ...]:
 
         """
         AXL All Methods Collection.
@@ -76,7 +121,17 @@ class CucmAxlClient(CucmSettings):
         return tuple(sorted([str(method[0]) for method in self._axl]))
 
     @cucm_logging
-    def axlDoAuthenticateUser(self, **kwargs: dict):
+    def risAllMethods(self) -> tuple[str, ...]:
+
+        """
+        RIS (Real-time Information Server) All Methods Collection.
+        :return:
+        """
+
+        return tuple(sorted([str(method[0]) for method in self._ris.service]))
+
+    @cucm_logging
+    def axlDoAuthenticateUser(self, **kwargs: Union[dict, ...]) -> dict:
 
         """
         AXL Do Object Method.
@@ -90,7 +145,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.doAuthenticateUser(**kwargs)
 
     @cucm_logging
-    def axlDoDeviceLogin(self, **kwargs: dict):
+    def axlDoDeviceLogin(self, **kwargs: Union[dict, ...]) -> dict:
 
         """
         AXL Do Object Method.
@@ -107,7 +162,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.doDeviceLogin(**kwargs)
 
     @cucm_logging
-    def axlDoDeviceLogout(self, **kwargs: dict):
+    def axlDoDeviceLogout(self, **kwargs: Union[dict, ...]) -> dict:
 
         """
         AXL Do Object Method.
@@ -119,7 +174,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.doDeviceLogout(**kwargs)
 
     @cucm_logging
-    def axlDoLdapSync(self, **kwargs: dict):
+    def axlDoLdapSync(self, **kwargs: Union[dict, ...]) -> dict:
 
         """
         AXL Do Object Method.
@@ -133,7 +188,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.doLdapSync(**kwargs)
 
     @cucm_logging
-    def axlGetCallPickupGroup(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetCallPickupGroup(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -154,7 +209,7 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getCallPickupGroup(**kwargs)["return"]["callPickupGroup"], dict)
 
     @cucm_logging
-    def axlGetDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetDeviceProfile(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -168,7 +223,7 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getDeviceProfile(**kwargs)["return"]["deviceProfile"], dict)
 
     @cucm_logging
-    def axlGetLine(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetLine(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -187,7 +242,7 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getLine(**kwargs)["return"]["line"], dict)
 
     @cucm_logging
-    def axlGetLineGroup(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetLineGroup(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -201,7 +256,7 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getLineGroup(**kwargs)["return"]["lineGroup"], dict)
 
     @cucm_logging
-    def axlGetPhone(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetPhone(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -215,7 +270,7 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getPhone(**kwargs)["return"]["phone"], dict)
 
     @cucm_logging
-    def axlGetRemoteDestination(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetRemoteDestination(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -229,7 +284,7 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getRemoteDestination(**kwargs)["return"]["remoteDestination"], dict)
 
     @cucm_logging
-    def axlGetRemoteDestinationProfile(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetRemoteDestinationProfile(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -244,7 +299,7 @@ class CucmAxlClient(CucmSettings):
             self._axl.getRemoteDestinationProfile(**kwargs)["return"]["remoteDestinationProfile"], dict)
 
     @cucm_logging
-    def axlGetTranslationPattern(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetTranslationPattern(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -263,7 +318,7 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getTransPattern(**kwargs)["return"]["transPattern"], dict)
 
     @cucm_logging
-    def axlGetUser(self, **kwargs: dict) -> Union[dict, None]:
+    def axlGetUser(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Get Object Method.
@@ -277,7 +332,7 @@ class CucmAxlClient(CucmSettings):
         return serialize_object(self._axl.getUser(**kwargs)["return"]["user"], dict)
 
     @cucm_logging
-    def axlRemoveCallPickupGroup(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemoveCallPickupGroup(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -298,7 +353,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removeCallPickupGroup(**kwargs)
 
     @cucm_logging
-    def axlRemoveDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemoveDeviceProfile(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -312,7 +367,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removeDeviceProfile(**kwargs)
 
     @cucm_logging
-    def axlRemoveLine(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemoveLine(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -331,7 +386,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removeLine(**kwargs)
 
     @cucm_logging
-    def axlRemoveLineGroup(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemoveLineGroup(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -345,7 +400,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removeLineGroup(**kwargs)
 
     @cucm_logging
-    def axlRemovePhone(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemovePhone(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -359,7 +414,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removePhone(**kwargs)
 
     @cucm_logging
-    def axlRemoveRemoteDestination(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemoveRemoteDestination(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -373,7 +428,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removeRemoteDestination(**kwargs)
 
     @cucm_logging
-    def axlRemoveRemoteDestinationProfile(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemoveRemoteDestinationProfile(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -387,7 +442,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removeRemoteDestinationProfile(**kwargs)
 
     @cucm_logging
-    def axlRemoveTranslationPattern(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemoveTranslationPattern(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -406,7 +461,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removeTransPattern(**kwargs)
 
     @cucm_logging
-    def axlRemoveUser(self, **kwargs: dict) -> Union[dict, None]:
+    def axlRemoveUser(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Remove Object Method.
@@ -420,7 +475,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.removeUser(**kwargs)
 
     @cucm_logging
-    def axlResetPhone(self, **kwargs: dict):
+    def axlResetPhone(self, **kwargs: Union[dict, ...]) -> dict:
 
         """
         AXL Reset Object Method.
@@ -434,7 +489,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.resetPhone(**kwargs)
 
     @cucm_logging
-    def axlRestartPhone(self, **kwargs: dict):
+    def axlRestartPhone(self, **kwargs: Union[dict, ...]) -> dict:
 
         """
         AXL Restart Object Method.
@@ -448,7 +503,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.restartPhone(**kwargs)
 
     @cucm_logging
-    def axlUpdateCallPickupGroup(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdateCallPickupGroup(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -469,7 +524,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.updateCallPickupGroup(**kwargs)
 
     @cucm_logging
-    def axlUpdateDeviceProfile(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdateDeviceProfile(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -483,7 +538,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.updateDeviceProfile(**kwargs)
 
     @cucm_logging
-    def axlUpdateLine(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdateLine(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -502,7 +557,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.updateLine(**kwargs)
 
     @cucm_logging
-    def axlUpdateLineGroup(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdateLineGroup(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -516,7 +571,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.updateLineGroup(**kwargs)
 
     @cucm_logging
-    def axlUpdatePhone(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdatePhone(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -530,7 +585,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.updatePhone(**kwargs)
 
     @cucm_logging
-    def axlUpdateRemoteDestination(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdateRemoteDestination(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -544,7 +599,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.updateRemoteDestination(**kwargs)
 
     @cucm_logging
-    def axlUpdateRemoteDestinationProfile(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdateRemoteDestinationProfile(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -558,7 +613,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.updateRemoteDestinationProfile(**kwargs)
 
     @cucm_logging
-    def axlUpdateTranslationPattern(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdateTranslationPattern(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -577,7 +632,7 @@ class CucmAxlClient(CucmSettings):
         return self._axl.updateTransPattern(**kwargs)
 
     @cucm_logging
-    def axlUpdateUser(self, **kwargs: dict) -> Union[dict, None]:
+    def axlUpdateUser(self, **kwargs: Union[dict, ...]) -> Union[dict, None]:
 
         """
         AXL Update Object Method.
@@ -590,6 +645,128 @@ class CucmAxlClient(CucmSettings):
 
         return self._axl.updateUser(**kwargs)
 
+    @cucm_logging
+    def risGetCti(self, **kwargs: Union[dict, ...]) -> dict:
+
+        """
+        RIS (Real-time Information Server) Get CTI Method.
+
+        * collection_name: `DevNames`, `DirNumbers`
+        * items_collection: Collection of Dictionaries. Depending on the type of collection, dictionaries should
+          contain the key `name` for `DevNames` or the key `pattern` for `DirNumbers`
+        * cti_mgr_class: `Provider`, `Device`, `Line`
+
+        :param kwargs:  Required Fields:
+                        `kwargs = {
+                            "collection_name": "Enum",
+                            items_collection: "Iterable",
+                            "cti_mgr_class": "Enum"
+                        }`
+        :return:
+        """
+
+        validated_data = CucmRisGetCtiModel(**kwargs).model_dump()
+
+        state_info = ""
+        criteria = {
+            "MaxReturnedItems": 1000,
+            "CtiMgrClass": validated_data["cti_mgr_class"].value,
+            "Status": "Any",
+            "NodeName": None,
+            "SelectAppBy": "AppId",
+            "AppItems": {"item": []},
+            "DevNames": {"item": []},
+            "DirNumbers": {"item": []},
+            validated_data["collection_name"]: {"item": validated_data["items_collection"]}
+        }
+        return self._ris.service.selectCtiItem(state_info, self._ris_factory.CtiSelectionCriteria(**criteria))
+
+    @cucm_logging
+    def risGetPhone(self, phone_name: str, is_raw_resp: bool = False) -> dict:
+
+        """
+        RIS (Real-time Information Server) Get Phone Method.
+        :param phone_name:  Phone Name
+        :param is_raw_resp: Raw or Short Dictionary Response
+        :return:
+        """
+
+        state_info = ""
+        criteria = self._ris_factory.CmSelectionCriteria(
+            MaxReturnedDevices=1,
+            DeviceClass="Phone",
+            Model=255,
+            Status="Any",
+            NodeName=None,
+            SelectBy="Name",
+            SelectItems={"item": [{"Item": phone_name}]},
+            Protocol="Any",
+            DownloadStatus="Any"
+        )
+        resp_raw = self._ris.service.selectCmDeviceExt(state_info, criteria)
+        if is_raw_resp:
+            return resp_raw
+        return self.__cucm_ris_phone_resp_normalizing(resp_raw=resp_raw)[0]
+
+    @cucm_logging
+    def risGetPhones(self, devices_collection: Iterable[dict, ...], is_raw_resp: bool = False) -> tuple[dict, ...]:
+
+        """
+        RIS (Real-time Information Server) Get Phones Method.
+        :param devices_collection:  Collection of Dictionaries. Dictionaries should contain the key `name`
+        :param is_raw_resp:         Raw or Short Dictionary Response
+        :return:
+        """
+
+        state_info = ""
+
+        # Split collection
+        splitted_devices_collection = [
+            {"item": [{"Item": device["name"]} for device in devices_collection[item:item + 1000]]}
+            for item in range(0, len(devices_collection), 1000)
+        ]
+
+        resp_raw_collection = []
+        temp_norm_collection = {}
+        for devices_collection_part in splitted_devices_collection:
+            # Max Returned Devices Limit = 1000
+            criteria = self._ris_factory.CmSelectionCriteria(
+                MaxReturnedDevices=1000,
+                DeviceClass="Phone",
+                Model=255,
+                Status="Any",
+                NodeName=None,
+                SelectBy="Name",
+                SelectItems=devices_collection_part,
+                Protocol="Any",
+                DownloadStatus="Any"
+            )
+            resp_raw = self._ris.service.selectCmDeviceExt(state_info, criteria)
+            if is_raw_resp:
+                resp_raw_collection.append(resp_raw)
+            else:
+                for item in self.__cucm_ris_phone_resp_normalizing(resp_raw=resp_raw):
+                    temp_norm_collection[item["DeviceName"]] = item
+
+        if is_raw_resp:
+            return tuple(resp_raw_collection)
+        for device in devices_collection:
+            if device["name"] in temp_norm_collection:
+                device["ris"] = temp_norm_collection[device["name"]]
+            else:
+                # Device not found (Not exist, Off-line, Unsupported Class or Type (RDP, UDP and ect.))
+                device["ris"] = {
+                    "DeviceName": None,
+                    "Status": None,
+                    "Model": None,
+                    "Product": None,
+                    "IP": None,
+                    "NodeName": None,
+                    "ActiveLoadID": None,
+                    "InactiveLoadID": None,
+                }
+        return tuple(devices_collection)
+
     def sqlExecuteQuery(self, sql_query: str) -> Union[tuple[dict, ...], None]:
 
         """
@@ -600,7 +777,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlListCallingSearchSpace(self) -> tuple:
+    def sqlListCallingSearchSpace(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -611,7 +788,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT css.pkid, css.name, css.description FROM callingsearchspace css ORDER BY css.name"
         )
 
-    def sqlListCredentialPolicy(self) -> Union[tuple, None]:
+    def sqlListCredentialPolicy(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -622,7 +799,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT cp.pkid, cp.displayname AS name FROM credentialpolicy cp ORDER BY cp.displayname"
         )
 
-    def sqlListDevicePool(self) -> Union[tuple, None]:
+    def sqlListDevicePool(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -631,7 +808,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT dp.pkid, dp.name FROM devicepool dp ORDER BY dp.name")
 
-    def sqlListDirGroup(self) -> Union[tuple, None]:
+    def sqlListDirGroup(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -640,7 +817,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT dg.pkid, dg.name FROM dirgroup dg ORDER BY dg.name")
 
-    def sqlListMediaResourceGroup(self) -> tuple:
+    def sqlListMediaResourceGroup(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -651,7 +828,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT mrg.pkid, mrg.name, mrg.description FROM mediaresourcegroup mrg ORDER BY mrg.name"
         )
 
-    def sqlListMediaResourceList(self) -> tuple:
+    def sqlListMediaResourceList(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -662,7 +839,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT mrl.pkid, mrl.name FROM mediaresourcelist mrl ORDER BY mrl.name"
         )
 
-    def sqlListPhoneTemplate(self) -> Union[tuple, None]:
+    def sqlListPhoneTemplate(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -671,7 +848,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT pt.pkid, pt.name FROM phonetemplate pt ORDER BY pt.name")
 
-    def sqlListProcessNode(self) -> Union[tuple, None]:
+    def sqlListProcessNode(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -686,7 +863,7 @@ class CucmAxlClient(CucmSettings):
                 ORDER BY pn.name
             """)
 
-    def sqlListRecordingProfile(self) -> tuple:
+    def sqlListRecordingProfile(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -695,7 +872,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT rp.pkid, rp.name FROM recordingprofile rp ORDER BY rp.name")
 
-    def sqlListRegion(self) -> Union[tuple, None]:
+    def sqlListRegion(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -704,7 +881,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT r.pkid, r.name FROM region r ORDER BY r.name")
 
-    def sqlListRoutePartition(self) -> Union[tuple, None]:
+    def sqlListRoutePartition(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -715,7 +892,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT rp.pkid, rp.name, rp.description FROM routepartition rp ORDER BY rp.name"
         )
 
-    def sqlListSoftkeyTemplate(self) -> Union[tuple, None]:
+    def sqlListSoftkeyTemplate(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -726,7 +903,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT skt.pkid, skt.name, skt.description FROM softkeytemplate skt ORDER BY skt.name"
         )
 
-    def sqlListTelecasterService(self) -> Union[tuple, None]:
+    def sqlListTelecasterService(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -737,7 +914,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT ts.pkid, ts.name, ts.description FROM telecasterservice ts ORDER BY ts.name"
         )
 
-    def sqlListTypeClass(self) -> Union[tuple, None]:
+    def sqlListTypeClass(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -746,7 +923,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT tc.enum AS pkid, tc.name FROM typeclass tc ORDER BY tc.enum")
 
-    def sqlListTypeCountry(self) -> Union[tuple, None]:
+    def sqlListTypeCountry(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -755,7 +932,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT tc.enum AS pkid, tc.name FROM typecountry tc ORDER BY tc.enum")
 
-    def sqlListTypeModel(self) -> Union[tuple, None]:
+    def sqlListTypeModel(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -764,7 +941,7 @@ class CucmAxlClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT tm.enum AS pkid, tm.name FROM typemodel tm ORDER BY tm.enum")
 
-    def sqlListTypeUserLocale(self) -> Union[tuple, None]:
+    def sqlListTypeUserLocale(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -775,7 +952,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT tul.enum AS pkid, tul.name, tul.nativename FROM typeuserlocale tul ORDER BY tul.enum"
         )
 
-    def sqlListUcServiceProfile(self) -> tuple:
+    def sqlListUcServiceProfile(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -786,7 +963,7 @@ class CucmAxlClient(CucmSettings):
             sql_query="SELECT ucsp.pkid, ucsp.name, ucsp.description FROM ucserviceprofile ucsp ORDER BY ucsp.name"
         )
 
-    def sqlListUcUserProfile(self) -> Union[tuple, None]:
+    def sqlListUcUserProfile(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -829,7 +1006,7 @@ class CucmAxlClient(CucmSettings):
                      ORDER BY cpg.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlSearchDevice(self, **kwargs: dict) -> Union[tuple[dict, ...], None]:
+    def sqlSearchDevice(self, **kwargs: Union[dict, ...]) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.
@@ -874,7 +1051,7 @@ class CucmAxlClient(CucmSettings):
                      ORDER BY d.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlSearchEndUser(self, **kwargs: dict) -> Union[tuple[dict, ...], None]:
+    def sqlSearchEndUser(self, **kwargs: Union[dict, ...]) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.
@@ -903,7 +1080,7 @@ class CucmAxlClient(CucmSettings):
                      ORDER BY eu.userid""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlSearchLineGroup(self, **kwargs: dict) -> Union[tuple[dict, ...], None]:
+    def sqlSearchLineGroup(self, **kwargs: Union[dict, ...]) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.
@@ -934,7 +1111,7 @@ class CucmAxlClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlSearchTranslationPattern(self, **kwargs: dict) -> Union[tuple[dict, ...], None]:
+    def sqlSearchTranslationPattern(self, **kwargs: Union[dict, ...]) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.

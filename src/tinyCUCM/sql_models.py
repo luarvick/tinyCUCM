@@ -1,6 +1,5 @@
 from enum import Enum
 from pydantic import BaseModel, model_validator
-from zeep.exceptions import ValidationError
 
 
 """ ######################################################### """

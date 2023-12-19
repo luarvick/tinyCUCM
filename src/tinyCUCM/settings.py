@@ -40,9 +40,12 @@ class CucmSettings:
         self.__session_verify: bool = kwargs.get("session_verify")
         self.__session_timeout: int = kwargs.get("session_timeout") or 20
 
+        self.__ris_wsdl_filename: str = kwargs.get("ris_wsdl_filename")
+
         self.__cucm_history = HistoryPlugin()
 
-        self.__cucm_axl_session_create()
+        self.__cucm_axl_client()
+        self.__cucm_ris_client()
 
     def _cucm_history_show(self) -> str:
 
@@ -62,21 +65,12 @@ class CucmSettings:
         except IndexError:
             return history_error
 
-    def __cucm_axl_session_create(self):
+    def __cucm_session_create(self) -> Session:
 
         """
-        AXL Session Create.
+        Session Create.
         :return:
         """
-
-        log_message = "@ CUCM AXL Session @ - {message}"
-
-        # If you're not disabling SSL verification, host should be the FQDN of the server rather than IP
-        location = f"https://{self.__pub_fqdn}:8443/axl/"
-        binding = "{http://www.cisco.com/AXLAPIService/}AXLAPIBinding"
-        wsdl_path = f"{self.__toolkit_path}/schema/{self.__pub_version}/AXLAPI.wsdl"
-        if not os.path.isfile(wsdl_path):
-            raise FileNotFoundError(f"{repr(wsdl_path)}, wsdl file not found.")
 
         session = Session()
         session.verify = False
@@ -85,17 +79,64 @@ class CucmSettings:
             session.verify = self.__cert_path
             if not os.path.isfile(self.__cert_path):
                 raise FileNotFoundError(f"{repr(self.__cert_path)}, certificate file not found.")
+        session.auth = HTTPBasicAuth(self.__user_login, self.__user_password)
+        return session
 
+    def __cucm_axl_client(self):
+
+        """
+        AXL Client.
+        :return:
+        """
+
+        log_message = "@ CUCM AXL Client @ - {message}"
+
+        # If you're not disabling SSL verification, host should be the FQDN of the server rather than IP
+        location = f"https://{self.__pub_fqdn}:8443/axl/"
+        binding = "{http://www.cisco.com/AXLAPIService/}AXLAPIBinding"
+        wsdl_path = f"{self.__toolkit_path}/schema/{self.__pub_version}/AXLAPI.wsdl"
+        if not os.path.isfile(wsdl_path):
+            raise FileNotFoundError(f"{repr(wsdl_path)}, wsdl file not found.")
+
+        session = self.__cucm_session_create()
         try:
-            session.auth = HTTPBasicAuth(self.__user_login, self.__user_password)
             # 'Exception Value: [WinError 5] Access is denied: '.\\zeep'' fixes:
             # cache=False or cache=SqliteCache(".../axlsqltoolkit/cache_axl.db")
             transport = Transport(
                 cache=SqliteCache(f"{self.__toolkit_path}/cache_axl.db"),
                 session=session,
-                timeout=self.__session_timeout)
+                timeout=self.__session_timeout
+            )
             client = Client(wsdl=wsdl_path, transport=transport, plugins=[self.__cucm_history])
             self._axl = client.create_service(binding, location)
+        except Exception as err:
+            logging.error(log_message.format(message=f"Error Detail:\n{err}."))
+            raise CucmSessionError("Session error occurred.")
+
+    def __cucm_ris_client(self):
+
+        """
+        RIS (Real-time Information Server) Client.
+        :return:
+        """
+
+        log_message = "@ CUCM RIS Client @ - {message}"
+
+        wsdl_path = f"{self.__toolkit_path}/{self.__ris_wsdl_filename}"
+        if not os.path.isfile(wsdl_path):
+            logging.warning(log_message.format(message=f"{repr(wsdl_path)}, wsdl file not found."))
+            wsdl_path = f"https://{self.__pub_fqdn}:8443/realtimeservice2/services/RISService70?wsdl"
+            # raise FileNotFoundError(f"{repr(wsdl_path)}, wsdl file not found.")
+
+        session = self.__cucm_session_create()
+        try:
+            transport = Transport(
+                cache=SqliteCache(f"{self.__toolkit_path}/cache_ris.db"),
+                session=session,
+                timeout=self.__session_timeout
+            )
+            self._ris = Client(wsdl=wsdl_path, transport=transport, plugins=[self.__cucm_history])
+            self._ris_factory = self._ris.type_factory("ns0")
         except Exception as err:
             logging.error(log_message.format(message=f"Error Detail:\n{err}."))
             raise CucmSessionError("Session error occurred.")
