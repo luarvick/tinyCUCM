@@ -1,9 +1,9 @@
 from collections.abc import Iterable
-from typing import Union, Tuple, Unpack
+from typing import Union
 from zeep.helpers import serialize_object
 from .decorators import cucm_logging
 from .settings import CucmSettings
-from .ris_models import CucmRisGetCtiModel, CucmRisCtiCollectionNameEnum, CucmRisCtiMgrClassEnum
+from .ris_models import CucmRisGetCtiModel
 from .sql_models import (
     CucmSqlSearchCallPickupGroupModel,
     CucmSqlSearchDeviceModel,
@@ -767,11 +767,22 @@ class CucmAxlClient(CucmSettings):
                 }
         return tuple(devices_collection)
 
+    @cucm_logging
+    def sqlUpdateQuery(self, sql_query: str):
+
+        """
+        SQL Update Request to the Cisco UCM DB Informix.
+        :param sql_query:   SQL `UPDATE` Query Expression
+        :return:
+        """
+
+        return self._axl.executeSQLUpdate(sql=sql_query)
+
     def sqlExecuteQuery(self, sql_query: str) -> Union[tuple[dict, ...], None]:
 
         """
-        SQL Request to the Cisco UCM DB Informix.
-        :param sql_query:   SQL Query Expression
+        SQL Select Request to the Cisco UCM DB Informix.
+        :param sql_query:   SQL `SELECT` Query Expression
         :return:
         """
 
@@ -1143,4 +1154,79 @@ class CucmAxlClient(CucmSettings):
                      ORDER BY np.dnorpattern""".format(
             obj=validated_data["criterion"], val=validated_data["value"].lower()
         )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlValidateDeviceEndUserDesignation(self, device: str):
+
+        """
+        SQL Validate Object Method.
+        :param device:      Device Name (Any Type Class)
+        :return:
+        """
+
+        sql_query = """SELECT eu.pkid AS enduser_pkid,
+                              eu.userid,
+                              eu.displayname AS enduser_displayname,
+                              d.pkid AS device_pkid,
+                              d.name AS device,
+                              d.description AS device_description,
+                              d.tkclass AS device_type
+                         FROM enduser eu
+                    LEFT JOIN enduserdevicemap eudm ON eudm.fkenduser = eu.pkid
+                    LEFT JOIN device d ON eudm.fkdevice = d.pkid
+                        WHERE LOWER(d.name) = '{val}'""".format(val=device.lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlValidateLine(self, pattern: str) -> Union[tuple[dict], None]:
+
+        """
+        SQL Validate Object Method.
+        :param pattern:     Pattern (`tkpatternusage = '2'` - Type Pattern Usage: Device Only)
+        :return:
+        """
+
+        sql_query = """SELECT d.pkid AS device_pkid,
+                              d.name AS device,
+                              d.description AS device_description,
+                              tc.name AS device_class,
+                              tm.name AS device_model,
+                              np.pkid AS pattern_pkid,
+                              np.dnorpattern AS pattern,
+                              np.description AS pattern_description,
+                              rp.name AS pattern_partition,
+                              np.tkpatternusage AS pattern_usage,
+                              tpu.name AS pattern_type
+                         FROM device d
+                    LEFT JOIN devicenumplanmap dnpm ON dnpm.fkdevice = d.pkid
+                    LEFT JOIN numplan np ON dnpm.fknumplan = np.pkid
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN typepatternusage tpu ON np.tkpatternusage = tpu.enum
+                    LEFT JOIN typeclass tc ON d.tkclass=tc.enum
+                    LEFT JOIN typemodel tm ON d.tkmodel=tm.enum
+                        WHERE LOWER(np.dnorpattern) = '{val}'
+                          AND np.tkpatternusage = '2' 
+                          AND (d.tkclass = '1' OR d.tkclass = '20' OR d.tkclass = '254')
+                          AND d.name NOT LIKE 'ModelProfile%'
+                     ORDER BY d.name""".format(val=pattern.lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlValidatePattern(self, pattern: str) -> Union[tuple[dict], None]:
+
+        """
+        SQL Validate Object Method.
+        :param pattern:     Pattern (`tkpatternusage` - Not Define. Any Pattern Type Usage)
+        :return:
+        """
+
+        sql_query = """SELECT np.pkid AS pattern_pkid,
+                              np.dnorpattern AS pattern,
+                              np.description AS pattern_description,
+                              rp.name AS pattern_partition,
+                              np.tkpatternusage AS pattern_usage,
+                              tpu.name AS pattern_type
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN typepatternusage tpu ON np.tkpatternusage = tpu.enum
+                        WHERE LOWER(np.dnorpattern) = '{val}'
+                     ORDER BY np.dnorpattern""".format(val=pattern.lower())
         return self.__cucm_sql_execute(sql_query=sql_query)

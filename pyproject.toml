@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tinyCUCM"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
   { name="Luarvick", email="lu.luarvick@gmail.com" },
 ]
-description = "Cisco Unified Call Manager 11.5 AXL Methods Collection."
+description = "Cisco Unified Call Manager AXL Methods Collection."
 readme = "README.md"
 dependencies = [
     "zeep==4.2.1",

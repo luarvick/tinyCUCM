@@ -840,9 +840,9 @@ cucm = ...
 sql_query = """
     SELECT d.pkid, d.name, d.description
     FROM device d
-    WHERE d.name LIKE '%your_value%'
+    WHERE d.name LIKE '%value%'
 """
-print(cucm.sqlExecuteQuery(sql_query=sql_query))
+print("Result:", cucm.sqlExecuteQuery(sql_query=sql_query))
 # Result: (
 #     {'pkid': '........-....-....-....-............', 'name': 'SEP...', 'description': '...'},
 #     {'pkid': '........-....-....-....-............', 'name': 'RDP...', 'description': '...'}, 
@@ -866,7 +866,19 @@ print(cucm.sqlExecuteQuery(sql_query=sql_query))
 <summary>Code Example:</summary>
 
 ```python
-
+cucm = ...
+sql_query = """
+    UPDATE device d 
+    SET d.description = 'New Description via SQL' 
+    WHERE d.name LIKE '%value%'
+"""
+print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
+# Result: {
+#     'return': {
+#         'rowsUpdated': 1
+#     },
+#     'sequence': None
+# }
 ```
 
 </details>
@@ -899,11 +911,23 @@ print(cucm.sqlExecuteQuery(sql_query=sql_query))
   * `sqlListUcServiceProfile`
   * `sqlListUcUserProfile`
 * `Search` Methods:
-  * `sqlSearchCallPickupGroup`
-  * `sqlSearchDevice`
-  * `sqlSearchEndUser`
-  * `sqlSearchLineGroup`
-  * `sqlSearchTranslationPattern`
+  * `sqlSearchCallPickupGroup` - required keywords args: `criterion`, `value`
+    * Arg `criterion`: `Name`, `Description`, `Pattern`, `Member Line Number`, `Member Line Description`
+  * `sqlSearchDevice` - required keywords args: `criterion`, `value`
+    * Arg `criterion`: `Name`, `Description`, `Line Number`, `Line Description`, `Userid`, `Device Pool`,
+      `Device Type`
+  * `sqlSearchEndUser` - required keywords args: `criterion`, `value`
+    * Arg `criterion`: `Userid`, `Display Name`, `Last Name`, `First Name`, `Phone Number`, `Mobile Number`,
+      `Email`, `Directory URI`
+  * `sqlSearchLineGroup` - required keywords args: `criterion`, `value`
+    * Arg `criterion`: `Name`, `Member Line Number`, `Member Line Description`
+  * `sqlSearchTranslationPattern` - required keywords args: `criterion`, `value`
+    * Arg `criterion`: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Called Party Transform Mask`,
+      `Prefix Digits Out` 
+* `Validate` Methods:
+  * `sqlValidateDeviceEndUserDesignation` - required keywords args: `device` (Type Class: Any)
+  * `sqlValidateLine` - required keywords args: `pattern` (Type Pattern Usage: Device Only)
+  * `sqlValidatePattern` - required keywords args: `pattern` (Type Pattern Usage: Any)
 
 </details>
 
