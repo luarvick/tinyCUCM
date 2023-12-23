@@ -28,6 +28,8 @@ class CucmSettings:
         disable_warnings(InsecureRequestWarning)
 
         self._axl = None
+        self._axl_client = None
+        self._axl_transport = None
         self._ris = None
         self._ris_factory = None
 
@@ -44,8 +46,18 @@ class CucmSettings:
 
         self.__cucm_history = HistoryPlugin()
 
-        self.__cucm_axl_client()
-        self.__cucm_ris_client()
+        self.__cucm_axl_service()
+        self.__cucm_ris_service()
+
+    @property
+    def _cucm_publisher_property(self) -> str:
+
+        """
+        CUCM Publisher Property
+        :return:
+        """
+
+        return self.__pub_fqdn
 
     def _cucm_history_show(self) -> str:
 
@@ -82,14 +94,14 @@ class CucmSettings:
         session.auth = HTTPBasicAuth(self.__user_login, self.__user_password)
         return session
 
-    def __cucm_axl_client(self):
+    def __cucm_axl_service(self):
 
         """
-        AXL Client.
+        AXL Service.
         :return:
         """
 
-        log_message = "@ CUCM AXL Client @ - {message}"
+        log_message = "@ CUCM AXL Service @ - {message}"
 
         # If you're not disabling SSL verification, host should be the FQDN of the server rather than IP
         location = f"https://{self.__pub_fqdn}:8443/axl/"
@@ -102,25 +114,25 @@ class CucmSettings:
         try:
             # 'Exception Value: [WinError 5] Access is denied: '.\\zeep'' fixes:
             # cache=False or cache=SqliteCache(".../axlsqltoolkit/cache_axl.db")
-            transport = Transport(
+            self._axl_transport = Transport(
                 cache=SqliteCache(f"{self.__toolkit_path}/cache_axl.db"),
                 session=session,
                 timeout=self.__session_timeout
             )
-            client = Client(wsdl=wsdl_path, transport=transport, plugins=[self.__cucm_history])
-            self._axl = client.create_service(binding, location)
+            self._axl_client = Client(wsdl=wsdl_path, transport=self._axl_transport, plugins=[self.__cucm_history])
+            self._axl = self._axl_client.create_service(binding, location)
         except Exception as err:
             logging.error(log_message.format(message=f"Error Detail:\n{err}."))
             raise CucmSessionError("Session error occurred.")
 
-    def __cucm_ris_client(self):
+    def __cucm_ris_service(self):
 
         """
-        RIS (Real-time Information Server) Client.
+        RIS (Real-time Information Server) Service.
         :return:
         """
 
-        log_message = "@ CUCM RIS Client @ - {message}"
+        log_message = "@ CUCM RIS Service @ - {message}"
 
         wsdl_path = f"{self.__toolkit_path}/{self.__ris_wsdl_filename}"
         if not os.path.isfile(wsdl_path):

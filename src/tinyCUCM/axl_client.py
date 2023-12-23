@@ -11,6 +11,7 @@ from .sql_models import (
     CucmSqlSearchLineGroupModel,
     CucmSqlSearchTranslationPatternModel,
 )
+from lxml import etree
 
 
 """ ######################################################### """
@@ -129,6 +130,241 @@ class CucmAxlClient(CucmSettings):
         """
 
         return tuple(sorted([str(method[0]) for method in self._ris.service]))
+
+    @cucm_logging
+    def axlAddCallPickupGroup(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "callPickupGroup": {
+                                    "name": "str",
+                                    "pattern": "str"
+                                }
+                            }`
+        :return:
+        """
+
+        return self._axl.addCallPickupGroup(**kwargs)
+
+    @cucm_logging
+    def axlAddLine(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+
+        * usage: `Device`
+
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "line": {
+                                    "pattern": "str",
+                                    "usage": "str"
+                                }
+                            }`
+        :return:
+        """
+
+        return self._axl.addLine(**kwargs)
+
+    @cucm_logging
+    def axlAddLineGroup(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+
+        * distributionAlgorithm: `Top Down`, `Circular`, `Longest Idle Time`, `Broadcast`
+        * huntAlgorithmNoAnswer:
+            `Try next member; then, try next group in Hunt List`,\n
+            `Try next member, but do not go to next group`,\n
+            `Skip remaining members, and go directly to next group`,\n
+            `Stop hunting`
+        * huntAlgorithmBusy:
+            `Try next member; then, try next group in Hunt List`,\n
+            `Try next member, but do not go to next group`,\n
+            `Skip remaining members, and go directly to next group`,\n
+            `Stop hunting`
+        * huntAlgorithmNotAvailable:
+            `Try next member; then, try next group in Hunt List`,\n
+            `Try next member, but do not go to next group`,\n
+            `Skip remaining members, and go directly to next group`,\n
+            `Stop hunting`
+
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "lineGroup": {
+                                    "name": "str",
+                                    "distributionAlgorithm": "str",
+                                    "rnaReversionTimeOut": "int",
+                                    "huntAlgorithmNoAnswer": "str",
+                                    "huntAlgorithmBusy": "str",
+                                    "huntAlgorithmNotAvailable": "str"
+                                }
+                            }`
+        :return:
+        """
+
+        return self._axl.addLineGroup(**kwargs)
+
+    @cucm_logging
+    def axlAddPhone(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+
+        * product: `Cisco 7821`, `...`
+        * class: `Phone`
+        * protocol: `SIP`, `SCCP`
+        * protocolSide: `User`
+        * commonPhoneConfigName: `Standard Common Phone Profile`
+        * locationName: `Hub_None`, `Phantom`, `Shadow`
+        * useTrustedRelayPoint: `Default`, `On`, `Off`
+        * phoneTemplateName: `Standard 7821 SIP`, `...`
+        * primaryPhoneName: `None`
+        * builtInBridgeStatus: `Default`, `On`, `Off`
+        * packetCaptureMode: `None`, `Batch Processing Mode`
+        * certificateOperation: `No Pending Operation`, `Install/Upgrade`, `Delete`, `Troubleshoot`
+        * deviceMobilityMode: `Default`, `On`, `Off`
+
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "phone": {
+                                    "product": "str",
+                                    "class": "str",
+                                    "protocol": "str",
+                                    "protocolSide": "str",
+                                    "devicePoolName": "str",
+                                    "commonPhoneConfigName": "str",
+                                    "locationName": "str",
+                                    "useTrustedRelayPoint": "str",
+                                    "phoneTemplateName": "str",
+                                    "primaryPhoneName": None,
+                                    "builtInBridgeStatus": "str",
+                                    "packetCaptureMode": "str",
+                                    "certificateOperation": "str",
+                                    "deviceMobilityMode": "str"
+                                }
+                            }`
+        :return:
+        """
+
+        return self._axl.addPhone(**kwargs)
+
+    @cucm_logging
+    def axlAddRemoteDestination(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+
+        * answerTooSoonTimer: `1500`
+        * answerTooLateTimer: `19000`
+        * delayBeforeRingingCell: `4000`
+
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "remoteDestination": {
+                                    "destination": "str",
+                                    "answerTooSoonTimer": "int",
+                                    "answerTooLateTimer": "int",
+                                    "delayBeforeRingingCell": "int",
+                                    "ownerUserId": "str",
+                                    "remoteDestinationProfileName": "str"
+                                }
+                            }`
+        :return:
+        """
+
+        # https://community.cisco.com/t5/cisco-bug-discussions/cscvq98025-addremotedestination-schema-requires/td-p/4305081
+        # https://github.com/CiscoDevNet/axl-python-zeep-samples/blob/master/axl_add_Remote_Destination.py
+
+        # Due to an issue with the AXL schema vs. implementation (11.5/12.5 - CSCvq98025)
+        # we have to remove the nil <dualModeDeviceName> element Zeep creates
+        # via the following lines
+
+        # Use the Zeep service to create an XML object of the request - don't send
+        req = self._axl_client.create_message(self._axl, "addRemoteDestination", **kwargs)
+        for element in req.xpath("//dualModeDeviceName"):
+            # Remove the dualModeDeviceName element
+            element.getparent().remove(element)
+
+        return self._axl_transport.post_xml(
+            f"https://{self._cucm_publisher_property}:8443/axl/",
+            envelope=req,
+            headers=None
+        )
+
+    @cucm_logging
+    def axlAddRemoteDestinationProfile(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+
+        * product: `Remote Destination Profile`
+        * class: `Remote Destination Profile`
+        * protocol: `Remote Destination`
+        * protocolSide: `User`
+        * callInfoPrivacyStatus: `Default`
+
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "remoteDestinationProfile": {
+                                    "name": "str",
+                                    "product": "str",
+                                    "class": "str",
+                                    "protocol": "str",
+                                    "protocolSide": "str",
+                                    "devicePoolName": "str",
+                                    "callInfoPrivacyStatus": "str",
+                                    "userId": "str"
+                                }
+                            }`
+        :return:
+        """
+
+        return self._axl.addRemoteDestinationProfile(**kwargs)
+
+    @cucm_logging
+    def axlAddTranslationPattern(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+
+        * usage: `Translation`
+
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "transPattern": {
+                                    "pattern": "str",
+                                    "routePartitionName": "str",
+                                    "usage": "str"
+                                }
+                            }`
+        :return:
+        """
+
+        return self._axl.addTransPattern(**kwargs)
+
+    @cucm_logging
+    def axlAddUser(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+
+        * presenceGroupName: `Standard Presence group`
+
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "user": {
+                                    "userid": "str",
+                                    "lastName": "str",
+                                    "presenceGroupName": "str"
+                                }
+                            }`
+        :return:
+        """
+
+        return self._axl.addUser(**kwargs)
 
     @cucm_logging
     def axlDoAuthenticateUser(self, **kwargs: Union[dict, ...]) -> dict:
@@ -659,7 +895,7 @@ class CucmAxlClient(CucmSettings):
         :param kwargs:  Required Fields:
                         `kwargs = {
                             "collection_name": "Enum",
-                            items_collection: "Iterable",
+                            "items_collection": "Iterable",
                             "cti_mgr_class": "Enum"
                         }`
         :return:

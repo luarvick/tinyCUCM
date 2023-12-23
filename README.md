@@ -147,11 +147,608 @@ if __name__ == "__main__":
 
 #### Add Methods
 
+
+* `axlAddCallPickupGroup`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `callPickupGroup`
+    * `name`
+    * `pattern`
+  * expected:
+    * `description`
+    * `routePartitionName`
+    * `members`
+    * `pickupNotification`
+    * `pickupNotificationTimer`
+    * `callInfoForPickupNotification`
+  </details>
+* `axlAddDeviceProfile`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `deviceProfile`
+    * `name`
+    * `product`
+    * `class`
+    * `protocol`
+    * `protocolSide`
+    * `phoneTemplateName`
+  * expected:
+    * `name`
+    * `description`
+    * `userHoldMohAudioSourceId`
+    * `vendorConfig`
+    * `traceFlag`
+    * `mlppDomainId`
+    * `mlppIndicationStatus`
+    * `preemption`
+    * `lines`
+      * `line` - collection of:
+        * required:
+          * `index`
+          * `dirn`
+            * `pattern`
+            * `routePartitionName`
+        * expected:
+          * `label`
+          * `display`
+          * `ringSetting`
+          * `consecutiveRingSetting`
+          * `ringSettingIdlePickupAlert`
+          * `ringSettingActivePickupAlert`
+          * `displayAscii`
+          * `e164Mask`
+          * `mwlPolicy`
+          * `maxNumCalls`
+          * `busyTrigger`
+          * `callInfoDisplay`
+          * `recordingProfileName`
+          * `monitoringCssName`
+          * `recordingFlag`
+          * `audibleMwi`
+          * `speedDial`
+          * `partitionUsage`
+          * `associatedEndusers`
+          * `missedCallLogging`
+          * `recordingMediaSource`
+    * `speeddials`
+    * `busyLampFields`
+    * `blfDirectedCallParks`
+    * `addOnModules`
+    * `userLocale`
+    * `singleButtonBarge`
+    * `joinAcrossLines`
+    * `loginUserId`
+    * `ignorePresentationIndicators`
+    * `dndOption`
+    * `dndRingSetting`
+    * `dndStatus`
+    * `emccCallingSearchSpace`
+    * `alwaysUsePrimeLine`
+    * `alwaysUsePrimeLineForVoiceMessage`
+    * `softkeyTemplateName`
+    * `callInfoPrivacyStatus`
+    * `services`
+    * `featureControlPolicy`
+  </details>
+* `axlAddLine`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `line`
+    * `pattern`
+    * `usage`
+  * expected:
+    * `description`
+    * `routePartitionName`
+    * `aarNeighborhoodName`
+    * `aarDestinationMask`
+    * `aarKeepCallHistory`
+    * `aarVoiceMailEnabled`
+    * `callForwardAll`
+    * `callForwardBusy`
+    * `callForwardBusyInt`
+    * `callForwardNoAnswer`
+    * `callForwardNoAnswerInt`
+    * `callForwardNoCoverage`
+    * `callForwardNoCoverageInt`
+    * `callForwardOnFailure`
+    * `callForwardAlternateParty`
+    * `callForwardNotRegistered`
+    * `callForwardNotRegisteredInt`
+    * `callPickupGroupName`
+    * `autoAnswer`
+    * `networkHoldMohAudioSourceId`
+    * `userHoldMohAudioSourceId`
+    * `alertingName`
+    * `asciiAlertingName`
+    * `presenceGroupName`
+    * `shareLineAppearanceCssName`
+    * `voiceMailProfileName`
+    * `patternPrecedence`
+    * `releaseClause`
+    * `hrDuration`
+    * `hrInterval`
+    * `cfaCssPolicy`
+    * `defaultActivatedDeviceName`
+    * `parkMonForwardNoRetrieveDn`
+    * `parkMonForwardNoRetrieveIntDn`
+    * `parkMonForwardNoRetrieveVmEnabled`
+    * `parkMonForwardNoRetrieveIntVmEnabled`
+    * `parkMonForwardNoRetrieveCssName`
+    * `parkMonForwardNoRetrieveIntCssName`
+    * `parkMonReversionTimer`
+    * `partyEntranceTone`
+    * `directoryURIs`
+    * `allowCtiControlFlag`
+    * `rejectAnonymousCall`
+    * `patternUrgency`
+    * `confidentialAccess`
+    * `externalCallControlProfile`
+    * `enterpriseAltNum`
+    * `e164AltNum`
+    * `pstnFailover`
+    * `callControlAgentProfile`
+    * `useEnterpriseAltNum`
+    * `useE164AltNum`
+    * `active`
+  </details>
+* `axlAddLineGroup`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `lineGroup`
+    * `name`
+    * `distributionAlgorithm`
+    * `rnaReversionTimeOut`
+    * `huntAlgorithmNoAnswer`
+    * `huntAlgorithmBusy`
+    * `huntAlgorithmNotAvailable`
+  * expected:
+    * `members`
+    * `autoLogOffHunt`
+  </details>
+* `axlAddPhone`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `phone`
+    * `name`
+    * `product`
+    * `class`
+    * `protocol`
+    * `protocolSide`
+    * `devicePoolName`
+    * `commonPhoneConfigName`
+    * `locationName`
+    * `useTrustedRelayPoint`
+    * `phoneTemplateName`
+    * `primaryPhoneName`
+    * `builtInBridgeStatus`
+    * `packetCaptureMode`
+    * `certificateOperation`
+    * `deviceMobilityMode`
+  * expected:
+    * `description`
+    * `callingSearchSpaceName`
+    * `commonDeviceConfigName`
+    * `networkLocation`
+    * `mediaResourceListName`
+    * `networkHoldMohAudioSourceId`
+    * `userHoldMohAudioSourceId`
+    * `automatedAlternateRoutingCssName`
+    * `aarNeighborhoodName`
+    * `loadInformation`
+    * `vendorConfig`
+    * `versionStamp`
+    * `traceFlag`
+    * `mlppDomainId`
+    * `mlppIndicationStatus`
+    * `preemption`
+    * `retryVideoCallAsAudio`
+    * `securityProfileName`
+    * `sipProfileName`
+    * `cgpnTransformationCssName`
+    * `useDevicePoolCgpnTransformCss`
+    * `geoLocationName`
+    * `geoLocationFilterName`
+    * `sendGeoLocation`
+    * `lines`
+      * `line` - collection of:
+        * required:
+          * `index`
+          * `dirn`
+            * `pattern`
+            * `routePartitionName`
+        * expected:
+          * `label`
+          * `display`
+          * `ringSetting`
+          * `consecutiveRingSetting`
+          * `ringSettingIdlePickupAlert`
+          * `ringSettingActivePickupAlert`
+          * `displayAscii`
+          * `e164Mask`
+          * `mwlPolicy`
+          * `maxNumCalls`
+          * `busyTrigger`
+          * `callInfoDisplay`
+          * `recordingProfileName`
+          * `monitoringCssName`
+          * `recordingFlag`
+          * `audibleMwi`
+          * `speedDial`
+          * `partitionUsage`
+          * `associatedEndusers`
+          * `missedCallLogging`
+          * `recordingMediaSource`
+    * `speeddials`
+    * `busyLampFields`
+    * `ringSettingIdleBlfAudibleAlert`
+    * `ringSettingBusyBlfAudibleAlert`
+    * `blfDirectedCallParks`
+    * `addOnModules`
+    * `userLocale`
+    * `networkLocale`
+    * `idleTimeout`
+    * `authenticationUrl`
+    * `directoryUrl`
+    * `idleUrl`
+    * `informationUrl`
+    * `messagesUrl`
+    * `proxyServerUrl`
+    * `servicesUrl`
+    * `services`
+    * `softkeyTemplateName`
+    * `defaultProfileName`
+    * `enableExtensionMobility`
+    * `singleButtonBarge`
+    * `joinAcrossLines`
+    * `callInfoPrivacyStatus`
+    * `hlogStatus`
+    * `ownerUserName`
+    * `ignorePresentationIndicators`
+    * `packetCaptureDuration`
+    * `subscribeCallingSearchSpaceName`
+    * `rerouteCallingSearchSpaceName`
+    * `allowCtiControlFlag`
+    * `presenceGroupName`
+    * `unattendedPort`
+    * `requireDtmfReception`
+    * `rfc2833Disabled`
+    * `authenticationMode`
+    * `keySize`
+    * `keyOrder`
+    * `ecKeySize`
+    * `authenticationString`
+    * `upgradeFinishTime`
+    * `remoteDevice`
+    * `dndOption`
+    * `dndRingSetting`
+    * `dndStatus`
+    * `isActive`
+    * `isDualMode`
+    * `mobilityUserIdName`
+    * `phoneSuite`
+    * `phoneServiceDisplay`
+    * `isProtected`
+    * `mtpRequired`
+    * `mtpPreferedCodec`
+    * `dialRulesName`
+    * `sshUserId`
+    * `sshPwd`
+    * `digestUser`
+    * `outboundCallRollover`
+    * `hotlineDevice`
+    * `secureInformationUrl`
+    * `secureDirectoryUrl`
+    * `secureMessageUrl`
+    * `secureServicesUrl`
+    * `secureAuthenticationUrl`
+    * `secureIdleUrl`
+    * `alwaysUsePrimeLine`
+    * `alwaysUsePrimeLineForVoiceMessage`
+    * `featureControlPolicy`
+    * `deviceTrustMode`
+    * `earlyOfferSupportForVoiceCall`
+    * `requireThirdPartyRegistration`
+    * `blockIncomingCallsWhenRoaming`
+    * `homeNetworkId`
+    * `AllowPresentationSharingUsingBfcp`
+    * `confidentialAccess`
+    * `requireOffPremiseLocation`
+    * `allowiXApplicableMedia`
+    * `cgpnIngressDN`
+    * `useDevicePoolCgpnIngressDN`
+    * `msisdn`
+    * `enableCallRoutingToRdWhenNoneIsActive`
+    * `wifiHotspotProfile`
+    * `wirelessLanProfileGroup`
+    * `elinGroup`
+  </details>
+* `axlAddeRemoteDestination`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `remoteDestination`
+    * `destination`
+    * `answerTooSoonTimer`
+    * `answerTooLateTimer`
+    * `delayBeforeRingingCell`
+    * `ownerUserId`
+    * `remoteDestinationProfileName`
+  * expected:
+    * `name`
+    * `enableUnifiedMobility`
+    * `enableExtendAndConnect`
+    * `ctiRemoteDeviceName`
+    * `dualModeDeviceName`
+    * `isMobilePhone`
+    * `enableMobileConnect`
+    * `lineAssociations`
+    * `timeZone`
+    * `todAccessName`
+    * `mobileSmartClientName`
+    * `mobilityProfileName`
+    * `singleNumberReachVoicemail`
+    * `dialViaOfficeReverseVoicemail`
+    * `ringSchedule`
+    * `accessListName`
+  </details>
+* `axlAddRemoteDestinationProfile`
+  <details>
+  <summary>keywords args</summary>
+
+  * required:
+    * `remoteDestinationProfile`
+    * `name`
+    * `product`
+    * `class`
+    * `protocol`
+    * `protocolSide`
+    * `devicePoolName`
+    * `callInfoPrivacyStatus`
+    * `userId`
+  * expected:
+    * `description`
+    * `callingSearchSpaceName`
+    * `networkHoldMohAudioSourceId`
+    * `userHoldMohAudioSourceId`
+    * `lines`
+      * `line` - collection of:
+        * required:
+          * `index`
+          * `dirn`
+            * `pattern`
+            * `routePartitionName`
+        * expected:
+          * `label`
+          * `display`
+          * `ringSetting`
+          * `consecutiveRingSetting`
+          * `ringSettingIdlePickupAlert`
+          * `ringSettingActivePickupAlert`
+          * `displayAscii`
+          * `e164Mask`
+          * `mwlPolicy`
+          * `maxNumCalls`
+          * `busyTrigger`
+          * `callInfoDisplay`
+          * `recordingProfileName`
+          * `monitoringCssName`
+          * `recordingFlag`
+          * `audibleMwi`
+          * `speedDial`
+          * `partitionUsage`
+          * `associatedEndusers`
+          * `missedCallLogging`
+          * `recordingMediaSource`
+    * `ignorePresentationIndicators`
+    * `rerouteCallingSearchSpaceName`
+    * `cgpnTransformationCssName`
+    * `automatedAlternateRoutingCssName`
+    * `useDevicePoolCgpnTransformCss`
+    * `userLocale`
+    * `networkLocale`
+    * `primaryPhoneName`
+    * `dndOption`
+    * `dndStatus`
+    * `mobileSmartClientProfileName`
+  </details>
+* `axlAddTranslationPattern`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `transPattern`
+    * `pattern`
+    * `routePartitionName`
+    * `usage`
+  * expected:
+    * `description`
+    * `blockEnable`
+    * `calledPartyTransformationMask`
+    * `callingPartyTransformationMask`
+    * `useCallingPartyPhoneMask`
+    * `callingPartyPrefixDigits`
+    * `dialPlanName`
+    * `digitDiscardInstructionName`
+    * `patternUrgency`
+    * `prefixDigitsOut`
+    * `routeFilterName`
+    * `callingLinePresentationBit`
+    * `callingNamePresentationBit`
+    * `connectedLinePresentationBit`
+    * `connectedNamePresentationBit`
+    * `patternPrecedence`
+    * `provideOutsideDialtone`
+    * `callingPartyNumberingPlan`
+    * `callingPartyNumberType`
+    * `calledPartyNumberingPlan`
+    * `calledPartyNumberType`
+    * `callingSearchSpaceName`
+    * `resourcePriorityNamespaceName`
+    * `routeNextHopByCgpn`
+    * `routeClass`
+    * `callInterceptProfileName`
+    * `releaseClause`
+    * `useOriginatorCss`
+    * `dontWaitForIDTOnSubsequentHops`
+    * `isEmergencyServiceNumber`
+  </details>
+* `axlAddUser`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `user`
+    * `userid`
+    * `lastName`
+    * `presenceGroupName`
+  * expected:
+    * `firstName`
+    * `displayName`
+    * `middleName`
+    * `password`
+    * `pin`
+    * `mailid`
+    * `department`
+    * `manager`
+    * `userLocale`
+    * `associatedDevices`
+    * `primaryExtension`
+    * `associatedPc`
+    * `associatedGroups`
+    * `enableCti` 
+    * `digestCredentials`
+    * `phoneProfiles`
+    * `defaultProfile`
+    * `subscribeCallingSearchSpaceName`
+    * `enableMobility`
+    * `enableMobileVoiceAccess`
+    * `maxDeskPickupWaitTime`
+    * `remoteDestinationLimit`
+    * `passwordCredentials`
+    * `pinCredentials`
+    * `enableEmcc`
+    * `ctiControlledDeviceProfiles`
+    * `patternPrecedence`
+    * `numericUserId`
+    * `mlppPassword`
+    * `customUserFields`
+    * `homeCluster`
+    * `imAndPresenceEnable`
+    * `serviceProfile`
+    * `lineAppearanceAssociationForPresences`
+    * `directoryUri`
+    * `telephoneNumber`
+    * `title`
+    * `mobileNumber`
+    * `homeNumber`
+    * `pagerNumber`
+    * `extensionsInfo`
+    * `selfService`
+    * `userProfile`
+    * `calendarPresence`
+    * `ldapDirectoryName`
+    * `userIdentity`
+    * `nameDialing`
+    * `ipccExtension`
+    * `convertUserAccount`
+    * `accountType`
+    * `authenticationType`
+    * `enableUserToHostConferenceNow`
+    * `attendeesAccessCode`
+    * `zeroHop`
+  </details>
+
 <details>
 <summary>Code Example:</summary>
 
 ```python
+cucm = ...
+print("Result:", cucm.axlAddCallPickupGroup(**{"callPickupGroup": {"name": "...", "pattern": "..."}}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
 
+print("Result:", cucm.axlAddLine(**{"line": {"pattern": "...", "usage": "Device"}}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
+
+print("Result:", cucm.axlAddLineGroup(**{
+    "lineGroup": {
+        "name": "...",
+        "distributionAlgorithm": "Broadcast",
+        "rnaReversionTimeOut": 10,
+        "huntAlgorithmNoAnswer": "Try next member; then, try next group in Hunt List",
+        "huntAlgorithmBusy": "Try next member; then, try next group in Hunt List",
+        "huntAlgorithmNotAvailable": "Try next member; then, try next group in Hunt List",
+    }
+}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
+
+print("Result:", cucm.axlAddPhone(**{
+    "phone": {
+        "name": "...",
+        "product": "Cisco 7821",
+        "class": "Phone",
+        "protocol": "SIP",
+        "protocolSide": "User",
+        "devicePoolName": "Default",
+        "commonPhoneConfigName": "Standard Common Phone Profile",
+        "locationName": "Hub_None",
+        "useTrustedRelayPoint": "Default",
+        "phoneTemplateName": "Standard 7821 SIP",
+        "primaryPhoneName": None,
+        "builtInBridgeStatus": "Default",
+        "packetCaptureMode": "None",
+        "certificateOperation": "No Pending Operation",
+        "deviceMobilityMode": "Default"
+    }
+}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
+
+print("Result:", cucm.axlAddRemoteDestination(**{
+    "remoteDestination": {
+        "destination": "...",
+        "answerTooSoonTimer": 1500,
+        "answerTooLateTimer": 19000,
+        "delayBeforeRingingCell": 4000,
+        "ownerUserId": "...",
+        "remoteDestinationProfileName": "..."
+    }
+}))
+# Result: <Response [200]>
+
+print("Result:", cucm.axlAddRemoteDestinationProfile(**{
+    "remoteDestinationProfile": {
+        "name": "...",
+        "product": "Remote Destination Profile",
+        "class": "Remote Destination Profile",
+        "protocol": "Remote Destination",
+        "protocolSide": "User",
+        "devicePoolName": "...",
+        "callInfoPrivacyStatus": "Default",
+        "userId": "..."
+    }
+}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
+
+# Pattern without `routePartitionName`
+print("Result:", cucm.axlAddTranslationPattern(**{
+        "transPattern": {"pattern": "...", "routePartitionName": "", "usage": "Translation"}
+}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
+
+print("Result:", cucm.axlAddUser(**{
+  "user": {"userid": "...", "lastName": "...", "presenceGroupName": "Standard Presence group"}
+}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
 ```
 
 </details>
@@ -161,31 +758,59 @@ if __name__ == "__main__":
 
 #### Do Methods
 
-* `axlDoAuthenticateUser` - required keywords args: (`userid`, `password`) or (`userid`, `pin`)
-* `axlDoDeviceLogin` - required keywords args: (`deviceName`, `loginDuration`, `profileName`, `userId`)
-  * Arg `loginDuration: str` values:
-    * `"0"` - Logout disabled
-    * `"36000"` - Logout after 10h
-* `axlDoDeviceLogout` - required keywords args: `deviceName`
-* `axlDoLdapSync` - required keywords args: (`uuid`, `sync`) or (`name`, `sync`)
-  * Arg `sync: bool` values:
-    * `True` - Start Synchronization
-    * `False` - Cancel the Synchronization which is currently under process
+* `axlDoAuthenticateUser`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `userid`
+    * `password` or `pin`
+  </details>
+* `axlDoDeviceLogin`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `deviceName`
+    * `loginDuration`
+      * `"0"` - Logout disabled
+      * `"36000"` - Logout after 10h (or any other positive value in milliseconds)
+    * `profileName`
+    * `userId`
+  </details>
+* `axlDoDeviceLogout`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `deviceName`
+  </details>
+* `axlDoLdapSync`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+    * `sync`
+      * `True` - Start Synchronization
+      * `False` - Cancel the Synchronization which is currently under process
+  </details>
 
 <details>
 <summary>Code Example:</summary>
 
 ```python
 cucm = ...
+print("Result:", cucm.axlDoAuthenticateUser(userid="...", pin= "..."))
 print("Result:", cucm.axlDoAuthenticateUser(**{"userid": "...", "password": "..."}))
 # Result: {'return': {'userAuthenticated': 'true', 'code': 0, 'daysToExpiry': 0, 'isWarningNeeded': 'false'}, 'sequence': None}
 # Result: {'return': {'userAuthenticated': 'false', 'code': 1, 'daysToExpiry': 0, 'isWarningNeeded': 'false'}, 'sequence': None}
 
 print("Result:", cucm.axlDoDeviceLogin(**{"deviceName": "SEP...", "loginDuration": "...", "profileName":"...", "userid": "..."}))
-# Result {'return': '{........-....-....-....-............}', 'sequence': None}
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
 
 print("Result:", cucm.axlDoDeviceLogout(**{"deviceName": "SEP..."}))
-# Result {'return': '{........-....-....-....-............}', 'sequence': None}
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
 
 print("Result:", cucm.axlDoLdapSync(**{"uuid": "........-....-....-....-............", "sync": True}))
 # Result: {'return': 'Sync initiated successfully', 'sequence': None}
@@ -198,21 +823,76 @@ print("Result:", cucm.axlDoLdapSync(**{"uuid": "........-....-....-....-........
 
 #### Get Methods
 
-* `axlGetCallPickupGroup` - required keywords args: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlGetDeviceProfile` - required keywords args: `uuid` or `name`
-* `axlGetLine` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlGetLineGroup` - required keywords args: `uuid` or `name`
-* `axlGetPhone` - required keywords args: `uuid` or `name`
-* `axlGetRemoteDestination` - required keywords args: `uuid` or `destination`
-* `axlGetRemoteDestinationProfile` - required keywords args: `uuid` or `name`
-* `axlGetTranslationPattern` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlGetUser` - required keywords args: `uuid` or `userid`
+* `axlGetCallPickupGroup`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+  </details>
+* `axlGetDeviceProfile`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
+* `axlGetLine`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+  </details>
+* `axlGetLineGroup`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
+* `axlGetPhone`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
+* `axlGetRemoteDestination`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `destination`
+  </details>
+* `axlGetRemoteDestinationProfile`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
+* `axlGetTranslationPattern`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+  </details>
+* `axlGetUser`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `userid`
+  </details>
 
 <details>
 <summary>Code Example:</summary>
 
 ```python
 cucm = ...
+print("Result:", cucm.axlGetPhone(name="SEP..."))
 print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-............"}))
 # Result: {
 #     'name': '...',
@@ -243,26 +923,78 @@ print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-..........
 
 #### Remove Methods
 
-* `axlRemoveCallPickupGroup` - required keywords args: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlRemoveDeviceProfile` - required keywords args: `uuid` or `name`
-* `axlRemoveLine` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlRemoveLineGroup` - required keywords args: `uuid` or `name`
-* `axlRemovePhone` - required keywords args: `uuid` or `name`
-* `axlRemoveRemoteDestination` - required keywords args: `uuid` or `destination`
-* `axlRemoveRemoteDestinationProfile` - required keywords args: `uuid` or `name`
-* `axlRemoveTranslationPattern` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
-* `axlRemoveUser` - required keywords args: `uuid` or `userid`
+* `axlRemoveCallPickupGroup`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+  </details>
+* `axlRemoveDeviceProfile`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
+* `axlRemoveLine`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+  </details>
+* `axlRemoveLineGroup`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
+* `axlRemovePhone`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
+* `axlRemoveRemoteDestination`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `destination`
+  </details>
+* `axlRemoveRemoteDestinationProfile`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
+* `axlRemoveTranslationPattern`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+  </details>
+* `axlRemoveUser`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `userid`
+  </details>
 
 <details>
 <summary>Code Example:</summary>
 
 ```python
 cucm = ...
-print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-............"}))
-# Result: {
-#     'return': '{........-....-....-....-............}',
-#     'sequence': None
-# }
+print("Result:", cucm.axlRemovePhone(name= "SEP..."))
+print("Result:", cucm.axlRemovePhone(**{"uuid": "........-....-....-....-............"}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
 ```
 
 </details>
@@ -272,13 +1004,22 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 
 #### Reset Methods
 
-* `axlResetPhone` - required keywords args: `uuid` or `name`
+* `axlResetPhone`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
 
 <details>
 <summary>Code Example:</summary>
 
 ```python
-
+cucm = ...
+print("Result:", cucm.axlResetPhone(name="SEP..."))
+print("Result:", cucm.axlResetPhone(**{"uuid": "........-....-....-....-............"}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
 ```
 
 </details>
@@ -288,13 +1029,22 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 
 #### Restart Methods
 
-* `axlRestartPhone` - required keywords args: `uuid` or `name`
+* `axlRestartPhone`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  </details>
 
 <details>
 <summary>Code Example:</summary>
 
 ```python
-
+cucm = ...
+print("Result:", cucm.axlRestartPhone(name="SEP..."))
+print("Result:", cucm.axlRestartPhone(**{"uuid": "........-....-....-....-............"}))
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
 ```
 
 </details>
@@ -307,14 +1057,30 @@ print("Result:", cucm.axlRemoveLine(**{"uuid": "........-....-....-....-........
 RIS - Real-time Information Server retrieve information stored in all RIS nodes in the cluster.
 https://developer.cisco.com/docs/sxml/#!risport70-api
 
-* `risGetCti` - required keywords args: `collection_name`, `items_collection`, `cti_mgr_class`
-  * Arg `collection_name` values: `DevNames` or `DirNumbers`
-  * Arg `items_collection`: Collection of Dictionaries. Depending on the type of collection, dictionaries should
-    contain the key `name` for `DevNames` or the key `pattern` for `DirNumbers`
-  * Arg `cti_mgr_class` values: `Provider` or `Device` or `Line`
-* `risGetPhone` - required keywords args: `phone_name`
-* `risGetPhones` - required keywords args: `devices_collection`
-  * Arg `devices_collection` - Collection of Dictionaries. Dictionaries should contain the key `name`
+* `risGetCti`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `collection_name` - values: `DevNames` or `DirNumbers`
+    * `items_collection` - Collection of Dictionaries. Depending on the type of collection, dictionaries should
+       contain the key `name` for `DevNames` or the key `pattern` for `DirNumbers`
+    * `cti_mgr_class` - values: `Provider` or `Device` or `Line`
+  </details>
+* `risGetPhone`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `phone_name`
+  </details>
+* `risGetPhones`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `devices_collection` - Collection of Dictionaries. Dictionaries should contain the key `name`
+  </details>
 
 <details>
 <summary>Code Example:</summary>
@@ -396,418 +1162,520 @@ print("Result:", cucm.risGetPhones(devices_collection=({"name": "TCT..."}, {"nam
 
 #### Update Methods
 
-* `axlUpdateCallPickupGroup` - required keywords args: `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlUpdateCallPickupGroup`
   <details>
-  <summary>expected keywords args:</summary>
-    
-  * `newPattern`
-  * `description`
-  * `newRoutePartitionName`
-  * `removeMembers`
-  * `addMembers`
-  * `members`
-  * `pickupNotification`
-  * `pickupNotificationTimer`
-  * `callInfoForPickupNotification`
-  * `newName`
+    <summary>keywords args</summary>
   
+  * required:
+    * `uuid` or `name` or `pattern` or (`pattern`, `routePartitionName`)
+  * expected:
+    * `newPattern`
+    * `description`
+    * `newRoutePartitionName`
+    * `removeMembers`
+    * `addMembers`
+    * `members`
+    * `pickupNotification`
+    * `pickupNotificationTimer`
+    * `callInfoForPickupNotification`
+    * `newName`
   </details>
-* `axlUpdateDeviceProfile` - required keywords args: `uuid` or `name`
+* `axlUpdateDeviceProfile`
   <details>
-  <summary>expected keywords args:</summary>
-
-  * `newName`
-  * `description`
-  * `userHoldMohAudioSourceId`
-  * `vendorConfig`
-  * `mlppDomainId`
-  * `mlppIndicationStatus`
-  * `preemption`
-  * `lines`
-  * `phoneTemplateName`
-  * `speeddials`
-  * `busyLampFields`
-  * `blfDirectedCallParks`
-  * `addOnModules`
-  * `userLocale`
-  * `singleButtonBarge`
-  * `joinAcrossLines`
-  * `loginUserId`
-  * `ignorePresentationIndicators`
-  * `dndOption`
-  * `dndRingSetting`
-  * `dndStatus`
-  * `emccCallingSearchSpace`
-  * `alwaysUsePrimeLine`
-  * `alwaysUsePrimeLineForVoiceMessage`
-  * `softkeyTemplateName`
-  * `callInfoPrivacyStatus`
-  * `services`
-  * `featureControlPolicy`
+  <summary>keywords args</summary>
   
+  * required:
+    * `uuid` or `name`
+  * expected:
+    * `newName`
+    * `description`
+    * `userHoldMohAudioSourceId`
+    * `vendorConfig`
+    * `mlppDomainId`
+    * `mlppIndicationStatus`
+    * `preemption`
+    * `lines`
+      * `line` - collection of:
+        * required:
+          * `index`
+          * `dirn`
+            * `pattern`
+            * `routePartitionName`
+        * expected:
+          * `label`
+          * `display`
+          * `ringSetting`
+          * `consecutiveRingSetting`
+          * `ringSettingIdlePickupAlert`
+          * `ringSettingActivePickupAlert`
+          * `displayAscii`
+          * `e164Mask`
+          * `mwlPolicy`
+          * `maxNumCalls`
+          * `busyTrigger`
+          * `callInfoDisplay`
+          * `recordingProfileName`
+          * `monitoringCssName`
+          * `recordingFlag`
+          * `audibleMwi`
+          * `speedDial`
+          * `partitionUsage`
+          * `associatedEndusers`
+          * `missedCallLogging`
+          * `recordingMediaSource`
+    * `phoneTemplateName`
+    * `speeddials`
+    * `busyLampFields`
+    * `blfDirectedCallParks`
+    * `addOnModules`
+    * `userLocale`
+    * `singleButtonBarge`
+    * `joinAcrossLines`
+    * `loginUserId`
+    * `ignorePresentationIndicators`
+    * `dndOption`
+    * `dndRingSetting`
+    * `dndStatus`
+    * `emccCallingSearchSpace`
+    * `alwaysUsePrimeLine`
+    * `alwaysUsePrimeLineForVoiceMessage`
+    * `softkeyTemplateName`
+    * `callInfoPrivacyStatus`
+    * `services`
+    * `featureControlPolicy`
   </details>
-* `axlUpdateLine` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlUpdateLine
   <details>
-  <summary>expected keywords args:</summary>
-
-  * `newPattern`
-  * `description`
-  * `newRoutePartitionName`
-  * `aarNeighborhoodName`
-  * `aarDestinationMask`
-  * `aarKeepCallHistory`
-  * `aarVoiceMailEnabled`
-  * `callForwardAll`
-  * `callForwardBusy`
-  * `callForwardBusyInt`
-  * `callForwardNoAnswer`
-  * `callForwardNoAnswerInt`
-  * `callForwardNoCoverage`
-  * `callForwardNoCoverageInt`
-  * `callForwardOnFailure`
-  * `callForwardAlternateParty`
-  * `callForwardNotRegistered`
-  * `callForwardNotRegisteredInt`
-  * `callPickupGroupName`
-  * `autoAnswer`
-  * `networkHoldMohAudioSourceId`
-  * `userHoldMohAudioSourceId`
-  * `alertingName`
-  * `asciiAlertingName`
-  * `presenceGroupName`
-  * `shareLineAppearanceCssName`
-  * `voiceMailProfileName`
-  * `patternPrecedence`
-  * `releaseClause`
-  * `hrDuration`
-  * `hrInterval`
-  * `cfaCssPolicy`
-  * `defaultActivatedDeviceName`
-  * `parkMonForwardNoRetrieveDn`
-  * `parkMonForwardNoRetrieveIntDn`
-  * `parkMonForwardNoRetrieveVmEnabled`
-  * `parkMonForwardNoRetrieveIntVmEnabled`
-  * `parkMonForwardNoRetrieveCssName`
-  * `parkMonForwardNoRetrieveIntCssName`
-  * `parkMonReversionTimer`
-  * `partyEntranceTone`
-  * `directoryURIs`
-  * `allowCtiControlFlag`
-  * `rejectAnonymousCall`
-  * `patternUrgency`
-  * `confidentialAccess`
-  * `externalCallControlProfile`
-  * `enterpriseAltNum`
-  * `e164AltNum`
-  * `pstnFailover`
-  * `callControlAgentProfile`
-  * `useEnterpriseAltNum`
-  * `useE164AltNum`
-  * `active`
-
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+  * expected:
+    * `newPattern`
+    * `description`
+    * `newRoutePartitionName`
+    * `aarNeighborhoodName`
+    * `aarDestinationMask`
+    * `aarKeepCallHistory`
+    * `aarVoiceMailEnabled`
+    * `callForwardAll`
+    * `callForwardBusy`
+    * `callForwardBusyInt`
+    * `callForwardNoAnswer`
+    * `callForwardNoAnswerInt`
+    * `callForwardNoCoverage`
+    * `callForwardNoCoverageInt`
+    * `callForwardOnFailure`
+    * `callForwardAlternateParty`
+    * `callForwardNotRegistered`
+    * `callForwardNotRegisteredInt`
+    * `callPickupGroupName`
+    * `autoAnswer`
+    * `networkHoldMohAudioSourceId`
+    * `userHoldMohAudioSourceId`
+    * `alertingName`
+    * `asciiAlertingName`
+    * `presenceGroupName`
+    * `shareLineAppearanceCssName`
+    * `voiceMailProfileName`
+    * `patternPrecedence`
+    * `releaseClause`
+    * `hrDuration`
+    * `hrInterval`
+    * `cfaCssPolicy`
+    * `defaultActivatedDeviceName`
+    * `parkMonForwardNoRetrieveDn`
+    * `parkMonForwardNoRetrieveIntDn`
+    * `parkMonForwardNoRetrieveVmEnabled`
+    * `parkMonForwardNoRetrieveIntVmEnabled`
+    * `parkMonForwardNoRetrieveCssName`
+    * `parkMonForwardNoRetrieveIntCssName`
+    * `parkMonReversionTimer`
+    * `partyEntranceTone`
+    * `directoryURIs`
+    * `allowCtiControlFlag`
+    * `rejectAnonymousCall`
+    * `patternUrgency`
+    * `confidentialAccess`
+    * `externalCallControlProfile`
+    * `enterpriseAltNum`
+    * `e164AltNum`
+    * `pstnFailover`
+    * `callControlAgentProfile`
+    * `useEnterpriseAltNum`
+    * `useE164AltNum`
+    * `active`
   </details>
 * `axlUpdateLineGroup` - required keywords args: `uuid` or `name`
   <details>
-  <summary>expected keywords args:</summary>
-
-  * `distributionAlgorithm`
-  * `rnaReversionTimeOut`
-  * `huntAlgorithmNoAnswer`
-  * `huntAlgorithmBusy`
-  * `huntAlgorithmNotAvailable`
-  * `removeMembers`
-  * `addMembers`
-  * `members`
-  * `newName`
-  * `autoLogOffHunt`
-
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  * expected:
+    * `distributionAlgorithm`
+    * `rnaReversionTimeOut`
+    * `huntAlgorithmNoAnswer`
+    * `huntAlgorithmBusy`
+    * `huntAlgorithmNotAvailable`
+    * `removeMembers`
+    * `addMembers`
+    * `members`
+    * `newName`
+    * `autoLogOffHunt`
   </details>
-* `axlUpdatePhone` - required keywords args: `uuid` or `name`
+* `axlUpdatePhone`
   <details>
-  <summary>expected keywords args:</summary>
-
-  * `newName`
-  * `description`
-  * `callingSearchSpaceName`
-  * `devicePoolName`
-  * `commonDeviceConfigName`
-  * `commonPhoneConfigName`
-  * `networkLocation`
-  * `locationName`
-  * `mediaResourceListName`
-  * `networkHoldMohAudioSourceId`
-  * `userHoldMohAudioSourceId`
-  * `automatedAlternateRoutingCssName`
-  * `aarNeighborhoodName`
-  * `loadInformation`
-  * `vendorConfig`
-  * `versionStamp`
-  * `traceFlag`
-  * `mlppDomainId`
-  * `mlppIndicationStatus`
-  * `preemption`
-  * `useTrustedRelayPoint`
-  * `retryVideoCallAsAudio`
-  * `securityProfileName`
-  * `sipProfileName`
-  * `cgpnTransformationCssName`
-  * `useDevicePoolCgpnTransformCss`
-  * `geoLocationName`
-  * `geoLocationFilterName`
-  * `sendGeoLocation`
-  * `removeLines`
-  * `addLines`
-  * `lines`
-  * `phoneTemplateName`
-  * `speeddials`
-  * `busyLampFields`
-  * `primaryPhoneName`
-  * `ringSettingIdleBlfAudibleAlert`
-  * `ringSettingBusyBlfAudibleAlert`
-  * `blfDirectedCallParks`
-  * `addOnModules`
-  * `userLocale`
-  * `networkLocale`
-  * `idleTimeout`
-  * `authenticationUrl`
-  * `directoryUrl`
-  * `idleUrl`
-  * `informationUrl`
-  * `messagesUrl`
-  * `proxyServerUrl`
-  * `servicesUrl`
-  * `services`
-  * `softkeyTemplateName`
-  * `defaultProfileName`
-  * `enableExtensionMobility`
-  * `singleButtonBarge`
-  * `joinAcrossLines`
-  * `builtInBridgeStatus`
-  * `callInfoPrivacyStatus`
-  * `hlogStatus`
-  * `ownerUserName`
-  * `ignorePresentationIndicators`
-  * `packetCaptureMode`
-  * `packetCaptureDuration`
-  * `subscribeCallingSearchSpaceName`
-  * `rerouteCallingSearchSpaceName`
-  * `allowCtiControlFlag`
-  * `presenceGroupName`
-  * `unattendedPort`
-  * `requireDtmfReception`
-  * `rfc2833Disabled`
-  * `certificateOperation`
-  * `authenticationMode`
-  * `keySize`
-  * `keyOrder`
-  * `ecKeySize`
-  * `authenticationString`
-  * `upgradeFinishTime`
-  * `deviceMobilityMode`
-  * `remoteDevice`
-  * `dndOption`
-  * `dndRingSetting`
-  * `dndStatus`
-  * `isActive`
-  * `mobilityUserIdName`
-  * `phoneSuite`
-  * `phoneServiceDisplay`
-  * `isProtected`
-  * `mtpRequired`
-  * `mtpPreferedCodec`
-  * `dialRulesName`
-  * `sshUserId`
-  * `sshPwd`
-  * `digestUser`
-  * `outboundCallRollover`
-  * `hotlineDevice`
-  * `secureInformationUrl`
-  * `secureDirectoryUrl`
-  * `secureMessageUrl`
-  * `secureServicesUrl`
-  * `secureAuthenticationUrl`
-  * `secureIdleUrl`
-  * `alwaysUsePrimeLine`
-  * `alwaysUsePrimeLineForVoiceMessage`
-  * `featureControlPolicy`
-  * `deviceTrustMode`
-  * `earlyOfferSupportForVoiceCall`
-  * `requireThirdPartyRegistration`
-  * `blockIncomingCallsWhenRoaming`
-  * `homeNetworkId`
-  * `AllowPresentationSharingUsingBfcp`
-  * `confidentialAccess`
-  * `requireOffPremiseLocation`
-  * `allowiXApplicableMedia`
-  * `cgpnIngressDN`
-  * `useDevicePoolCgpnIngressDN`
-  * `msisdn`
-  * `enableCallRoutingToRdWhenNoneIsActive`
-  * `wifiHotspotProfile`
-  * `wirelessLanProfileGroup`
-  * `elinGroup`
-
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  * expected:
+    * `newName`
+    * `description`
+    * `callingSearchSpaceName`
+    * `devicePoolName`
+    * `commonDeviceConfigName`
+    * `commonPhoneConfigName`
+    * `networkLocation`
+    * `locationName`
+    * `mediaResourceListName`
+    * `networkHoldMohAudioSourceId`
+    * `userHoldMohAudioSourceId`
+    * `automatedAlternateRoutingCssName`
+    * `aarNeighborhoodName`
+    * `loadInformation`
+    * `vendorConfig`
+    * `versionStamp`
+    * `traceFlag`
+    * `mlppDomainId`
+    * `mlppIndicationStatus`
+    * `preemption`
+    * `useTrustedRelayPoint`
+    * `retryVideoCallAsAudio`
+    * `securityProfileName`
+    * `sipProfileName`
+    * `cgpnTransformationCssName`
+    * `useDevicePoolCgpnTransformCss`
+    * `geoLocationName`
+    * `geoLocationFilterName`
+    * `sendGeoLocation`
+    * `removeLines`
+    * `addLines`
+    * `lines`
+      * `line` - collection of:
+        * required:
+          * `index`
+          * `dirn`
+            * `pattern`
+            * `routePartitionName`
+        * expected:
+          * `label`
+          * `display`
+          * `ringSetting`
+          * `consecutiveRingSetting`
+          * `ringSettingIdlePickupAlert`
+          * `ringSettingActivePickupAlert`
+          * `displayAscii`
+          * `e164Mask`
+          * `mwlPolicy`
+          * `maxNumCalls`
+          * `busyTrigger`
+          * `callInfoDisplay`
+          * `recordingProfileName`
+          * `monitoringCssName`
+          * `recordingFlag`
+          * `audibleMwi`
+          * `speedDial`
+          * `partitionUsage`
+          * `associatedEndusers`
+          * `missedCallLogging`
+          * `recordingMediaSource`
+    * `phoneTemplateName`
+    * `speeddials`
+    * `busyLampFields`
+    * `primaryPhoneName`
+    * `ringSettingIdleBlfAudibleAlert`
+    * `ringSettingBusyBlfAudibleAlert`
+    * `blfDirectedCallParks`
+    * `addOnModules`
+    * `userLocale`
+    * `networkLocale`
+    * `idleTimeout`
+    * `authenticationUrl`
+    * `directoryUrl`
+    * `idleUrl`
+    * `informationUrl`
+    * `messagesUrl`
+    * `proxyServerUrl`
+    * `servicesUrl`
+    * `services`
+    * `softkeyTemplateName`
+    * `defaultProfileName`
+    * `enableExtensionMobility`
+    * `singleButtonBarge`
+    * `joinAcrossLines`
+    * `builtInBridgeStatus`
+    * `callInfoPrivacyStatus`
+    * `hlogStatus`
+    * `ownerUserName`
+    * `ignorePresentationIndicators`
+    * `packetCaptureMode`
+    * `packetCaptureDuration`
+    * `subscribeCallingSearchSpaceName`
+    * `rerouteCallingSearchSpaceName`
+    * `allowCtiControlFlag`
+    * `presenceGroupName`
+    * `unattendedPort`
+    * `requireDtmfReception`
+    * `rfc2833Disabled`
+    * `certificateOperation`
+    * `authenticationMode`
+    * `keySize`
+    * `keyOrder`
+    * `ecKeySize`
+    * `authenticationString`
+    * `upgradeFinishTime`
+    * `deviceMobilityMode`
+    * `remoteDevice`
+    * `dndOption`
+    * `dndRingSetting`
+    * `dndStatus`
+    * `isActive`
+    * `mobilityUserIdName`
+    * `phoneSuite`
+    * `phoneServiceDisplay`
+    * `isProtected`
+    * `mtpRequired`
+    * `mtpPreferedCodec`
+    * `dialRulesName`
+    * `sshUserId`
+    * `sshPwd`
+    * `digestUser`
+    * `outboundCallRollover`
+    * `hotlineDevice`
+    * `secureInformationUrl`
+    * `secureDirectoryUrl`
+    * `secureMessageUrl`
+    * `secureServicesUrl`
+    * `secureAuthenticationUrl`
+    * `secureIdleUrl`
+    * `alwaysUsePrimeLine`
+    * `alwaysUsePrimeLineForVoiceMessage`
+    * `featureControlPolicy`
+    * `deviceTrustMode`
+    * `earlyOfferSupportForVoiceCall`
+    * `requireThirdPartyRegistration`
+    * `blockIncomingCallsWhenRoaming`
+    * `homeNetworkId`
+    * `AllowPresentationSharingUsingBfcp`
+    * `confidentialAccess`
+    * `requireOffPremiseLocation`
+    * `allowiXApplicableMedia`
+    * `cgpnIngressDN`
+    * `useDevicePoolCgpnIngressDN`
+    * `msisdn`
+    * `enableCallRoutingToRdWhenNoneIsActive`
+    * `wifiHotspotProfile`
+    * `wirelessLanProfileGroup`
+    * `elinGroup`
   </details>
-* `axlUpdateRemoteDestination` - required keywords args: `uuid` or `destination`
+* `axlUpdateRemoteDestination`
   <details>
-  <summary>expected keywords args:</summary>
-
-  * `newName`
-  * `newDestination`
-  * `answerTooSoonTimer`
-  * `answerTooLateTimer`
-  * `delayBeforeRingingCell`
-  * `ownerUserId`
-  * `enableUnifiedMobility`
-  * `remoteDestinationProfileName`
-  * `enableExtendAndConnect`
-  * `ctiRemoteDeviceName`
-  * `dualModeDeviceName`
-  * `isMobilePhone`
-  * `enableMobileConnect`
-  * `lineAssociations`
-  * `timeZone`
-  * `todAccessName`
-  * `mobileSmartClientName`
-  * `mobilityProfileName`
-  * `singleNumberReachVoicemail`
-  * `dialViaOfficeReverseVoicemail`
-  * `removeRingSchedule`
-  * `addRingSchedule`
-  * `ringSchedule`
-  * `accessListName`
-
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `destination`
+  * expected:
+    * `newName`
+    * `newDestination`
+    * `answerTooSoonTimer`
+    * `answerTooLateTimer`
+    * `delayBeforeRingingCell`
+    * `ownerUserId`
+    * `enableUnifiedMobility`
+    * `remoteDestinationProfileName`
+    * `enableExtendAndConnect`
+    * `ctiRemoteDeviceName`
+    * `dualModeDeviceName`
+    * `isMobilePhone`
+    * `enableMobileConnect`
+    * `lineAssociations`
+    * `timeZone`
+    * `todAccessName`
+    * `mobileSmartClientName`
+    * `mobilityProfileName`
+    * `singleNumberReachVoicemail`
+    * `dialViaOfficeReverseVoicemail`
+    * `removeRingSchedule`
+    * `addRingSchedule`
+    * `ringSchedule`
+    * `accessListName`
   </details>
-* `axlUpdateRemoteDestinationProfile` - required keywords args: `uuid` or `name`
+* `axlUpdateRemoteDestinationProfile`
   <details>
-  <summary>expected keywords args:</summary>
-
-  * `newName`
-  * `description`
-  * `callingSearchSpaceName`
-  * `devicePoolName`
-  * `networkHoldMohAudioSourceId`
-  * `userHoldMohAudioSourceId`
-  * `lines`
-  * `callInfoPrivacyStatus`
-  * `userId`
-  * `ignorePresentationIndicators`
-  * `rerouteCallingSearchSpaceName`
-  * `cgpnTransformationCssName`
-  * `automatedAlternateRoutingCssName`
-  * `useDevicePoolCgpnTransformCss`
-  * `userLocale`
-  * `networkLocale`
-  * `primaryPhoneName`
-  * `dndOption`
-  * `dndStatus`
-  * `mobileSmartClientProfileName`
-
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `name`
+  * expected:
+    * `newName`
+    * `description`
+    * `callingSearchSpaceName`
+    * `devicePoolName`
+    * `networkHoldMohAudioSourceId`
+    * `userHoldMohAudioSourceId`
+    * `lines`
+      * `line` - collection of:
+        * required:
+          * `index`
+          * `dirn`
+            * `pattern`
+            * `routePartitionName`
+        * expected:
+          * `label`
+          * `display`
+          * `ringSetting`
+          * `consecutiveRingSetting`
+          * `ringSettingIdlePickupAlert`
+          * `ringSettingActivePickupAlert`
+          * `displayAscii`
+          * `e164Mask`
+          * `mwlPolicy`
+          * `maxNumCalls`
+          * `busyTrigger`
+          * `callInfoDisplay`
+          * `recordingProfileName`
+          * `monitoringCssName`
+          * `recordingFlag`
+          * `audibleMwi`
+          * `speedDial`
+          * `partitionUsage`
+          * `associatedEndusers`
+          * `missedCallLogging`
+          * `recordingMediaSource`
+    * `callInfoPrivacyStatus`
+    * `userId`
+    * `ignorePresentationIndicators`
+    * `rerouteCallingSearchSpaceName`
+    * `cgpnTransformationCssName`
+    * `automatedAlternateRoutingCssName`
+    * `useDevicePoolCgpnTransformCss`
+    * `userLocale`
+    * `networkLocale`
+    * `primaryPhoneName`
+    * `dndOption`
+    * `dndStatus`
+    * `mobileSmartClientProfileName`
   </details>
-* `axlUpdateTranslationPattern` - required keywords args: `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+* `axlUpdateTranslationPattern`
   <details>
-  <summary>expected keywords args:</summary>
-
-  * `dialPlanName`
-  * `routeFilterName`
-  * `newPattern`
-  * `description`
-  * `newRoutePartitionName`
-  * `blockEnable`
-  * `calledPartyTransformationMask`
-  * `callingPartyTransformationMask`
-  * `useCallingPartyPhoneMask`
-  * `callingPartyPrefixDigits`
-  * `newDialPlanName`
-  * `digitDiscardInstructionName`
-  * `patternUrgency`
-  * `prefixDigitsOut`
-  * `newRouteFilterName`
-  * `callingLinePresentationBit`
-  * `callingNamePresentationBit`
-  * `connectedLinePresentationBit`
-  * `connectedNamePresentationBit`
-  * `patternPrecedence`
-  * `provideOutsideDialtone`
-  * `callingPartyNumberingPlan`
-  * `callingPartyNumberType`
-  * `calledPartyNumberingPlan`
-  * `calledPartyNumberType`
-  * `callingSearchSpaceName`
-  * `resourcePriorityNamespaceName`
-  * `routeNextHopByCgpn`
-  * `routeClass`
-  * `callInterceptProfileName`
-  * `releaseClause`
-  * `useOriginatorCss`
-  * `dontWaitForIDTOnSubsequentHops`
-  * `isEmergencyServiceNumber`
-
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `pattern` or (`pattern`, `routePartitionName`)
+  * expected:
+    * `dialPlanName`
+    * `routeFilterName`
+    * `newPattern`
+    * `description`
+    * `newRoutePartitionName`
+    * `blockEnable`
+    * `calledPartyTransformationMask`
+    * `callingPartyTransformationMask`
+    * `useCallingPartyPhoneMask`
+    * `callingPartyPrefixDigits`
+    * `newDialPlanName`
+    * `digitDiscardInstructionName`
+    * `patternUrgency`
+    * `prefixDigitsOut`
+    * `newRouteFilterName`
+    * `callingLinePresentationBit`
+    * `callingNamePresentationBit`
+    * `connectedLinePresentationBit`
+    * `connectedNamePresentationBit`
+    * `patternPrecedence`
+    * `provideOutsideDialtone`
+    * `callingPartyNumberingPlan`
+    * `callingPartyNumberType`
+    * `calledPartyNumberingPlan`
+    * `calledPartyNumberType`
+    * `callingSearchSpaceName`
+    * `resourcePriorityNamespaceName`
+    * `routeNextHopByCgpn`
+    * `routeClass`
+    * `callInterceptProfileName`
+    * `releaseClause`
+    * `useOriginatorCss`
+    * `dontWaitForIDTOnSubsequentHops`
+    * `isEmergencyServiceNumber`
   </details>
-* `axlUpdateUser` - required keywords args: `uuid` or `userid`
+* `axlUpdateUser`
   <details>
-  <summary>expected keywords args:</summary>
-
-  * `firstName`
-  * `displayName`
-  * `middleName`
-  * `lastName`
-  * `newUserid`
-  * `password`
-  * `pin`
-  * `mailid`
-  * `department`
-  * `manager`
-  * `userLocale`
-  * `associatedDevices`
-  * `primaryExtension`
-  * `associatedPc`
-  * `associatedGroups`
-  * `enableCti`
-  * `digestCredentials`
-  * `phoneProfiles`
-  * `defaultProfile`
-  * `presenceGroupName`
-  * `subscribeCallingSearchSpaceName`
-  * `enableMobility`
-  * `enableMobileVoiceAccess`
-  * `maxDeskPickupWaitTime`
-  * `remoteDestinationLimit`
-  * `passwordCredentials`
-  * `pinCredentials`
-  * `enableEmcc`
-  * `ctiControlledDeviceProfiles`
-  * `patternPrecedence`
-  * `numericUserId`
-  * `mlppPassword`
-  * `customUserFields`
-  * `homeCluster`
-  * `imAndPresenceEnable`
-  * `serviceProfile`
-  * `lineAppearanceAssociationForPresences`
-  * `directoryUri`
-  * `telephoneNumber`
-  * `title`
-  * `mobileNumber`
-  * `homeNumber`
-  * `pagerNumber`
-  * `removeExtensionsInfo`
-  * `addExtensionsInfo`
-  * `extensionsInfo`
-  * `selfService`
-  * `userProfile`
-  * `calendarPresence`
-  * `ldapDirectoryName`
-  * `userIdentity`
-  * `nameDialing`
-  * `ipccExtension`
-  * `convertUserAccount`
-  * `accountType`
-  * `authenticationType`
-  * `enableUserToHostConferenceNow`
-  * `attendeesAccessCode`
-  * `zeroHop`
-
+  <summary>keywords args</summary>
+  
+  * required:
+    * `uuid` or `userid`
+  * expected:
+    * `firstName`
+    * `displayName`
+    * `middleName`
+    * `lastName`
+    * `newUserid`
+    * `password`
+    * `pin`
+    * `mailid`
+    * `department`
+    * `manager`
+    * `userLocale`
+    * `associatedDevices`
+    * `primaryExtension`
+    * `associatedPc`
+    * `associatedGroups`
+    * `enableCti`
+    * `digestCredentials`
+    * `phoneProfiles`
+    * `defaultProfile`
+    * `presenceGroupName`
+    * `subscribeCallingSearchSpaceName`
+    * `enableMobility`
+    * `enableMobileVoiceAccess`
+    * `maxDeskPickupWaitTime`
+    * `remoteDestinationLimit`
+    * `passwordCredentials`
+    * `pinCredentials`
+    * `enableEmcc`
+    * `ctiControlledDeviceProfiles`
+    * `patternPrecedence`
+    * `numericUserId`
+    * `mlppPassword`
+    * `customUserFields`
+    * `homeCluster`
+    * `imAndPresenceEnable`
+    * `serviceProfile`
+    * `lineAppearanceAssociationForPresences`
+    * `directoryUri`
+    * `telephoneNumber`
+    * `title`
+    * `mobileNumber`
+    * `homeNumber`
+    * `pagerNumber`
+    * `removeExtensionsInfo`
+    * `addExtensionsInfo`
+    * `extensionsInfo`
+    * `selfService`
+    * `userProfile`
+    * `calendarPresence`
+    * `ldapDirectoryName`
+    * `userIdentity`
+    * `nameDialing`
+    * `ipccExtension`
+    * `convertUserAccount`
+    * `accountType`
+    * `authenticationType`
+    * `enableUserToHostConferenceNow`
+    * `attendeesAccessCode`
+    * `zeroHop`
   </details>
 
 <details>
@@ -815,11 +1683,9 @@ print("Result:", cucm.risGetPhones(devices_collection=({"name": "TCT..."}, {"nam
 
 ```python
 cucm = ...
+print("Result:", cucm.axlUpdatePhone(name="SEP", description="New Description"))
 print("Result:", cucm.axlUpdatePhone(**{"uuid": "........-....-....-....-............", "description": "New Description"}))
-# Result: {
-#     'return': '{........-....-....-....-............}',
-#     'sequence': None
-# }
+# Result: {'return': '{........-....-....-....-............}', 'sequence': None}
 ```
 
 </details>
@@ -966,11 +1832,11 @@ class CucmAxlCustom(CucmSettings):
         super().__init__(**kwargs)
         
     @cucm_logging
-    def axlYourOwnGetMethod(self, **kwargs: dict) -> Union[dict, None]:
+    def axlYourOwnGetMethod(self, **kwargs: Union[dict, ...]) -> dict:
 
         """
-        AXL Your Own Get Method.
-        :param kwargs:      Expected Fields:
+        AXL Your Own `Get` or Any Other Method.
+        :param kwargs:      Required Fields:
                             `kwargs = {"uuid": "uuid"}`
                             or
                             `kwargs = {"name": "name"}`
