@@ -2,12 +2,15 @@ import logging, os
 from lxml import etree
 from requests import Session
 from requests.auth import HTTPBasicAuth
+from typing import Union
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from zeep import Client
 from zeep.cache import SqliteCache
 from zeep.plugins import HistoryPlugin
+from zeep.proxy import ServiceProxy
 from zeep.transports import Transport
+
 from .exceptions import CucmSessionError
 
 
@@ -19,7 +22,7 @@ from .exceptions import CucmSessionError
 class CucmSettings:
 
     """
-        tinyCUCM Settings. Cisco Unified Call Manager Configuration & Sessions Class
+        tinyCUCM Settings. Cisco Unified Call Manager Configuration & Sessions Class.
         """
 
     def __init__(self, **kwargs):
@@ -30,8 +33,9 @@ class CucmSettings:
         self._axl = None
         self._axl_client = None
         self._axl_transport = None
-        self._ris = None
-        self._ris_factory = None
+        self._ccs = None            # Control Center Services
+        self._ris = None            # Real-time Information Server
+        self._ris_factory = None    # Real-time Information Server
 
         self.__pub_fqdn: str = kwargs.get("pub_fqdn")
         self.__pub_version: str = kwargs.get("pub_version")
@@ -42,18 +46,20 @@ class CucmSettings:
         self.__session_verify: bool = kwargs.get("session_verify")
         self.__session_timeout: int = kwargs.get("session_timeout") or 20
 
-        self.__ris_wsdl_filename: str = kwargs.get("ris_wsdl_filename")
+        self.__ccs_wsdl_filename: str = kwargs.get("ccs_wsdl_filename") or "wsdlControlCenterServices.xml"
+        self.__ris_wsdl_filename: str = kwargs.get("ris_wsdl_filename") or "wsdlRISService70.xml"
 
         self.__cucm_history = HistoryPlugin()
 
         self.__cucm_axl_service()
+        self.__cucm_ccs_service()
         self.__cucm_ris_service()
 
     @property
     def _cucm_publisher_property(self) -> str:
 
         """
-        CUCM Publisher Property
+        CUCM Publisher Property.
         :return:
         """
 
@@ -62,7 +68,7 @@ class CucmSettings:
     def _cucm_history_show(self) -> str:
 
         """
-        History Show
+        History Show.
         :return:
         """
 
@@ -125,6 +131,39 @@ class CucmSettings:
             logging.error(log_message.format(message=f"Error Detail:\n{err}."))
             raise CucmSessionError("Session error occurred.")
 
+    def __cucm_ccs_service(self, node_fqdn: str = None) -> Union[ServiceProxy, None]:
+
+        """
+        CCS (Control Center Services) Service.
+        :param node_fqdn:   Cluster Node FQDN or IP Address
+        :return:
+        """
+
+        log_message = "@ CUCM CCS Service @ - {message}"
+
+        location = f"https://{self.__pub_fqdn}:8443/controlcenterservice2/services/ControlCenterServices"
+        binding = "{http://schemas.cisco.com/ast/soap}ControlCenterServicesBinding"
+
+        wsdl_path = f"{self.__toolkit_path}/{self.__ccs_wsdl_filename}"
+        if not os.path.isfile(wsdl_path):
+            raise FileNotFoundError(f"{repr(wsdl_path)}, wsdl file not found.")
+
+        session = self.__cucm_session_create()
+        try:
+            transport = Transport(
+                cache=False,
+                session=session,
+                timeout=self.__session_timeout
+            )
+            client = Client(wsdl=wsdl_path, transport=transport, plugins=[self.__cucm_history])
+            if node_fqdn:
+                location = f"https://{node_fqdn}:8443/controlcenterservice2/services/ControlCenterServices"
+                return client.create_service(binding, location)
+            self._ccs = client.create_service(binding, location)
+        except Exception as err:
+            logging.error(log_message.format(message=f"Error Detail:\n{err}."))
+            raise CucmSessionError("Session error occurred.")
+
     def __cucm_ris_service(self):
 
         """
@@ -152,3 +191,13 @@ class CucmSettings:
         except Exception as err:
             logging.error(log_message.format(message=f"Error Detail:\n{err}."))
             raise CucmSessionError("Session error occurred.")
+
+    def _cucm_ccs_custom_node_service(self, node_fqdn: Union[str, None]) -> ServiceProxy:
+
+        """
+        CCS (Control Center Services) Service for Another Cluster Node.
+        :param node_fqdn:   Cluster Node FQDN or IP Address
+        :return:
+        """
+
+        return self.__cucm_ccs_service(node_fqdn=node_fqdn) if node_fqdn and node_fqdn != self.__pub_fqdn else self._ccs

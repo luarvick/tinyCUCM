@@ -27,6 +27,7 @@
           <li><a href="#remove-methods">Remove Methods</a></li>
           <li><a href="#reset-methods">Reset Methods</a></li>
           <li><a href="#restart-methods">Restart Methods</a></li>
+          <li><a href="#ccs-methods">CCS Methods</a></li>
           <li><a href="#ris-methods">RIS Methods</a></li>
           <li><a href="#update-methods">Update Methods</a></li>
         </ul>
@@ -1050,6 +1051,45 @@ print("Result:", cucm.axlRestartPhone(**{"uuid": "........-....-....-....-......
 </details>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+#### CCS Methods
+CCS - Control Center Services provides an API Methods used to view status, to restart, to start and stop Cisco CallManager services for a particular server.
+
+* `ccsGetServiceStatus`
+  <details>
+  <summary>keywords args</summary>
+  
+  * optional
+    * `service_name` - Specify a specific service name
+    * `node_fqdn` - Specify a node other than the publisher
+  </details>
+* `ccsDoControlService`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `service_names` - List of Service Names
+    * `service_command` - Collection of Dictionaries. Depending on the type of collection, dictionaries should
+  * optional
+    * `node_fqdn` - Specify a node other than the publisher
+  </details>
+
+```python
+cucm = ...
+print("Result:", cucm.ccsGetServiceStatus())
+# Result: (
+#   {'ServiceName': 'A Cisco DB', 'ServiceStatus': 'Started', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': 'Tue Mar  5 13:01:39 2024', 'UpTime': 10012}, 
+#   ...,
+#   {'ServiceName': 'Cisco Wireless Controller Synchronization Service', 'ServiceStatus': 'Stopped', 'ReasonCode': -1068, 'ReasonCodeString': 'Service Not Activated ', 'StartTime': None, 'UpTime': -1}
+# )
+
+print("Result:", cucm.ccsDoControlService(service_names=["Cisco License Manager", "Cisco Tftp"], service_command="Restart"))
+# Result: (
+#   {'ServiceName': 'Cisco License Manager', 'ServiceStatus': 'Starting', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': None, 'UpTime': -1}, 
+#   {'ServiceName': 'Cisco Tftp', 'ServiceStatus': 'Started', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': 'Tue Mar  5 15:53:19 2024', 'UpTime': 4}
+# )
+```
 
 
 #### RIS Methods
