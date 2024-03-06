@@ -27,10 +27,10 @@
           <li><a href="#remove-methods">Remove Methods</a></li>
           <li><a href="#reset-methods">Reset Methods</a></li>
           <li><a href="#restart-methods">Restart Methods</a></li>
-          <li><a href="#ccs-methods">CCS Methods</a></li>
-          <li><a href="#ris-methods">RIS Methods</a></li>
           <li><a href="#update-methods">Update Methods</a></li>
         </ul>
+        <li><a href="#ccs-methods">CCS Methods</a></li>
+        <li><a href="#ris-methods">RIS Methods</a></li>
         <li><a href="#sql-collection">SQL Collection</a></li>
         <ul>
           <li><a href="#execute-query">Execute Query</a></li>
@@ -47,7 +47,7 @@
 
 ---
 
-<!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 This project is for informational purposes only and is intended to study the capabilities of the Cisco Unified Call Manager's API. 
@@ -57,8 +57,6 @@ Methods have been tested on CUCM ver. 11.5.\
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- INSTALLATION -->
 ## Installation
 
 Installation is as simple as:
@@ -70,8 +68,6 @@ Installation is as simple as:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- USAGE EXAMPLES -->
 ## Usage
 
 Cisco UCM WSDL Services:
@@ -93,6 +89,7 @@ Copy `RISService70` and create `RISService70.xml` file, put file it into `axlsql
 Create an Cisco UCM application account or local end user with `Standard CCM Super Users` privileges
 (Assign access control group to `Your-CUCM-Account`).
 
+
 ### Instance Create
 
 Create a new instance of the `CucmAxlClient` class and assigns this object to the local variable `cucm`.
@@ -104,7 +101,7 @@ Create a new instance of the `CucmAxlClient` class and assigns this object to th
 
 ```python
 from pathlib import Path
-from tinyCUCM import CucmAxlClient
+from tinyCUCM import CucmClient
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -121,7 +118,7 @@ settings = {
 }
 
 if __name__ == "__main__":
-    cucm = CucmAxlClient(**settings)
+    cucm = CucmClient(**settings)
     # Get All AXL Method Names
     print("Result:", cucm.axlAllMethods())
     # Result: (
@@ -147,7 +144,6 @@ if __name__ == "__main__":
 
 
 #### Add Methods
-
 
 * `axlAddCallPickupGroup`
   <details>
@@ -1053,153 +1049,6 @@ print("Result:", cucm.axlRestartPhone(**{"uuid": "........-....-....-....-......
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-#### CCS Methods
-CCS - Control Center Services provides an API Methods used to view status, to restart, to start and stop Cisco CallManager services for a particular server.
-
-* `ccsGetServiceStatus`
-  <details>
-  <summary>keywords args</summary>
-  
-  * optional
-    * `service_name` - Specify a specific service name
-    * `node_fqdn` - Specify a node other than the publisher
-  </details>
-* `ccsDoControlService`
-  <details>
-  <summary>keywords args</summary>
-  
-  * required:
-    * `service_names` - List of Service Names
-    * `service_command` - Collection of Dictionaries. Depending on the type of collection, dictionaries should
-  * optional
-    * `node_fqdn` - Specify a node other than the publisher
-  </details>
-
-```python
-cucm = ...
-print("Result:", cucm.ccsGetServiceStatus())
-# Result: (
-#   {'ServiceName': 'A Cisco DB', 'ServiceStatus': 'Started', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': 'Tue Mar  5 13:01:39 2024', 'UpTime': 10012}, 
-#   ...,
-#   {'ServiceName': 'Cisco Wireless Controller Synchronization Service', 'ServiceStatus': 'Stopped', 'ReasonCode': -1068, 'ReasonCodeString': 'Service Not Activated ', 'StartTime': None, 'UpTime': -1}
-# )
-
-print("Result:", cucm.ccsDoControlService(service_names=["Cisco License Manager", "Cisco Tftp"], service_command="Restart"))
-# Result: (
-#   {'ServiceName': 'Cisco License Manager', 'ServiceStatus': 'Starting', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': None, 'UpTime': -1}, 
-#   {'ServiceName': 'Cisco Tftp', 'ServiceStatus': 'Started', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': 'Tue Mar  5 15:53:19 2024', 'UpTime': 4}
-# )
-```
-
-
-#### RIS Methods
-
-RIS - Real-time Information Server retrieve information stored in all RIS nodes in the cluster.
-https://developer.cisco.com/docs/sxml/#!risport70-api
-
-* `risGetCti`
-  <details>
-  <summary>keywords args</summary>
-  
-  * required:
-    * `collection_name` - values: `DevNames` or `DirNumbers`
-    * `items_collection` - Collection of Dictionaries. Depending on the type of collection, dictionaries should
-       contain the key `name` for `DevNames` or the key `pattern` for `DirNumbers`
-    * `cti_mgr_class` - values: `Provider` or `Device` or `Line`
-  </details>
-* `risGetPhone`
-  <details>
-  <summary>keywords args</summary>
-  
-  * required:
-    * `phone_name`
-  </details>
-* `risGetPhones`
-  <details>
-  <summary>keywords args</summary>
-  
-  * required:
-    * `devices_collection` - Collection of Dictionaries. Dictionaries should contain the key `name`
-  </details>
-
-<details>
-<summary>Code Example:</summary>
-
-```python
-cucm = ...
-print("Result:", cucm.risGetCti(
-    collection_name="DirNumbers",
-    items_collection=({"pattern": "..."}, {"pattern": "..."}, ...),
-    cti_mgr_class="Line"
-))
-# Result: {
-#     'SelectCtiItemResult': {
-#         'TotalItemsFound': 6,
-#         'CtiNodes': {...}
-#     },
-#     'StateInfo': '<StateInfo><Node Name="cucm.example.com" ...'
-# } 
-
-print("Result:", cucm.risGetPhone(phone_name="CSF...", is_raw_resp=False))
-# Result: {
-#     'DeviceName': 'CSF...',
-#     'Status': 'Registered',
-#     'Model': 503,
-#     'Product': 390,
-#     'IP': 'xxx.xxx.xxx.xxx',
-#     'NodeName': 'cucm.example.com',
-#     'ActiveLoadID': '...',
-#     'InactiveLoadID': '...'
-# }
-
-print("Result:", cucm.risGetPhones(devices_collection=({"name": "TCT..."}, {"name": "CSF..."}, ...), is_raw_resp=False))
-# Result = (
-#     {
-#         'name': 'TCT...',
-#         'ris': {
-#             'DeviceName': 'TCT...',
-#             'Status': 'UnRegistered',
-#             'Model': 562,
-#             'Product': 449,
-#             'IP': 'xxx.xxx.xxx.xxx',
-#             'NodeName': 'cucm.example.com',
-#             'ActiveLoadID': '...',
-#             'InactiveLoadID': '...'
-#         }
-#     },
-#     {
-#         'name': 'CSF...',
-#         'ris': {
-#             'DeviceName': 'CSF...',
-#             'Status': 'Registered',
-#             'Model': 503,
-#             'Product': 390,
-#             'IP': 'xxx.xxx.xxx.xxx',
-#             'NodeName': 'cucm.example.com',
-#             'ActiveLoadID': '...',
-#             'InactiveLoadID': '...'
-#         }
-#     },
-#     {
-#         'name': 'SEP...',
-#         'ris': {'DeviceName': None, 'Status': None, ...}
-#     },
-#     {
-#         'name': 'RDP...',
-#         'ris': {'DeviceName': None, 'Status': None, ...}
-#     },
-#     {
-#         'name': 'UDP...',
-#         'ris': {'DeviceName': None, 'Status': None, ...}
-#     }
-# )
-```
-
-</details>
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 #### Update Methods
 
 * `axlUpdateCallPickupGroup`
@@ -1733,6 +1582,185 @@ print("Result:", cucm.axlUpdatePhone(**{"uuid": "........-....-....-....-.......
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+### CCS Methods
+
+CCS - Control Center Services provides an API Methods used to view status, to restart, to start and stop Cisco CallManager services for a particular server.
+
+* `ccsDoControlServices`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `control_command` - Control Command: `Restart`, `Start` or `Stop`
+    * `service_names` - Service Names Collection
+  * optional
+    * `node_fqdn` - Specify a node other than the publisher
+  </details>
+* `ccsDoServiceDeployment`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `deploy_command` - Deploy Command: `Deploy` or `UnDeploy`
+    * `service_names` - Service Names Collection
+  * optional
+    * `node_fqdn` - Specify a node other than the publisher
+  </details>
+* `ccsGetProductInfoList`
+  <details>
+  <summary>keywords args</summary>
+  
+  * optional
+    * `node_fqdn` - Specify a node other than the publisher
+  </details>
+* `ccsGetServiceStatus`
+  <details>
+  <summary>keywords args</summary>
+  
+  * optional
+    * `service_name` - Specify a specific service name
+    * `node_fqdn` - Specify a node other than the publisher
+  </details>
+* `ccsGetStaticServiceList`
+  <details>
+  <summary>keywords args</summary>
+  
+  * optional
+    * `node_fqdn` - Specify a node other than the publisher
+  </details>
+
+```python
+cucm = ...
+print("Result:", cucm.ccsDoControlServices(control_command="Restart", service_names=["Cisco License Manager", "Cisco Tftp"]))
+# Result: (
+#   {'ServiceName': 'Cisco License Manager', 'ServiceStatus': 'Starting', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': None, 'UpTime': -1}, 
+#   {'ServiceName': 'Cisco Tftp', 'ServiceStatus': 'Started', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': 'Tue Mar  5 15:53:19 2024', 'UpTime': 4}
+# )
+
+print("Result:", cucm.ccsDoServiceDeployment(deploy_command="Deploy", service_names=["Cisco Tftp"]))
+# Result: (
+#   {'ServiceName': 'Cisco Tftp', 'ServiceStatus': 'Started', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': 'Wed Mar  6 13:37:59 2024', 'UpTime': 17},
+# )
+
+print("Result:", cucm.ccsGetServiceStatus())
+# Result: (
+#   {'ServiceName': 'A Cisco DB', 'ServiceStatus': 'Started', 'ReasonCode': -1, 'ReasonCodeString': ' ', 'StartTime': 'Tue Mar  5 13:01:39 2024', 'UpTime': 10012}, 
+#   ...,
+#   {'ServiceName': 'Cisco Wireless Controller Synchronization Service', 'ServiceStatus': 'Stopped', 'ReasonCode': -1068, 'ReasonCodeString': 'Service Not Activated ', 'StartTime': None, 'UpTime': -1}
+# )
+
+
+```
+
+
+### RIS Methods
+
+RIS - Real-time Information Server retrieve information stored in all RIS nodes in the cluster.
+https://developer.cisco.com/docs/sxml/#!risport70-api
+
+* `risGetCti`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `collection_name` - values: `DevNames` or `DirNumbers`
+    * `items_collection` - Collection of Dictionaries. Depending on the type of collection, dictionaries should
+       contain the key `name` for `DevNames` or the key `pattern` for `DirNumbers`
+    * `cti_mgr_class` - values: `Provider` or `Device` or `Line`
+  </details>
+* `risGetPhone`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `phone_name`
+  </details>
+* `risGetPhones`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `devices_collection` - Collection of Dictionaries. Dictionaries should contain the key `name`
+  </details>
+
+<details>
+<summary>Code Example:</summary>
+
+```python
+cucm = ...
+print("Result:", cucm.risGetCti(
+    collection_name="DirNumbers",
+    items_collection=({"pattern": "..."}, {"pattern": "..."}, ...),
+    cti_mgr_class="Line"
+))
+# Result: {
+#     'SelectCtiItemResult': {
+#         'TotalItemsFound': 6,
+#         'CtiNodes': {...}
+#     },
+#     'StateInfo': '<StateInfo><Node Name="cucm.example.com" ...'
+# } 
+
+print("Result:", cucm.risGetPhone(phone_name="CSF...", is_raw_resp=False))
+# Result: {
+#     'DeviceName': 'CSF...',
+#     'Status': 'Registered',
+#     'Model': 503,
+#     'Product': 390,
+#     'IP': 'xxx.xxx.xxx.xxx',
+#     'NodeName': 'cucm.example.com',
+#     'ActiveLoadID': '...',
+#     'InactiveLoadID': '...'
+# }
+
+print("Result:", cucm.risGetPhones(devices_collection=({"name": "TCT..."}, {"name": "CSF..."}, ...), is_raw_resp=False))
+# Result = (
+#     {
+#         'name': 'TCT...',
+#         'ris': {
+#             'DeviceName': 'TCT...',
+#             'Status': 'UnRegistered',
+#             'Model': 562,
+#             'Product': 449,
+#             'IP': 'xxx.xxx.xxx.xxx',
+#             'NodeName': 'cucm.example.com',
+#             'ActiveLoadID': '...',
+#             'InactiveLoadID': '...'
+#         }
+#     },
+#     {
+#         'name': 'CSF...',
+#         'ris': {
+#             'DeviceName': 'CSF...',
+#             'Status': 'Registered',
+#             'Model': 503,
+#             'Product': 390,
+#             'IP': 'xxx.xxx.xxx.xxx',
+#             'NodeName': 'cucm.example.com',
+#             'ActiveLoadID': '...',
+#             'InactiveLoadID': '...'
+#         }
+#     },
+#     {
+#         'name': 'SEP...',
+#         'ris': {'DeviceName': None, 'Status': None, ...}
+#     },
+#     {
+#         'name': 'RDP...',
+#         'ris': {'DeviceName': None, 'Status': None, ...}
+#     },
+#     {
+#         'name': 'UDP...',
+#         'ris': {'DeviceName': None, 'Status': None, ...}
+#     }
+# )
+```
+
+</details>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 ### SQL Collection
 
 
@@ -1907,8 +1935,6 @@ if __name__ == "__main__":
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
@@ -1916,8 +1942,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- CONTACT -->
 ## Contact
 
 Luarvick - lu.luarvick@gmail.com

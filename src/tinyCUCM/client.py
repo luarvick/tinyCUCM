@@ -2,6 +2,7 @@ from collections.abc import Iterable
 from typing import Union
 from zeep.helpers import serialize_object
 
+from .ccs_models import CucmCcsDoControlModel, CucmCcsDoDeploymentModel
 from .decorators import cucm_logging
 from .settings import CucmSettings
 from .ris_models import CucmRisGetCtiModel
@@ -19,10 +20,10 @@ from .sql_models import (
 """ ######################################################### """
 
 
-class CucmAxlClient(CucmSettings):
+class CucmClient(CucmSettings):
 
     """
-        tinyCUCM AXL Client. Cisco Unified Call Manager AXL Methods Collection.
+        tinyCUCM Client. Cisco Unified Call Manager API Methods Collection.
         """
 
     def __init__(self, **kwargs):
@@ -891,6 +892,61 @@ class CucmAxlClient(CucmSettings):
 
         return self._axl.updateUser(**kwargs)
 
+    @cucm_logging
+    def ccsDoControlServices(self, control_command: str, service_names: list, node_fqdn: str = None):
+
+        """
+        CCS (Control Center Services) Do Control Services Method.
+        :param control_command: Service(s) Control Command: `Restart`, `Start` or `Stop`
+        :param service_names:   Service Names Collection
+        :param node_fqdn:       Cluster Node FQDN or IP Address, Return Status From the Pub If the Node isn't Specified
+        :return:
+        """
+
+        client = self._cucm_ccs_custom_node_service(node_fqdn=node_fqdn)
+        validated_data = CucmCcsDoControlModel(**{
+            # "NodeName": node_fqdn,        # Do not work properly
+            "ControlType": control_command,
+            "ServiceList": {"item": service_names}
+        }).model_dump()
+        return tuple(
+            serialize_object(client.soapDoControlServices(validated_data), dict)["ServiceInfoList"]["item"]
+        )
+
+    @cucm_logging
+    def ccsDoServiceDeployment(self, deploy_command: str, service_names: list, node_fqdn: str = None) -> tuple[dict]:
+
+        """
+        CCS (Control Center Services) Do Service Deployment Method.
+        :param deploy_command:  Service(s) Deploy Command: `Deploy` or `UnDeploy`
+        :param service_names:   Service Names Collection
+        :param node_fqdn:       Cluster Node FQDN or IP Address, Return Status From the Pub If the Node isn't Specified
+        :return:
+        """
+
+        client = self._cucm_ccs_custom_node_service(node_fqdn=node_fqdn)
+        validated_data = CucmCcsDoDeploymentModel(**{
+            # "NodeName": node_fqdn,        # Do not work properly
+            "DeployType": deploy_command,
+            "ServiceList": {"item": service_names}
+        }).model_dump()
+        return tuple(
+            serialize_object(client.soapDoServiceDeployment(validated_data), dict)["ServiceInfoList"]["item"]
+        )
+
+    @cucm_logging
+    def ccsGetProductInfoList(self, node_fqdn: str = None) -> tuple[dict]:
+
+        """
+        CCS (Control Center Services) Get Product Information Method.
+        :param node_fqdn:       Cluster Node FQDN or IP Address, Return Status From the Pub If the Node isn't Specified
+        :return:
+        """
+
+        client = self._cucm_ccs_custom_node_service(node_fqdn=node_fqdn)
+        return client.getProductInformationList("")
+
+    @cucm_logging
     def ccsGetServiceStatus(self, service_name: str = "", node_fqdn: str = None) -> tuple[dict]:
 
         """
@@ -905,25 +961,17 @@ class CucmAxlClient(CucmSettings):
             serialize_object(client.soapGetServiceStatus(service_name), dict)["ServiceInfoList"]["item"]
         )
 
-    def ccsDoControlService(self, service_names: list, service_command: str, node_fqdn: str = None):
+    @cucm_logging
+    def ccsGetStaticServiceList(self, node_fqdn: str = None) -> tuple[dict]:
 
         """
-        CCS (Control Center Services) Do Control Services Method.
-        :param service_names:   Service Names Collection
-        :param service_command: Service Command: `Restart`, `Start` or `Stop`
+        CCS (Control Center Services) Get Static Service Method.
         :param node_fqdn:       Cluster Node FQDN or IP Address, Return Status From the Pub If the Node isn't Specified
         :return:
         """
 
         client = self._cucm_ccs_custom_node_service(node_fqdn=node_fqdn)
-        service_do_params = {
-            # "NodeName": node_fqdn,
-            "ControlType": service_command,
-            "ServiceList": {"item": service_names}
-        }
-        return tuple(
-            serialize_object(client.soapDoControlServices(service_do_params), dict)["ServiceInfoList"]["item"]
-        )
+        return tuple(serialize_object(client.soapGetStaticServiceList(""), dict)["item"])
 
     @cucm_logging
     def risGetCti(self, **kwargs: Union[dict, ...]) -> dict:
