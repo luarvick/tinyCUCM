@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from typing import Union
+from typing_extensions import Unpack
 from zeep.helpers import serialize_object
 
 from .ccs_models import CucmCcsDoControlModel, CucmCcsDoDeploymentModel
@@ -11,6 +12,7 @@ from .sql_models import (
     CucmSqlSearchDeviceModel,
     CucmSqlSearchEndUserModel,
     CucmSqlSearchLineGroupModel,
+    CucmSqlSearchRemoteDestinationModel,
     CucmSqlSearchTranslationPatternModel,
 )
 
@@ -1313,7 +1315,9 @@ class CucmClient(CucmSettings):
             sql_query="SELECT ucup.pkid, ucup.name, ucup.description FROM ucuserprofile ucup ORDER BY ucup.name"
         )
 
-    def sqlSearchCallPickupGroup(self, **kwargs) -> Union[tuple[dict, ...], None]:
+    def sqlSearchCallPickupGroup(
+        self, **kwargs: Unpack[CucmSqlSearchCallPickupGroupModel]
+    ) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.
@@ -1345,7 +1349,7 @@ class CucmClient(CucmSettings):
                      ORDER BY cpg.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlSearchDevice(self, **kwargs: Union[dict, ...]) -> Union[tuple[dict, ...], None]:
+    def sqlSearchDevice(self, **kwargs: Unpack[CucmSqlSearchDeviceModel]) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.
@@ -1390,7 +1394,7 @@ class CucmClient(CucmSettings):
                      ORDER BY d.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlSearchEndUser(self, **kwargs: Union[dict, ...]) -> Union[tuple[dict, ...], None]:
+    def sqlSearchEndUser(self, **kwargs: Unpack[CucmSqlSearchEndUserModel]) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.
@@ -1419,7 +1423,7 @@ class CucmClient(CucmSettings):
                      ORDER BY eu.userid""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlSearchLineGroup(self, **kwargs: Union[dict, ...]) -> Union[tuple[dict, ...], None]:
+    def sqlSearchLineGroup(self, **kwargs: Unpack[CucmSqlSearchLineGroupModel]) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.
@@ -1450,7 +1454,37 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlSearchTranslationPattern(self, **kwargs: Union[dict, ...]) -> Union[tuple[dict, ...], None]:
+    def sqlSearchRemoteDestination(
+        self, **kwargs: Unpack[CucmSqlSearchRemoteDestinationModel]
+    ) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Search Object Method.
+
+        * criterion: `Name`, `Destination`
+        * value: Search Value String
+
+        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        :return:
+        """
+
+        validated_data = CucmSqlSearchRemoteDestinationModel(**kwargs).model_dump()
+        sql_query = """SELECT rd.pkid,
+                              rd.name,
+                              rdd.destination,
+                              rdd.enablesinglenumberreach AS snr,
+                              rdd.ismobilephone AS is_mobile,
+                              rdd.delaybeforeringingcell AS start_delay,
+                              rdd.answertoolatetimer AS stop_ringing
+                         FROM remotedestination rd
+                    LEFT JOIN remotedestinationdynamic rdd ON rdd.fkremotedestination = rd.pkid
+                        WHERE LOWER({obj}) LIKE '%{val}%'
+                     ORDER BY rd.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchTranslationPattern(
+        self, **kwargs: Unpack[CucmSqlSearchTranslationPatternModel]
+    ) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Search Object Method.

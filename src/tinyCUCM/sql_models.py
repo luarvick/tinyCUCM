@@ -2,11 +2,6 @@ from enum import Enum
 from pydantic import BaseModel, model_validator
 
 
-""" ######################################################### """
-""" ****************** TINY CUCM SQL MODELS ***************** """
-""" ######################################################### """
-
-
 CUCM_SQL_SEARCH_CALL_PICKUP_GROUP_CRITERIA = {
     "Name": "cpg.name",
     "Description": "npg.description",
@@ -38,6 +33,10 @@ CUCM_SQL_SEARCH_LINE_GROUP_CRITERIA = {
     "Member Line Number": "np.dnorpattern",
     "Member Line Description": "np.description",
 }
+CUCM_SQL_SEARCH_REMOTE_DESTINATION_CRITERIA = {
+    "Name": "rd.name",
+    "Destination": "rdd.destination",
+}
 CUCM_SQL_SEARCH_TRANSLATION_PATTERN_CRITERIA = {
     "Pattern": "np.dnorpattern",
     "Description": "np.description",
@@ -46,6 +45,11 @@ CUCM_SQL_SEARCH_TRANSLATION_PATTERN_CRITERIA = {
     "Called Party Transform Mask": "np.calledpartytransformationmask",
     "Prefix Digits Out": "np.prefixdigitsout",
 }
+
+
+""" ######################################################### """
+""" ****************** TINY CUCM SQL ENUMS ****************** """
+""" ######################################################### """
 
 
 class CucmSqlSearchCallPickupGroupEnum(str, Enum):
@@ -83,6 +87,11 @@ class CucmSqlSearchLineGroupEnum(str, Enum):
     member_line_description = "Member Line Description"
 
 
+class CucmSqlSearchRemoteDestinationEnum(str, Enum):
+    name = "Name"
+    destination = "Destination"
+
+
 class CucmSqlSearchTranslationPatternEnum(str, Enum):
     pattern = "Pattern"
     description = "Description"
@@ -92,9 +101,17 @@ class CucmSqlSearchTranslationPatternEnum(str, Enum):
     pdo = "Prefix Digits Out"
 
 
-class CucmSqlSearchCallPickupGroupModel(BaseModel):
-    criterion: CucmSqlSearchCallPickupGroupEnum
+""" ######################################################### """
+""" ****************** TINY CUCM SQL MODELS ***************** """
+""" ######################################################### """
+
+
+class CucmSqlBaseSearchModel(BaseModel):
     value: str
+
+
+class CucmSqlSearchCallPickupGroupModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchCallPickupGroupEnum
 
     @model_validator(mode="after")
     def check_fields(self):
@@ -102,7 +119,7 @@ class CucmSqlSearchCallPickupGroupModel(BaseModel):
         return self
 
 
-class CucmSqlSearchDeviceModel(BaseModel):
+class CucmSqlSearchDeviceModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchDeviceEnum
 
     @model_validator(mode="after")
@@ -111,7 +128,7 @@ class CucmSqlSearchDeviceModel(BaseModel):
         return self.criterion
 
 
-class CucmSqlSearchEndUserModel(BaseModel):
+class CucmSqlSearchEndUserModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchEndUserEnum
 
     @model_validator(mode="after")
@@ -120,7 +137,7 @@ class CucmSqlSearchEndUserModel(BaseModel):
         return self
 
 
-class CucmSqlSearchLineGroupModel(BaseModel):
+class CucmSqlSearchLineGroupModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchLineGroupEnum
 
     @model_validator(mode="after")
@@ -129,7 +146,16 @@ class CucmSqlSearchLineGroupModel(BaseModel):
         return self
 
 
-class CucmSqlSearchTranslationPatternModel(BaseModel):
+class CucmSqlSearchRemoteDestinationModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchRemoteDestinationEnum
+
+    @model_validator(mode="after")
+    def check_fields(self):
+        self.criterion = CUCM_SQL_SEARCH_REMOTE_DESTINATION_CRITERIA[self.criterion]
+        return self
+
+
+class CucmSqlSearchTranslationPatternModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchTranslationPatternEnum
 
     @model_validator(mode="after")

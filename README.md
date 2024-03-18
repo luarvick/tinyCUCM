@@ -1195,7 +1195,7 @@ print("Result:", cucm.axlRestartPhone(**{"uuid": "........-....-....-....-......
     * `useE164AltNum`
     * `active`
   </details>
-* `axlUpdateLineGroup` - required keywords args: `uuid` or `name`
+* `axlUpdateLineGroup`
   <details>
   <summary>keywords args</summary>
   
@@ -1629,6 +1629,9 @@ CCS - Control Center Services provides an API Methods used to view status, to re
     * `node_fqdn` - Specify a node other than the publisher
   </details>
 
+<details>
+<summary>Code Example:</summary>
+
 ```python
 cucm = ...
 print("Result:", cucm.ccsDoControlServices(control_command="Restart", service_names=["Cisco License Manager", "Cisco Tftp"]))
@@ -1648,9 +1651,11 @@ print("Result:", cucm.ccsGetServiceStatus())
 #   ...,
 #   {'ServiceName': 'Cisco Wireless Controller Synchronization Service', 'ServiceStatus': 'Stopped', 'ReasonCode': -1068, 'ReasonCodeString': 'Service Not Activated ', 'StartTime': None, 'UpTime': -1}
 # )
-
-
 ```
+
+</details>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ### RIS Methods
@@ -1846,17 +1851,19 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
   * `sqlListUcUserProfile`
 * `Search` Methods:
   * `sqlSearchCallPickupGroup` - required keywords args: `criterion`, `value`
-    * Arg `criterion`: `Name`, `Description`, `Pattern`, `Member Line Number`, `Member Line Description`
+    * `criterion` enum: `Name`, `Description`, `Pattern`, `Member Line Number`, `Member Line Description`
   * `sqlSearchDevice` - required keywords args: `criterion`, `value`
-    * Arg `criterion`: `Name`, `Description`, `Line Number`, `Line Description`, `Userid`, `Device Pool`,
+    * `criterion` enum: `Name`, `Description`, `Line Number`, `Line Description`, `Userid`, `Device Pool`,
       `Device Type`
   * `sqlSearchEndUser` - required keywords args: `criterion`, `value`
-    * Arg `criterion`: `Userid`, `Display Name`, `Last Name`, `First Name`, `Phone Number`, `Mobile Number`,
+    * `criterion` enum: `Userid`, `Display Name`, `Last Name`, `First Name`, `Phone Number`, `Mobile Number`,
       `Email`, `Directory URI`
   * `sqlSearchLineGroup` - required keywords args: `criterion`, `value`
-    * Arg `criterion`: `Name`, `Member Line Number`, `Member Line Description`
+    * `criterion` enum: `Name`, `Member Line Number`, `Member Line Description`
+  * `sqlSearchRemoteDestination` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Name`, `Destination`
   * `sqlSearchTranslationPattern` - required keywords args: `criterion`, `value`
-    * Arg `criterion`: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Called Party Transform Mask`,
+    * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Called Party Transform Mask`,
       `Prefix Digits Out` 
 * `Validate` Methods:
   * `sqlValidateDeviceEndUserDesignation` - required keywords args: `device` (Type Class: Any)
