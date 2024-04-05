@@ -114,7 +114,8 @@ settings = {
     "cert_path": BASE_DIR / "cucm.crt",
     "session_verify": False,
     "session_timeout": 15,
-    "ris_wsdl_filename": "wsdlRISService70_test.xml", 
+    "ccs_wsdl_filename": "wsdlControlCenterServices_test.xml",
+    "ris_wsdl_filename": "wsdlRISService70_test.xml",
 }
 
 if __name__ == "__main__":
@@ -1867,6 +1868,7 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
       `Prefix Digits Out` 
 * `Validate` Methods:
   * `sqlValidateDeviceEndUserDesignation` - required keywords args: `device` (Type Class: Any)
+  * `sqlValidateEndUser` - required keywords args: `userid`
   * `sqlValidateLine` - required keywords args: `pattern` (Type Pattern Usage: Device Only)
   * `sqlValidatePattern` - required keywords args: `pattern` (Type Pattern Usage: Any)
 
@@ -1885,7 +1887,7 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
 ```python
 from pathlib import Path
 from typing import Union
-from tinyCUCM import CucmSettings, cucm_logging
+from tinyCUCM import CucmClient, cucm_logging
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -1902,9 +1904,7 @@ settings = {
 }
 
 
-class CucmAxlCustom(CucmSettings):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+class CucmAxlCustom(CucmClient):
         
     @cucm_logging
     def axlYourOwnGetMethod(self, **kwargs: Union[dict, ...]) -> dict:

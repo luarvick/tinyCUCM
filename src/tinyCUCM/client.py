@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Iterable
 from typing import Union
 from typing_extensions import Unpack
@@ -15,6 +16,9 @@ from .sql_models import (
     CucmSqlSearchRemoteDestinationModel,
     CucmSqlSearchTranslationPatternModel,
 )
+
+
+logger = logging.getLogger("cucm_client")
 
 
 """ ######################################################### """
@@ -1330,7 +1334,7 @@ class CucmClient(CucmSettings):
         """
 
         validated_data = CucmSqlSearchCallPickupGroupModel(**kwargs).model_dump()
-        sql_query = """SELECT cpg.pkid AS uuid,
+        sql_query = """SELECT cpg.pkid
                               cpg.name,
                               npg.description,
                               npg.dnorpattern AS pattern,
@@ -1518,7 +1522,7 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlValidateDeviceEndUserDesignation(self, device: str):
+    def sqlValidateDeviceEndUserDesignation(self, device: str) -> Union[tuple[dict], None]:
 
         """
         SQL Validate Object Method.
@@ -1537,6 +1541,23 @@ class CucmClient(CucmSettings):
                     LEFT JOIN enduserdevicemap eudm ON eudm.fkenduser = eu.pkid
                     LEFT JOIN device d ON eudm.fkdevice = d.pkid
                         WHERE LOWER(d.name) = '{val}'""".format(val=device.lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlValidateEndUser(self, userid: str) -> Union[tuple[dict], None]:
+
+        """
+        SQL Validate Object Method.
+        :param userid:      User ID
+        :return:
+        """
+
+        sql_query = """SELECT eu.pkid AS enduser_pkid,
+                              eu.userid,
+                              eu.displayname AS enduser_displayname
+                         FROM enduser eu
+                        WHERE LOWER(eu.userid) = '{val}'
+                          AND eu.status = '1'
+                     ORDER BY eu.userid""".format(val=userid.lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
 
     def sqlValidateLine(self, pattern: str) -> Union[tuple[dict], None]:

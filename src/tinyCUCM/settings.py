@@ -31,8 +31,8 @@ class CucmSettings:
         disable_warnings(InsecureRequestWarning)
 
         self._axl = None
-        self._axl_client = None
-        self._axl_transport = None
+        self._axl_client = None     # Workaround for CSCvq98025 (axlAddRemoteDestination)
+        self._axl_transport = None  # Workaround for CSCvq98025 (axlAddRemoteDestination)
         self._ccs = None            # Control Center Services
         self._ris = None            # Real-time Information Server
         self._ris_factory = None    # Real-time Information Server

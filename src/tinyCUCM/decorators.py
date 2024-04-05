@@ -1,6 +1,7 @@
 import logging
 from requests.exceptions import ConnectionError, HTTPError, ProxyError, RequestException, Timeout
 from zeep.exceptions import Fault, ValidationError
+
 from .exceptions import (
     CucmAxlSessionError,
     CucmBadRequestError,
@@ -8,6 +9,9 @@ from .exceptions import (
     CucmUnauthorizedError,
     CucmUnexpectedError
 )
+
+
+logger = logging.getLogger("cucm_client")
 
 
 """ ######################################################### """
@@ -26,7 +30,7 @@ def cucm_logging(cucm_method):
     def wrapped(self, *args, **kwargs):
 
         """
-        Connection & Methods Log Wrapper
+        Method Wrapper
         :return:
         """
 
@@ -59,24 +63,25 @@ def cucm_logging(cucm_method):
                 raise CucmUnauthorizedError("Unauthorized error occurred.")
             elif "<axlcode>5003</axlcode>" in history or "<axlcode>5007</axlcode>" in history:
                 # Only for AXL Requests - 404 Not Found
-                # Do or Get Request - AXLCode: <axlcode>5007</axlcode>
-                # ("Item not valid: The specified {{CUCM Object}} was not found")
-                # UpdateRequest - AXLCode: <axlcode>5003</axlcode> ("{{CUCM Object}} not found")
+                # Do or Get Request - AXLCode: 5007 - "Item not valid: The specified {{CUCM Object}} was not found"
+                # UpdateRequest - AXLCode: 5003 - "{{CUCM Object}} not found"
                 logging.warning(log_message.format(message=f"Error Detail:\n{repr(err)}."))
                 return None
             else:
-                # For Invalid SQL Queries. AXLCode: 201 ("A syntax error has occurred")
+                # For Invalid SQL Queries.
+                # AXLCode: 201 - "A syntax error has occurred"
+                # AXLCode: 217 - "Column ({{column_names}}) not found..."
                 logging.error(log_message.format(message=f"Error Detail:\n{repr(err)}."))
                 logging.error(log_message.format(message=f"History:\n{history}."))
-                raise CucmBadRequestError("BadRequest error occurred.")
+                raise CucmBadRequestError(f"BadRequest error occurred. {repr(err)}")
 
         except (ConnectionError, HTTPError, ProxyError, RequestException, Timeout) as err:
             logging.error(log_message.format(message=f"Error Detail:\n{repr(err)}"))
-            raise CucmConnectionError("Connection has been failed.")
+            raise CucmConnectionError(f"Connection has been failed. {repr(err)}")
 
         except Exception as err:
             logging.error(log_message.format(message=f"Error Detail: {repr(err)}."))
             logging.error(log_message.format(message=f"History:\n{self._cucm_history_show()}"))
-            raise CucmUnexpectedError("Unexpected error occurred.")
+            raise CucmUnexpectedError(f"Unexpected error occurred. {repr(err)}")
 
     return wrapped
