@@ -1830,6 +1830,9 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
 
 <details>
 
+* `Get` Methods:
+  * `sqlGetDeviceEndUsersRelations`
+  * `sqlGetEndUserDevicesRelations`
 * `List` Methods:
   * `sqlListCallingSearchSpace`
   * `sqlListCredentialPolicy`
@@ -1867,7 +1870,6 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
     * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Called Party Transform Mask`,
       `Prefix Digits Out` 
 * `Validate` Methods:
-  * `sqlValidateDeviceEndUserDesignation` - required keywords args: `device` (Type Class: Any)
   * `sqlValidateEndUser` - required keywords args: `userid`
   * `sqlValidateLine` - required keywords args: `pattern` (Type Pattern Usage: Device Only)
   * `sqlValidatePattern` - required keywords args: `pattern` (Type Pattern Usage: Any)

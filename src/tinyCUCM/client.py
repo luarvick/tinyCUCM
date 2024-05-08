@@ -51,7 +51,7 @@ class CucmClient(CucmSettings):
 
         """
         Normalizing RIS (Real-time Information Server) Phone(s) Response Dictionary.
-        :param resp_raw:    RIS Raw Response
+        :param resp_raw:    RIS Raw Response Dictionary
         :return:
         """
 
@@ -1122,7 +1122,67 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlListCallingSearchSpace(self) -> tuple[dict, ...]:
+    def sqlGetDeviceEndUsersRelations(self, name: str) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Get Object Method.
+        :param name:  Device Name
+        :return:
+        """
+
+        sql_query = """SELECT eu.pkid AS enduser_pkid,
+                              eu.userid,
+                              eu.displayname AS enduser_displayname,
+                              d.pkid AS device_pkid,
+                              d.name AS device,
+                              d.description AS device_description,
+                              tc.name AS device_class,
+                              tp.name AS device_product,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description
+                         FROM enduser eu
+                    LEFT JOIN enduserdevicemap eudm ON eudm.fkenduser = eu.pkid
+                    LEFT JOIN device d ON d.pkid = eudm.fkdevice
+                    LEFT JOIN devicenumplanmap dnpm ON dnpm.fkdevice = d.pkid
+                    LEFT JOIN numplan np ON np.pkid = dnpm.fknumplan
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN typeclass tc ON tc.enum = d.tkclass
+                    LEFT JOIN typeproduct tp ON tp.enum = d.tkproduct
+                        WHERE LOWER(d.name) = '{val}'""".format(val=name.lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlGetEndUserDevicesRelations(self, userid: str) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Get Object Method.
+        :param userid:      EndUserID
+        :return:
+        """
+
+        sql_query = """SELECT eu.pkid AS enduser_pkid,
+                              eu.userid,
+                              eu.displayname AS enduser_displayname,
+                              d.pkid AS device_pkid,
+                              d.name AS device,
+                              d.description AS device_description,
+                              tc.name AS device_class,
+                              tp.name AS device_product,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description
+                         FROM enduser eu
+                    LEFT JOIN enduserdevicemap eudm ON eudm.fkenduser = eu.pkid
+                    LEFT JOIN device d ON d.pkid = eudm.fkdevice
+                    LEFT JOIN devicenumplanmap dnpm ON dnpm.fkdevice = d.pkid
+                    LEFT JOIN numplan np ON np.pkid = dnpm.fknumplan
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN typeclass tc ON tc.enum = d.tkclass
+                    LEFT JOIN typeproduct tp ON tp.enum = d.tkproduct
+                        WHERE LOWER(eu.userid) = '{val}'""".format(val=userid.lower())
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlListCallingSearchSpace(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -1133,7 +1193,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT css.pkid, css.name, css.description FROM callingsearchspace css ORDER BY css.name"
         )
 
-    def sqlListCredentialPolicy(self) -> Union[tuple[dict, ...], None]:
+    def sqlListCredentialPolicy(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1144,7 +1204,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT cp.pkid, cp.displayname AS name FROM credentialpolicy cp ORDER BY cp.displayname"
         )
 
-    def sqlListDevicePool(self) -> Union[tuple[dict, ...], None]:
+    def sqlListDevicePool(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1153,7 +1213,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT dp.pkid, dp.name FROM devicepool dp ORDER BY dp.name")
 
-    def sqlListDirGroup(self) -> Union[tuple[dict, ...], None]:
+    def sqlListDirGroup(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1162,7 +1222,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT dg.pkid, dg.name FROM dirgroup dg ORDER BY dg.name")
 
-    def sqlListMediaResourceGroup(self) -> tuple[dict, ...]:
+    def sqlListMediaResourceGroup(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -1173,7 +1233,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT mrg.pkid, mrg.name, mrg.description FROM mediaresourcegroup mrg ORDER BY mrg.name"
         )
 
-    def sqlListMediaResourceList(self) -> tuple[dict, ...]:
+    def sqlListMediaResourceList(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -1184,7 +1244,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT mrl.pkid, mrl.name FROM mediaresourcelist mrl ORDER BY mrl.name"
         )
 
-    def sqlListPhoneTemplate(self) -> Union[tuple[dict, ...], None]:
+    def sqlListPhoneTemplate(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1193,7 +1253,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT pt.pkid, pt.name FROM phonetemplate pt ORDER BY pt.name")
 
-    def sqlListProcessNode(self) -> Union[tuple[dict, ...], None]:
+    def sqlListProcessNode(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1208,7 +1268,7 @@ class CucmClient(CucmSettings):
                 ORDER BY pn.name
             """)
 
-    def sqlListRecordingProfile(self) -> tuple[dict, ...]:
+    def sqlListRecordingProfile(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -1217,7 +1277,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT rp.pkid, rp.name FROM recordingprofile rp ORDER BY rp.name")
 
-    def sqlListRegion(self) -> Union[tuple[dict, ...], None]:
+    def sqlListRegion(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1226,7 +1286,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT r.pkid, r.name FROM region r ORDER BY r.name")
 
-    def sqlListRoutePartition(self) -> Union[tuple[dict, ...], None]:
+    def sqlListRoutePartition(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1237,7 +1297,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT rp.pkid, rp.name, rp.description FROM routepartition rp ORDER BY rp.name"
         )
 
-    def sqlListSoftkeyTemplate(self) -> Union[tuple[dict, ...], None]:
+    def sqlListSoftkeyTemplate(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1248,7 +1308,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT skt.pkid, skt.name, skt.description FROM softkeytemplate skt ORDER BY skt.name"
         )
 
-    def sqlListTelecasterService(self) -> Union[tuple[dict, ...], None]:
+    def sqlListTelecasterService(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1259,7 +1319,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT ts.pkid, ts.name, ts.description FROM telecasterservice ts ORDER BY ts.name"
         )
 
-    def sqlListTypeClass(self) -> Union[tuple[dict, ...], None]:
+    def sqlListTypeClass(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1268,7 +1328,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT tc.enum AS pkid, tc.name FROM typeclass tc ORDER BY tc.enum")
 
-    def sqlListTypeCountry(self) -> Union[tuple[dict, ...], None]:
+    def sqlListTypeCountry(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1277,7 +1337,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT tc.enum AS pkid, tc.name FROM typecountry tc ORDER BY tc.enum")
 
-    def sqlListTypeModel(self) -> Union[tuple[dict, ...], None]:
+    def sqlListTypeModel(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1286,7 +1346,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query="SELECT tm.enum AS pkid, tm.name FROM typemodel tm ORDER BY tm.enum")
 
-    def sqlListTypeUserLocale(self) -> Union[tuple[dict, ...], None]:
+    def sqlListTypeUserLocale(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1297,7 +1357,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT tul.enum AS pkid, tul.name, tul.nativename FROM typeuserlocale tul ORDER BY tul.enum"
         )
 
-    def sqlListUcServiceProfile(self) -> tuple[dict, ...]:
+    def sqlListUcServiceProfile(self) -> Union[tuple[dict, ...], None]:
 
         """
         SQL List Object(s) Method.
@@ -1308,7 +1368,7 @@ class CucmClient(CucmSettings):
             sql_query="SELECT ucsp.pkid, ucsp.name, ucsp.description FROM ucserviceprofile ucsp ORDER BY ucsp.name"
         )
 
-    def sqlListUcUserProfile(self) -> Union[tuple[dict, ...], None]:
+    def sqlListUcUserProfile(self) -> tuple[dict, ...]:
 
         """
         SQL List Object(s) Method.
@@ -1334,20 +1394,20 @@ class CucmClient(CucmSettings):
         """
 
         validated_data = CucmSqlSearchCallPickupGroupModel(**kwargs).model_dump()
-        sql_query = """SELECT cpg.pkid
+        sql_query = """SELECT cpg.pkid,
                               cpg.name,
                               npg.description,
                               npg.dnorpattern AS pattern,
-                              rp.name AS partition,
+                              rpg.name AS partition,
                               npm.dnorpattern AS line,
                               rpm.name AS line_partition,
                               npm.description AS line_description
                          FROM pickupgroup cpg
-                    LEFT JOIN numplan npg ON cpg.fknumplan_pickup = npg.pkid
-                    LEFT JOIN routepartition rp ON npg.fkroutepartition = rp.pkid
+                    LEFT JOIN numplan npg ON npg.pkid = cpg.fknumplan_pickup
+                    LEFT JOIN routepartition rpg ON rpg.pkid = npg.fkroutepartition
                     LEFT JOIN pickupgrouplinemap pglm ON pglm.fkpickupgroup = cpg.pkid
-                    LEFT JOIN numplan npm ON pglm.fknumplan_line = npm.pkid
-                    LEFT JOIN routepartition rpm ON npm.fkroutepartition = rpm.pkid
+                    LEFT JOIN numplan npm ON npm.pkid = pglm.fknumplan_line
+                    LEFT JOIN routepartition rpm ON rpm.pkid = npm.fkroutepartition
                         WHERE LOWER({obj}) LIKE '%{val}%'
                           AND npg.tkpatternusage = '4'
                      ORDER BY cpg.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
@@ -1372,6 +1432,7 @@ class CucmClient(CucmSettings):
                               d.description,
                               dp.name AS device_pool,
                               np.dnorpattern AS line,
+                              dnpm.numplanindex AS line_index,
                               rp.name AS line_partition,
                               np.description AS line_description,
                               tc.name AS class,
@@ -1384,18 +1445,20 @@ class CucmClient(CucmSettings):
                               eu_rdp.displayname AS display_name_rdp
                          FROM device d
                     LEFT JOIN devicenumplanmap dnpm ON dnpm.fkdevice = d.pkid
-                    LEFT JOIN numplan np ON dnpm.fknumplan = np.pkid
-                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
-                    LEFT JOIN devicepool dp ON d.fkdevicepool = dp.pkid
-                    LEFT JOIN typemodel tm ON d.tkmodel=tm.enum
-                    LEFT JOIN typeclass tc ON d.tkclass=tc.enum
+                    LEFT JOIN numplan np ON np.pkid = dnpm.fknumplan
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN devicepool dp ON dp.pkid = d.fkdevicepool
+                    LEFT JOIN typemodel tm ON tm.enum = d.tkmodel
+                    LEFT JOIN typeclass tc ON tc.enum = d.tkclass
                     LEFT JOIN typeproduct tprod ON tprod.tkmodel = d.tkmodel
-                    LEFT JOIN enduser eu ON d.fkenduser=eu.pkid
-                    LEFT JOIN enduser eu_rdp ON d.fkenduser_mobility=eu_rdp.pkid
+                    LEFT JOIN enduser eu ON eu.pkid = d.fkenduser
+                    LEFT JOIN enduser eu_rdp ON eu_rdp.pkid = d.fkenduser_mobility
                         WHERE LOWER({obj}) LIKE '%{val}%'
                           AND (d.tkclass = '1' OR d.tkclass = '20' OR d.tkclass = '254')
                           AND d.name NOT LIKE 'ModelProfile%'
-                     ORDER BY d.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
+                     ORDER BY d.name, dnpm.numplanindex""".format(
+            obj=validated_data["criterion"], val=validated_data["value"].lower()
+        )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
     def sqlSearchEndUser(self, **kwargs: Unpack[CucmSqlSearchEndUserModel]) -> Union[tuple[dict, ...], None]:
@@ -1449,9 +1512,9 @@ class CucmClient(CucmSettings):
                               lgnpm.lineselectionorder AS line_index
                          FROM linegroup lg
                     LEFT JOIN linegroupnumplanmap lgnpm ON lgnpm.fklinegroup = lg.pkid
-                    LEFT JOIN typedistributealgorithm tda ON lg.tkdistributealgorithm = tda.enum
-                    LEFT JOIN numplan np ON lgnpm.fknumplan = np.pkid
-                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN typedistributealgorithm tda ON tda.enum = lg.tkdistributealgorithm
+                    LEFT JOIN numplan np ON np.pkid = lgnpm.fknumplan
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
                         WHERE LOWER({obj}) LIKE '%{val}%' 
                      ORDER BY lg.name, lgnpm.lineselectionorder""".format(
             obj=validated_data["criterion"], val=validated_data["value"].lower()
@@ -1512,9 +1575,9 @@ class CucmClient(CucmSettings):
                               rc.name AS route_class,
                               np.blockenable AS block_enable
                          FROM numplan np
-                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
-                    LEFT JOIN callingsearchspace css ON np.fkcallingsearchspace_translation = css.pkid
-                    LEFT JOIN typepatternrouteclass rc ON np.tkpatternrouteclass = rc.enum
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN callingsearchspace css ON css.pkid = np.fkcallingsearchspace_translation
+                    LEFT JOIN typepatternrouteclass rc ON rc.enum = np.tkpatternrouteclass
                         WHERE LOWER({obj}) LIKE '%{val}%'
                           AND np.tkpatternusage = '3'
                      ORDER BY np.dnorpattern""".format(
@@ -1522,32 +1585,11 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlValidateDeviceEndUserDesignation(self, device: str) -> Union[tuple[dict], None]:
-
-        """
-        SQL Validate Object Method.
-        :param device:      Device Name (Any Type Class)
-        :return:
-        """
-
-        sql_query = """SELECT eu.pkid AS enduser_pkid,
-                              eu.userid,
-                              eu.displayname AS enduser_displayname,
-                              d.pkid AS device_pkid,
-                              d.name AS device,
-                              d.description AS device_description,
-                              d.tkclass AS device_type
-                         FROM enduser eu
-                    LEFT JOIN enduserdevicemap eudm ON eudm.fkenduser = eu.pkid
-                    LEFT JOIN device d ON eudm.fkdevice = d.pkid
-                        WHERE LOWER(d.name) = '{val}'""".format(val=device.lower())
-        return self.__cucm_sql_execute(sql_query=sql_query)
-
     def sqlValidateEndUser(self, userid: str) -> Union[tuple[dict], None]:
 
         """
         SQL Validate Object Method.
-        :param userid:      User ID
+        :param userid:      EndUserID
         :return:
         """
 
@@ -1581,11 +1623,11 @@ class CucmClient(CucmSettings):
                               tpu.name AS pattern_type
                          FROM device d
                     LEFT JOIN devicenumplanmap dnpm ON dnpm.fkdevice = d.pkid
-                    LEFT JOIN numplan np ON dnpm.fknumplan = np.pkid
-                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
-                    LEFT JOIN typepatternusage tpu ON np.tkpatternusage = tpu.enum
-                    LEFT JOIN typeclass tc ON d.tkclass=tc.enum
-                    LEFT JOIN typemodel tm ON d.tkmodel=tm.enum
+                    LEFT JOIN numplan np ON np.pkid = dnpm.fknumplan
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN typepatternusage tpu ON tpu.enum = np.tkpatternusage
+                    LEFT JOIN typeclass tc ON tc.enum = d.tkclass
+                    LEFT JOIN typemodel tm ON tm.enum = d.tkmodel
                         WHERE LOWER(np.dnorpattern) = '{val}'
                           AND np.tkpatternusage = '2' 
                           AND (d.tkclass = '1' OR d.tkclass = '20' OR d.tkclass = '254')
@@ -1608,8 +1650,8 @@ class CucmClient(CucmSettings):
                               np.tkpatternusage AS pattern_usage,
                               tpu.name AS pattern_type
                          FROM numplan np
-                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
-                    LEFT JOIN typepatternusage tpu ON np.tkpatternusage = tpu.enum
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN typepatternusage tpu ON tpu.enum = np.tkpatternusage
                         WHERE LOWER(np.dnorpattern) = '{val}'
                      ORDER BY np.dnorpattern""".format(val=pattern.lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
