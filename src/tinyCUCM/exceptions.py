@@ -33,6 +33,10 @@ class CucmConnectionError(CucmBaseError):
     pass
 
 
+class CucmObjNotFoundError(CucmBaseError):
+    pass
+
+
 class CucmSessionError(CucmBaseError):
     pass
 

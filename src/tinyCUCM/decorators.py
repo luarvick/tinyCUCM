@@ -6,6 +6,7 @@ from .exceptions import (
     CucmAxlSessionError,
     CucmBadRequestError,
     CucmConnectionError,
+    CucmObjNotFoundError,
     CucmUnauthorizedError,
     CucmUnexpectedError
 )
@@ -44,17 +45,17 @@ def cucm_logging(cucm_method):
         except (AttributeError, TypeError) as err:
             err = str(err)
             if "NoneType" in err:
-                logging.error(log_message.format(message=f"Error Detail:\n{repr(err)}."))
+                logging.error(log_message.format(message=f"Error Detail: {repr(err)}."))
                 raise CucmAxlSessionError("Session FailedDependency error occurred. Client is None.")
             elif ("Service has no operation" in err
                   or "got an unexpected keyword argument" in err
                   or "object has no attribute" in err):
                 # "Service has no operation 'method name'" - Method Error
                 # "got an unexpected keyword argument" - Invalid Argument for AXL Methods (Example: "uud" vs. "uuid")
-                logging.error(log_message.format(message=f"Error Detail:\n{repr(err)}."))
+                logging.error(log_message.format(message=f"Error Detail: {repr(err)}."))
                 raise CucmBadRequestError("BadRequest error occurred.")
 
-            logging.error(log_message.format(message=f"Error Detail:\n{repr(err)}."))
+            logging.error(log_message.format(message=f"Error Detail: {repr(err)}."))
             raise CucmUnexpectedError("Unexpected error occurred.")
 
         except (Fault, ValidationError) as err:
@@ -65,18 +66,19 @@ def cucm_logging(cucm_method):
                 # Only for AXL Requests - 404 Not Found
                 # Do or Get Request - AXLCode: 5007 - "Item not valid: The specified {{CUCM Object}} was not found"
                 # UpdateRequest - AXLCode: 5003 - "{{CUCM Object}} not found"
-                logging.warning(log_message.format(message=f"Error Detail:\n{repr(err)}."))
-                return None
+                logging.error(log_message.format(message=f"Error Detail: {repr(err)}."))
+                logging.error(log_message.format(message=f"History:\n{history}."))
+                raise CucmObjNotFoundError(f"NotFound error occurred. {repr(err)}")
             else:
                 # For Invalid SQL Queries.
                 # AXLCode: 201 - "A syntax error has occurred"
                 # AXLCode: 217 - "Column ({{column_names}}) not found..."
-                logging.error(log_message.format(message=f"Error Detail:\n{repr(err)}."))
+                logging.error(log_message.format(message=f"Error Detail: {repr(err)}."))
                 logging.error(log_message.format(message=f"History:\n{history}."))
                 raise CucmBadRequestError(f"BadRequest error occurred. {repr(err)}")
 
         except (ConnectionError, HTTPError, ProxyError, RequestException, Timeout) as err:
-            logging.error(log_message.format(message=f"Error Detail:\n{repr(err)}"))
+            logging.error(log_message.format(message=f"Error Detail: {repr(err)}"))
             raise CucmConnectionError(f"Connection has been failed. {repr(err)}")
 
         except Exception as err:
