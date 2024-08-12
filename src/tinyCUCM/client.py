@@ -1,7 +1,9 @@
 import logging
 from collections.abc import Iterable
+from datetime import datetime
 from typing import Union
 from typing_extensions import Unpack
+from uuid import UUID
 from zeep.helpers import serialize_object
 
 from .ccs_models import CucmCcsDoControlModel, CucmCcsDoDeploymentModel
@@ -1122,14 +1124,15 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlGetDeviceEndUsersRelations(self, name: str) -> Union[tuple[dict, ...], None]:
+    def sqlGetDeviceEndUsersRelations(self, obj: Union[str, UUID]) -> Union[tuple[dict, ...], None]:
 
         """
         SQL Get Object Method.
-        :param name:  Device Name
+        :param obj:     Object PKID or Name
         :return:
         """
 
+        # One Device - Many End Users
         sql_query = """SELECT eu.pkid AS enduser_pkid,
                               eu.userid,
                               eu.displayname AS enduser_displayname,
@@ -1149,17 +1152,96 @@ class CucmClient(CucmSettings):
                     LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
                     LEFT JOIN typeclass tc ON tc.enum = d.tkclass
                     LEFT JOIN typeproduct tp ON tp.enum = d.tkproduct
-                        WHERE LOWER(d.name) = '{val}'""".format(val=name.lower())
+                        WHERE d.pkid = '{val}'
+                           OR LOWER(d.name) = '{val}'
+                     ORDER BY eu.userid""".format(val=str(obj).lower() if isinstance(obj, UUID) else obj.lower()
+        )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlGetEndUserDevicesRelations(self, userid: str) -> Union[tuple[dict, ...], None]:
+    def sqlGetEMSession(self, obj: Union[str, UUID]) -> Union[dict, None]:
 
         """
         SQL Get Object Method.
-        :param userid:      EndUserID
+        :param obj:     Object PKID or Name
         :return:
         """
 
+        sql_query = """SELECT d.pkid,
+                              d.name,
+                              d.description,
+                              tm.name AS model,
+                              emd.logintime AS login_time,
+                              emd.loginduration AS login_duration,
+                              emd.datetimestamp,
+                              udp.pkid AS device_profile_pkid,
+                              udp.name AS device_profile,
+                              udp.description AS device_profile_description,
+                              eu.userid,
+                              eu.displayname AS display_name,
+                              eul.userid AS userid_last,
+                              eul.displayname AS display_name_last
+                         FROM extensionmobilitydynamic emd
+                    LEFT JOIN device d ON emd.fkdevice = d.pkid
+                    LEFT JOIN device udp ON  emd.fkdevice_currentloginprofile = udp.pkid
+                    LEFT JOIN typemodel tm ON d.tkmodel=tm.enum
+                    LEFT JOIN enduser eu ON emd.fkenduser = eu.pkid
+                    LEFT JOIN enduser eul ON emd.fkenduser_lastlogin = eul.pkid
+                        WHERE d.pkid = '{val}'
+                           OR LOWER(d.name) = '{val}'""".format(
+            val=str(obj).lower() if isinstance(obj, UUID) else obj.lower()
+        )
+        resp_result = self.sqlExecuteQuery(sql_query=sql_query)
+        if resp_result:
+            resp_result = resp_result[0]
+            if resp_result["login_time"]:
+                resp_result["login_time"] = int(resp_result["login_time"])
+                auto_logout = resp_result["login_time"] + int(resp_result["login_duration"])
+
+                # Local Time Zone
+                resp_result["auto_logout"] = datetime.fromtimestamp(auto_logout).isoformat()
+                resp_result["login_time"] = datetime.fromtimestamp(resp_result["login_time"]).isoformat()
+        return resp_result
+
+    def sqlGetEndUserDefaultDeviceProfile(self, obj: Union[str, UUID]) -> Union[dict, None]:
+
+        """
+        SQL Get Object Method.
+        :param obj:    Object PKID or UserID
+        :return:
+        """
+
+        # 'tkuserassociation' (Association Type):
+        # 1 - Controlled Devices (Phones & SoftPhones)
+        # 5 - Controlled User Device Profiles
+        # 7 - CTI Controlled Device Profiles
+        sql_query = """SELECT eu.pkid,
+                              eu.userid,
+                              eu.displayname AS display_name,
+                              d.name AS device_profile,
+                              eudm.tkuserassociation AS association_type,
+                              eudm.defaultprofile AS is_default_udp
+                         FROM enduser eu
+                    LEFT JOIN enduserdevicemap eudm ON eu.pkid = eudm.fkenduser
+                    LEFT JOIN device d ON eudm.fkdevice = d.pkid
+                        WHERE (eu.pkid = '{val}' OR LOWER(eu.userid) = '{val}')
+                          AND eudm.tkuserassociation = '5'
+                          AND eudm.defaultprofile = 't'""".format(
+            val=str(obj).lower() if isinstance(obj, UUID) else obj.lower()
+        )
+        resp_result = self.__cucm_sql_execute(sql_query=sql_query)
+        if resp_result:
+            resp_result = resp_result[0]
+        return resp_result
+
+    def sqlGetEndUserDevicesRelations(self, obj: Union[str, UUID]) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Get Object Method.
+        :param obj:    Object PKID or UserID
+        :return:
+        """
+
+        # One End User - Many Devices
         sql_query = """SELECT eu.pkid AS enduser_pkid,
                               eu.userid,
                               eu.displayname AS enduser_displayname,
@@ -1179,8 +1261,91 @@ class CucmClient(CucmSettings):
                     LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
                     LEFT JOIN typeclass tc ON tc.enum = d.tkclass
                     LEFT JOIN typeproduct tp ON tp.enum = d.tkproduct
-                        WHERE LOWER(eu.userid) = '{val}'""".format(val=userid.lower())
+                        WHERE eu.pkid = '{val}'
+                           OR LOWER(eu.userid) = '{val}'
+                     ORDER BY d.name""".format(val=str(obj).lower() if isinstance(obj, UUID) else obj.lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlGetLineGroupStatus(self, obj: Union[str, UUID]) -> Union[dict, None]:
+
+        """
+        SQL Get Object Method.
+        :param obj:    Object PKID or Name
+        :return:
+
+        Optional:
+        dnpm.numplanindex AS device_order
+        """
+
+        sql_query = """SELECT lgmap.lineselectionorder AS member_index,
+                              np.dnorpattern AS member_line,
+                              rp.name AS member_partition,
+                              np.description AS member_description,
+                              dhd.hlog AS status,
+                              d.name AS device,
+                              d.description AS device_description,
+                              'phone' AS usage
+                         FROM linegroup lg
+                         JOIN linegroupnumplanmap lgmap ON lgmap.fklinegroup = lg.pkid
+                         JOIN numplan np ON lgmap.fknumplan = np.pkid
+                         JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                         JOIN devicenumplanmap dmap ON dmap.fknumplan = np.pkid
+                         JOIN device d ON dmap.fkdevice = d.pkid
+                    LEFT JOIN extensionmobilitydynamic emd ON emd.fkdevice_currentloginprofile = dmap.pkid
+                    LEFT JOIN device dp ON emd.fkdevice_currentloginprofile = dp.pkid
+                         JOIN devicehlogdynamic dhd ON dhd.fkdevice = d.pkid
+                        WHERE lg.pkid = '{val}'
+                           OR LOWER(lg.name) = '{val}'
+                 UNION SELECT lgmap.lineselectionorder AS member_index,
+                              np.dnorpattern AS member_line,
+                              rp.name AS member_partition,
+                              np.description AS member_description,
+                              dhd.hlog AS status,
+                              d.name AS device,
+                              d.description AS device_description,
+                              'udp' AS usage
+                         FROM extensionmobilitydynamic emd
+                    LEFT JOIN device d ON d.pkid = emd.fkdevice
+                         JOIN devicenumplanmap dnpm ON dnpm.fkdevice = emd.fkdevice_currentloginprofile
+                         JOIN numplan np ON np.pkid = dnpm.fknumplan
+                         JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                         JOIN linegroupnumplanmap lgmap ON lgmap.fknumplan = np.pkid
+                         JOIN linegroup lg ON lg.pkid = lgmap.fklinegroup
+                    LEFT JOIN devicehlogdynamic dhd ON d.pkid = dhd.fkdevice
+                        WHERE lg.pkid = '{val}'
+                           OR LOWER(lg.name) = '{val}'
+                     ORDER BY lgmap.lineselectionorder, d.name""".format(
+            val=str(obj).lower() if isinstance(obj, UUID) else obj.lower()
+        )
+        resp_result = self.sqlExecuteQuery(sql_query=sql_query)
+        if resp_result:
+            for item in resp_result:
+                item["status"] = "On-Line" if item["status"] == "t" else "Off-Line"
+        return resp_result
+
+    def sqlGetRemoteDestination(self, obj: Union[str, UUID]) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Get Object Method.
+        :param obj:    Object PKID or Name
+        :return:
+        """
+
+        # Get Remote Destination via Remote Destination Profile
+        sql_query = """SELECT rd.pkid,
+                              rd.name,
+                              rdd.destination,
+                              rdd.enablesinglenumberreach AS snr,
+                              rdd.ismobilephone AS is_mobile,
+                              rdd.delaybeforeringingcell AS start_delay,
+                              rdd.answertoolatetimer AS stop_ringing
+                         FROM device d
+                    LEFT JOIN remotedestination rd ON rd.fkdevice_remotedestinationtemplate = d.pkid
+                    LEFT JOIN remotedestinationdynamic rdd ON rdd.fkremotedestination = rd.pkid
+                        WHERE d.pkid = '{val}'
+                           OR LOWER(d.name) = '{val}'
+                     ORDER_BY d.name""".format(val=str(obj).lower() if isinstance(obj, UUID) else obj.lower())
+        return self.sqlExecuteQuery(sql_query=sql_query)
 
     def sqlListCallingSearchSpace(self) -> Union[tuple[dict, ...], None]:
 

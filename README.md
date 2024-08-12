@@ -1832,7 +1832,11 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
 
 * `Get` Methods:
   * `sqlGetDeviceEndUsersRelations`
+  * `sqlGetEMSession`
+  * `sqlGetEndUserDefaultDeviceProfile`
   * `sqlGetEndUserDevicesRelations`
+  * `sqlGetLineGroupStatus`
+  * `sqlGetRemoteDestination`
 * `List` Methods:
   * `sqlListCallingSearchSpace`
   * `sqlListCredentialPolicy`
