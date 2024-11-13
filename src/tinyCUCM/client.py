@@ -1,4 +1,3 @@
-import logging
 from collections.abc import Iterable
 from datetime import datetime
 from typing import Union
@@ -18,9 +17,6 @@ from .sql_models import (
     CucmSqlSearchRemoteDestinationModel,
     CucmSqlSearchTranslationPatternModel,
 )
-
-
-logger = logging.getLogger("cucm_client")
 
 
 """ ######################################################### """
@@ -1344,7 +1340,7 @@ class CucmClient(CucmSettings):
                     LEFT JOIN remotedestinationdynamic rdd ON rdd.fkremotedestination = rd.pkid
                         WHERE d.pkid = '{val}'
                            OR LOWER(d.name) = '{val}'
-                     ORDER_BY d.name""".format(val=str(obj).lower() if isinstance(obj, UUID) else obj.lower())
+                     ORDER BY rd.name""".format(val=str(obj).lower() if isinstance(obj, UUID) else obj.lower())
         return self.sqlExecuteQuery(sql_query=sql_query)
 
     def sqlListCallingSearchSpace(self) -> Union[tuple[dict, ...], None]:

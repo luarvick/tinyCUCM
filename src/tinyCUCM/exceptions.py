@@ -1,4 +1,4 @@
-import logging
+from .logger import logger
 
 
 """ ######################################################### """
@@ -15,7 +15,7 @@ class CucmBaseError(Exception):
     def __init__(self, message: str = None):
         self.message = message
         if self.message:
-            logging.error(self.message)
+            logger.error(self.message)
 
     def __str__(self):
         return self.message

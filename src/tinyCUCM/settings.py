@@ -1,4 +1,4 @@
-import logging, os
+import os
 from lxml import etree
 from requests import Session
 from requests.auth import HTTPBasicAuth
@@ -12,6 +12,7 @@ from zeep.proxy import ServiceProxy
 from zeep.transports import Transport
 
 from .exceptions import CucmSessionError
+from .logger import logger
 
 
 """ ######################################################### """
@@ -128,7 +129,7 @@ class CucmSettings:
             self._axl_client = Client(wsdl=wsdl_path, transport=self._axl_transport, plugins=[self.__cucm_history])
             self._axl = self._axl_client.create_service(binding, location)
         except Exception as err:
-            logging.error(log_message.format(message=f"Error Detail:\n{err}."))
+            logger.error(log_message.format(message=f"Error Detail:\n{err}."))
             raise CucmSessionError("Session error occurred.")
 
     def __cucm_ccs_service(self, node_fqdn: str = None) -> Union[ServiceProxy, None]:
@@ -161,7 +162,7 @@ class CucmSettings:
                 return client.create_service(binding, location)
             self._ccs = client.create_service(binding, location)
         except Exception as err:
-            logging.error(log_message.format(message=f"Error Detail:\n{err}."))
+            logger.error(log_message.format(message=f"Error Detail:\n{err}."))
             raise CucmSessionError("Session error occurred.")
 
     def __cucm_ris_service(self):
@@ -175,7 +176,7 @@ class CucmSettings:
 
         wsdl_path = f"{self.__toolkit_path}/{self.__ris_wsdl_filename}"
         if not os.path.isfile(wsdl_path):
-            logging.warning(log_message.format(message=f"{repr(wsdl_path)}, wsdl file not found."))
+            logger.warning(log_message.format(message=f"{repr(wsdl_path)}, wsdl file not found."))
             wsdl_path = f"https://{self.__pub_fqdn}:8443/realtimeservice2/services/RISService70?wsdl"
             # raise FileNotFoundError(f"{repr(wsdl_path)}, wsdl file not found.")
 
@@ -189,7 +190,7 @@ class CucmSettings:
             self._ris = Client(wsdl=wsdl_path, transport=transport, plugins=[self.__cucm_history])
             self._ris_factory = self._ris.type_factory("ns0")
         except Exception as err:
-            logging.error(log_message.format(message=f"Error Detail:\n{err}."))
+            logger.error(log_message.format(message=f"Error Detail:\n{err}."))
             raise CucmSessionError("Session error occurred.")
 
     def _cucm_ccs_custom_node_service(self, node_fqdn: Union[str, None]) -> ServiceProxy:
