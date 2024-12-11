@@ -164,6 +164,34 @@ class CucmClient(CucmSettings):
         return self._axl.addCallPickupGroup(**kwargs)
 
     @cucm_logging
+    def axlAddDeviceProfile(self, **kwargs: dict) -> dict:
+
+        """
+        AXL Add Object Method.
+
+        * product: `Cisco 7821`, `...`
+        * class: `Phone`
+        * protocol: `SIP`, `SCCP`
+        * protocolSide: `User`
+        * phoneTemplateName: `Standard 7821 SIP`, `...`
+
+        :param kwargs:      Required Fields:
+                            `kwargs = {
+                                "deviceProfile": {
+                                    "name": str,
+                                    "product": "str",
+                                    "class": "str",
+                                    "protocol": "str",
+                                    "protocolSide": "str",
+                                    "phoneTemplateName": "str",
+                                }
+                            }`
+        :return:
+        """
+
+        return self._axl.addDeviceProfile(**kwargs)
+
+    @cucm_logging
     def axlAddLine(self, **kwargs: dict) -> dict:
 
         """
@@ -245,6 +273,7 @@ class CucmClient(CucmSettings):
         :param kwargs:      Required Fields:
                             `kwargs = {
                                 "phone": {
+                                    "name",
                                     "product": "str",
                                     "class": "str",
                                     "protocol": "str",
@@ -1128,7 +1157,7 @@ class CucmClient(CucmSettings):
         :return:
         """
 
-        # One Device - Many End Users
+        # One Device - A lot of End Users or None End Users
         sql_query = """SELECT eu.pkid AS enduser_pkid,
                               eu.userid,
                               eu.displayname AS enduser_displayname,
@@ -1153,6 +1182,29 @@ class CucmClient(CucmSettings):
                      ORDER BY eu.userid""".format(val=str(obj).lower() if isinstance(obj, UUID) else obj.lower()
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlGetDeviceServicesSubscription(self, obj: Union[str, UUID]) -> Union[tuple[dict, ...], None]:
+
+        """
+        SQL Get Object Method.
+        :param obj:     Object PKID or Name
+        :return:
+        """
+
+        # One Device - A lot of Services or None Services
+        sql_query = """SELECT d.name,
+                              d.description,  
+                              d.allowhotelingflag AS em_enable,
+                              tss.servicename AS service_name
+                         FROM device d 
+                    LEFT JOIN telecastersubscribedservice tss on tss.fkdevice = d.pkid
+                        WHERE d.pkid = '{val}'
+                           OR LOWER(d.name) = '{val}'
+                     ORDER BY d.name, tss.servicename""".format(
+            val=str(obj).lower() if isinstance(obj, UUID) else obj.lower()
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
 
     def sqlGetEMSession(self, obj: Union[str, UUID]) -> Union[dict, None]:
 
@@ -1237,7 +1289,7 @@ class CucmClient(CucmSettings):
         :return:
         """
 
-        # One End User - Many Devices
+        # One End User - A lot of Devices or None Devices
         sql_query = """SELECT eu.pkid AS enduser_pkid,
                               eu.userid,
                               eu.displayname AS enduser_displayname,
