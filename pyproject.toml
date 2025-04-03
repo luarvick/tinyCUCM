@@ -1,18 +1,18 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=75.8.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "tinyCUCM"
-version = "0.2.94"
+version = "0.2.95"
 authors = [
   { name="Luarvick", email="lu.luarvick@gmail.com" },
 ]
 description = "Cisco Unified Call Manager AXL Methods Collection."
 readme = "README.md"
 dependencies = [
-    "zeep==4.2.1",
-    "pydantic==2.6.3"
+    "zeep==4.3.1",
+    "pydantic==2.10.6"
 ]
 requires-python = ">=3.10"
 classifiers = [

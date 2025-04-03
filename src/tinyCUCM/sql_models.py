@@ -113,52 +113,46 @@ class CucmSqlBaseSearchModel(BaseModel):
 class CucmSqlSearchCallPickupGroupModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchCallPickupGroupEnum
 
-    @model_validator(mode="after")
-    def check_fields(self):
-        self.criterion = CUCM_SQL_SEARCH_CALL_PICKUP_GROUP_CRITERIA[self.criterion]
-        return self
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_CALL_PICKUP_GROUP_CRITERIA[self.criterion]
 
 
 class CucmSqlSearchDeviceModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchDeviceEnum
 
-    @model_validator(mode="after")
-    def check_fields(self):
-        self.criterion = CUCM_SQL_SEARCH_DEVICE_CRITERIA[self.criterion]
-        return self.criterion
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_DEVICE_CRITERIA[self.criterion]
 
 
 class CucmSqlSearchEndUserModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchEndUserEnum
 
-    @model_validator(mode="after")
-    def check_fields(self):
-        self.criterion = CUCM_SQL_SEARCH_END_USER_CRITERIA[self.criterion]
-        return self
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_END_USER_CRITERIA[self.criterion]
 
 
 class CucmSqlSearchLineGroupModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchLineGroupEnum
 
-    @model_validator(mode="after")
-    def check_fields(self):
-        self.criterion = CUCM_SQL_SEARCH_LINE_GROUP_CRITERIA[self.criterion]
-        return self
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_LINE_GROUP_CRITERIA[self.criterion]
 
 
 class CucmSqlSearchRemoteDestinationModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchRemoteDestinationEnum
 
-    @model_validator(mode="after")
-    def check_fields(self):
-        self.criterion = CUCM_SQL_SEARCH_REMOTE_DESTINATION_CRITERIA[self.criterion]
-        return self
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_REMOTE_DESTINATION_CRITERIA[self.criterion]
 
 
 class CucmSqlSearchTranslationPatternModel(CucmSqlBaseSearchModel):
     criterion: CucmSqlSearchTranslationPatternEnum
 
-    @model_validator(mode="after")
-    def check_fields(self):
-        self.criterion = CUCM_SQL_SEARCH_TRANSLATION_PATTERN_CRITERIA[self.criterion]
-        return self
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_TRANSLATION_PATTERN_CRITERIA[self.criterion]

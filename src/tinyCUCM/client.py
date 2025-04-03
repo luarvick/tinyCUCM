@@ -1606,7 +1606,7 @@ class CucmClient(CucmSettings):
         :return:
         """
 
-        validated_data = CucmSqlSearchCallPickupGroupModel(**kwargs).model_dump()
+        validated_data = CucmSqlSearchCallPickupGroupModel(**kwargs)
         sql_query = """SELECT cpg.pkid,
                               cpg.name,
                               npg.description,
@@ -1624,7 +1624,10 @@ class CucmClient(CucmSettings):
                     LEFT JOIN routepartition rpm ON rpm.pkid = npm.fkroutepartition
                         WHERE LOWER({obj}) LIKE '%{val}%'
                           AND npg.tkpatternusage = '4'
-                     ORDER BY cpg.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
+                     ORDER BY cpg.name""".format(
+            obj=validated_data.sql_criterion,
+            val=validated_data.value.lower()
+        )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
     def sqlSearchDevice(self, **kwargs: Unpack[CucmSqlSearchDeviceModel]) -> Union[tuple[dict, ...], None]:
@@ -1640,7 +1643,7 @@ class CucmClient(CucmSettings):
         :return:
         """
 
-        validated_data = CucmSqlSearchDeviceModel(**kwargs).model_dump()
+        validated_data = CucmSqlSearchDeviceModel(**kwargs)
         sql_query = """SELECT d.pkid,
                               d.name,
                               d.description,
@@ -1672,7 +1675,8 @@ class CucmClient(CucmSettings):
                           AND (d.tkclass = '1' OR d.tkclass = '20' OR d.tkclass = '254')
                           AND d.name NOT LIKE 'ModelProfile%'
                      ORDER BY d.name, dnpm.numplanindex""".format(
-            obj=validated_data["criterion"], val=validated_data["value"].lower()
+            obj=validated_data.sql_criterion,
+            val=validated_data.value.lower()
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
@@ -1689,7 +1693,7 @@ class CucmClient(CucmSettings):
         :return:
         """
 
-        validated_data = CucmSqlSearchEndUserModel(**kwargs).model_dump()
+        validated_data = CucmSqlSearchEndUserModel(**kwargs)
         sql_query = """SELECT eu.pkid,
                               eu.userid,
                               eu.displayname AS display_name,
@@ -1702,7 +1706,10 @@ class CucmClient(CucmSettings):
                               eu.status AS user_status
                          FROM enduser eu
                         WHERE LOWER({obj}) LIKE '%{val}%' 
-                     ORDER BY eu.userid""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
+                     ORDER BY eu.userid""".format(
+            obj=validated_data.sql_criterion,
+            val=validated_data.value.lower()
+        )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
     def sqlSearchLineGroup(self, **kwargs: Unpack[CucmSqlSearchLineGroupModel]) -> Union[tuple[dict, ...], None]:
@@ -1717,7 +1724,7 @@ class CucmClient(CucmSettings):
         :return:
         """
 
-        validated_data = CucmSqlSearchLineGroupModel(**kwargs).model_dump()
+        validated_data = CucmSqlSearchLineGroupModel(**kwargs)
         sql_query = """SELECT lg.pkid,
                               lg.name,
                               tda.name AS algorithm,
@@ -1733,7 +1740,8 @@ class CucmClient(CucmSettings):
                     LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
                         WHERE LOWER({obj}) LIKE '%{val}%' 
                      ORDER BY lg.name, lgnpm.lineselectionorder""".format(
-            obj=validated_data["criterion"], val=validated_data["value"].lower()
+            obj=validated_data.sql_criterion,
+            val=validated_data.value.lower()
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
@@ -1751,7 +1759,7 @@ class CucmClient(CucmSettings):
         :return:
         """
 
-        validated_data = CucmSqlSearchRemoteDestinationModel(**kwargs).model_dump()
+        validated_data = CucmSqlSearchRemoteDestinationModel(**kwargs)
         sql_query = """SELECT rd.pkid,
                               rd.name,
                               rdd.destination,
@@ -1762,7 +1770,10 @@ class CucmClient(CucmSettings):
                          FROM remotedestination rd
                     LEFT JOIN remotedestinationdynamic rdd ON rdd.fkremotedestination = rd.pkid
                         WHERE LOWER({obj}) LIKE '%{val}%'
-                     ORDER BY rd.name""".format(obj=validated_data["criterion"], val=validated_data["value"].lower())
+                     ORDER BY rd.name""".format(
+            obj=validated_data.sql_criterion,
+            val=validated_data.value.lower()
+        )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
     def sqlSearchTranslationPattern(
@@ -1780,7 +1791,7 @@ class CucmClient(CucmSettings):
         :return:
         """
 
-        validated_data = CucmSqlSearchTranslationPatternModel(**kwargs).model_dump()
+        validated_data = CucmSqlSearchTranslationPatternModel(**kwargs)
         sql_query = """SELECT np.pkid,
                               np.dnorpattern AS pattern,
                               np.description,
@@ -1797,7 +1808,8 @@ class CucmClient(CucmSettings):
                         WHERE LOWER({obj}) LIKE '%{val}%'
                           AND np.tkpatternusage = '3'
                      ORDER BY np.dnorpattern""".format(
-            obj=validated_data["criterion"], val=validated_data["value"].lower()
+            obj=validated_data.sql_criterion,
+            val=validated_data.value.lower()
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
