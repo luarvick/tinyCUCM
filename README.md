@@ -1877,6 +1877,7 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
 * `Validate` Methods:
   * `sqlValidateEndUser` - required keywords args: `userid`
   * `sqlValidateLine` - required keywords args: `pattern` (Type Pattern Usage: Device Only)
+  * `sqlValidateLineDevices` - required keywords args: `pattern` (Type Pattern Usage: Device Only)
   * `sqlValidatePattern` - required keywords args: `pattern` (Type Pattern Usage: Any)
 
 </details>
