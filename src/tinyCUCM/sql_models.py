@@ -1,5 +1,14 @@
 from enum import Enum
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel
+from typing import Optional
+
+
+CUCM_SQL_DEFAULT_PATTERN_CRITERIA = {
+    "Pattern": "np.dnorpattern",
+    "Description": "np.description",
+    "Partition": "rp.name",
+    "Calling Search Space": "css.name",
+}
 
 
 CUCM_SQL_SEARCH_CALL_PICKUP_GROUP_CRITERIA = {
@@ -33,15 +42,15 @@ CUCM_SQL_SEARCH_LINE_GROUP_CRITERIA = {
     "Member Line Number": "np.dnorpattern",
     "Member Line Description": "np.description",
 }
+CUCM_SQL_SEARCH_DIRECTORY_NUMBER_CRITERIA = CUCM_SQL_DEFAULT_PATTERN_CRITERIA | {
+    "Alerting Name": "np.alertingname",
+    "Alerting Name ASCII": "np.alertingnameascii",
+}
 CUCM_SQL_SEARCH_REMOTE_DESTINATION_CRITERIA = {
     "Name": "rd.name",
     "Destination": "rdd.destination",
 }
-CUCM_SQL_SEARCH_TRANSLATION_PATTERN_CRITERIA = {
-    "Pattern": "np.dnorpattern",
-    "Description": "np.description",
-    "Partition": "rp.name",
-    "Calling Search Space": "css.name",
+CUCM_SQL_SEARCH_TRANSLATION_PATTERN_CRITERIA = CUCM_SQL_DEFAULT_PATTERN_CRITERIA | {
     "Called Party Transform Mask": "np.calledpartytransformationmask",
     "Prefix Digits Out": "np.prefixdigitsout",
 }
@@ -68,6 +77,15 @@ class CucmSqlSearchDeviceEnum(str, Enum):
     userid = "Userid"
     device_pool = "Device Pool"
     device_type = "Device Type"
+
+
+class CucmSqlSearchDirectoryNumberEnum(str, Enum):
+    pattern = "Pattern"
+    description = "Description"
+    partition = "Partition"
+    css = "Calling Search Space"
+    alertingname = "Alerting Name"
+    alertingnameascii = "Alerting Name ASCII"
 
 
 class CucmSqlSearchEndUserEnum(str, Enum):
@@ -107,7 +125,7 @@ class CucmSqlSearchTranslationPatternEnum(str, Enum):
 
 
 class CucmSqlBaseSearchModel(BaseModel):
-    value: str
+    value: Optional[str] = None
 
 
 class CucmSqlSearchCallPickupGroupModel(CucmSqlBaseSearchModel):
@@ -124,6 +142,14 @@ class CucmSqlSearchDeviceModel(CucmSqlBaseSearchModel):
     @property
     def sql_criterion(self):
         return CUCM_SQL_SEARCH_DEVICE_CRITERIA[self.criterion]
+
+
+class CucmSqlSearchDirectoryNumberModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchDirectoryNumberEnum
+
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_DIRECTORY_NUMBER_CRITERIA[self.criterion]
 
 
 class CucmSqlSearchEndUserModel(CucmSqlBaseSearchModel):

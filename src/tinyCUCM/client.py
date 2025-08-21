@@ -13,6 +13,7 @@ from .ris_models import CucmRisGetCtiModel
 from .sql_models import (
     CucmSqlSearchCallPickupGroupModel,
     CucmSqlSearchDeviceModel,
+    CucmSqlSearchDirectoryNumberModel,
     CucmSqlSearchEndUserModel,
     CucmSqlSearchLineGroupModel,
     CucmSqlSearchRemoteDestinationModel,
@@ -1631,14 +1632,37 @@ class CucmClient(CucmSettings):
         """
         SQL Search Object Method.
 
-        * criterion: `Name`, `Description`, `Pattern`, `Member Line Number`, `Member Line Description`
-        * value: Search Value String
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Name"
+                - "Description"
+                - "Pattern"
+                - "Member Line Number"
+                - "Member Line Description"
 
-        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion                 | Value = "" (empty string) | Value = None                                  |
+        |---------------------------|---------------------------|-----------------------------------------------|
+        | "Name"                    | Returns all records       | Returns none (field is required)              |
+        | "Description"             | Returns all records       | Returns records without CPG description       |
+        | "Pattern"                 | Returns all records       | Returns none (field is required)              |
+        | "Member Line Number"      | Returns all records       | Returns records without members (empty group) |
+        | "Member Line Description" | Returns all records       | Returns records without member description    |
+
+        :param kwargs:
         :return:
         """
 
         validated_data = CucmSqlSearchCallPickupGroupModel(**kwargs)
+
+        condition_for_none = "= ''"
+        if validated_data.sql_criterion == "npm.dnorpattern":
+            # Search Empty Call Pickup Groups
+            condition_for_none = "IS NULL"
+
         sql_query = """SELECT cpg.pkid,
                               cpg.name,
                               npg.description,
@@ -1654,11 +1678,11 @@ class CucmClient(CucmSettings):
                     LEFT JOIN pickupgrouplinemap pglm ON pglm.fkpickupgroup = cpg.pkid
                     LEFT JOIN numplan npm ON npm.pkid = pglm.fknumplan_line
                     LEFT JOIN routepartition rpm ON rpm.pkid = npm.fkroutepartition
-                        WHERE LOWER({obj}) LIKE '%{val}%'
+                        WHERE LOWER({obj}) {val}
                           AND npg.tkpatternusage = '4'
                      ORDER BY cpg.name""".format(
             obj=validated_data.sql_criterion,
-            val=validated_data.value.lower()
+            val=condition_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
@@ -1667,15 +1691,41 @@ class CucmClient(CucmSettings):
         """
         SQL Search Object Method.
 
-        * criterion:Search By: `Name`, `Description`, `Line Number`, `Line Description`, `Userid`, `Device Pool`,
-          `Device Type`
-        * value: Search Value String
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Name"
+                - "Description"
+                - "Line Number"
+                - "Line Description"
+                - "Userid"
+                - "Device Pool"
+                - "Device Type"
 
-        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion          | Value = "" (empty string)                 | Value = None                               |
+        |--------------------|-------------------------------------------|--------------------------------------------|
+        | "Name"             | Returns all records                       | Returns none (field is required)           |
+        | "Description"      | Returns all records                       | Returns records without device description |
+        | "Line Number"      | Returns all records with line             | Returns records without line               |
+        | "Line Description" | Returns all records with line description | Returns records without line description   |
+        | "Userid"           | Returns all records with owner            | Returns records without owner              |
+        | "Device Pool"      | Returns all records with device pool      | Returns records without device pool        |
+        | "Device Type"      | Returns all records                       | Returns none (field is required)           |
+
+        :param kwargs:
         :return:
         """
 
         validated_data = CucmSqlSearchDeviceModel(**kwargs)
+
+        condition_for_none = "= ''"
+        if validated_data.sql_criterion in ("np.dnorpattern", "eu.userid", "dp.name"):
+            # Search Device Without Line, Userid, Device Pool
+            condition_for_none = "IS NULL"
+
         sql_query = """SELECT d.pkid,
                               d.name,
                               d.description,
@@ -1703,12 +1753,70 @@ class CucmClient(CucmSettings):
                     LEFT JOIN typeproduct tprod ON tprod.tkmodel = d.tkmodel
                     LEFT JOIN enduser eu ON eu.pkid = d.fkenduser
                     LEFT JOIN enduser eu_rdp ON eu_rdp.pkid = d.fkenduser_mobility
-                        WHERE LOWER({obj}) LIKE '%{val}%'
+                        WHERE LOWER({obj}) {val}
                           AND (d.tkclass = '1' OR d.tkclass = '20' OR d.tkclass = '254')
                           AND d.name NOT LIKE 'ModelProfile%'
                      ORDER BY d.name, dnpm.numplanindex""".format(
             obj=validated_data.sql_criterion,
-            val=validated_data.value.lower()
+            val=condition_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchDirectoryNumber(
+        self, **kwargs: Unpack[CucmSqlSearchDirectoryNumberModel]
+    ) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Object Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Pattern"
+                - "Description"
+                - "Partition"
+                - "Calling Search Space"
+                - "Alerting Name"
+                - "Alerting Name ASCII"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion              | Value = "" (empty string)                     | Value = None                                 |
+        |------------------------|-----------------------------------------------|----------------------------------------------|
+        | "Pattern"              | Returns all records                           | Returns none (field is required)             |
+        | "Description"          | Returns all records                           | Returns records without line description     |
+        | "Partition"            | Returns all records with partition            | Returns records without partition            |
+        | "Calling Search Space" | Returns all records with calling search space | Returns records without calling search space |
+        | "Alerting Name"        | Returns all records                           | Returns records without alerting name        |
+        | "Alerting Name ASCII"  | Returns all records                           | Returns records without alerting name ascii  |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchDirectoryNumberModel(**kwargs)
+
+        condition_for_none = "= ''"
+        if validated_data.sql_criterion in ("rp.name", "css.name"):
+            # Search Device Without Partition, Calling Search Space
+            condition_for_none = "IS NULL"
+
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS pattern,
+                              np.description,
+                              np.alertingname,
+                              np.alertingnameascii,
+                              rp.name AS partition,
+                              css.name AS css
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN callingsearchspace css ON css.pkid = np.fkcallingsearchspace_sharedlineappear
+                        WHERE LOWER({obj}) {val}
+                          AND np.tkpatternusage = '2'
+                     ORDER BY np.dnorpattern""".format(
+            obj=validated_data.sql_criterion,
+            val=condition_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
@@ -1717,18 +1825,42 @@ class CucmClient(CucmSettings):
         """
         SQL Search Object Method.
 
-        * criterion: Search By: `Userid`, `Display Name`, `Last Name`, `First Name`, `Phone Number`, `Mobile Number`,
-          `Email`, `Directory URI`
-        * value: Search Value String
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Userid"
+                - "Display Name"
+                - "Last Name"
+                - "First Name"
+                - "Phone Number"
+                - "Mobile Number"
+                - "Email"
+                - "Directory URI"
 
-        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion       | Value = "" (empty string) | Value = None                          |
+        |-----------------|---------------------------|---------------------------------------|
+        | "Userid"        | Returns all records       | Returns none (field is required)      |
+        | "Display Name"  | Returns all records       | Returns records without display name  |
+        | "Last Name"     | Returns all records       | Returns none (field is required)      |
+        | "First Name"    | Returns all records       | Returns records without first name    |
+        | "Phone Number"  | Returns all records       | Returns records without phone number  |
+        | "Mobile Number" | Returns all records       | Returns records without mobile number |
+        | "Email"         | Returns all records       | Returns records without email         |
+        | "Directory URI" | Returns all records       | Returns records without directory uri |
+
+        :param kwargs:
         :return:
         """
 
         validated_data = CucmSqlSearchEndUserModel(**kwargs)
+
         sql_query = """SELECT eu.pkid,
                               eu.userid,
                               eu.displayname AS display_name,
+                              eu.lastname AS last_name,
                               eu.telephonenumber AS phone_number,
                               eu.mobile AS mobile_number,
                               eu.mailid,
@@ -1737,10 +1869,10 @@ class CucmClient(CucmSettings):
                               eu.fkdirectorypluginconfig AS user_type,
                               eu.status AS user_status
                          FROM enduser eu
-                        WHERE LOWER({obj}) LIKE '%{val}%' 
+                        WHERE LOWER({obj}) {val}
                      ORDER BY eu.userid""".format(
             obj=validated_data.sql_criterion,
-            val=validated_data.value.lower()
+            val="LIKE ''" if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
@@ -1752,11 +1884,33 @@ class CucmClient(CucmSettings):
         * criterion: `Name`, `Member Line Number`, `Member Line Description`
         * value: Search Value String
 
-        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Name"
+                - "Member Line Number"
+                - "Member Line Description"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion                 | Value = "" (empty string) | Value = None                                  |
+        |---------------------------|---------------------------|-----------------------------------------------|
+        | "Name"                    | Returns all records       | Returns none (field is required)              |
+        | "Member Line Number"      | Returns all records       | Returns records without members (empty group) |
+        | "Member Line Description" | Returns all records       | Returns records without member description    |
+
+        :param kwargs:
         :return:
         """
 
         validated_data = CucmSqlSearchLineGroupModel(**kwargs)
+
+        condition_for_none = "= ''"
+        if validated_data.sql_criterion == "np.dnorpattern":
+            # Search Empty Line Groups
+            condition_for_none = "IS NULL"
+
         sql_query = """SELECT lg.pkid,
                               lg.name,
                               tda.name AS algorithm,
@@ -1770,10 +1924,10 @@ class CucmClient(CucmSettings):
                     LEFT JOIN typedistributealgorithm tda ON tda.enum = lg.tkdistributealgorithm
                     LEFT JOIN numplan np ON np.pkid = lgnpm.fknumplan
                     LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
-                        WHERE LOWER({obj}) LIKE '%{val}%' 
+                        WHERE LOWER({obj}) {val}
                      ORDER BY lg.name, lgnpm.lineselectionorder""".format(
             obj=validated_data.sql_criterion,
-            val=validated_data.value.lower()
+            val=condition_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
@@ -1784,14 +1938,26 @@ class CucmClient(CucmSettings):
         """
         SQL Search Object Method.
 
-        * criterion: `Name`, `Destination`
-        * value: Search Value String
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Name"
+                - "Destination"
 
-        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion     | Value = "" (empty string) | Value = None                     |
+        |---------------|---------------------------|----------------------------------|
+        | "Name"        | Returns all records       | Returns none (field is required) |
+        | "Destination" | Returns all records       | Returns none (field is required) |
+
+        :param kwargs:
         :return:
         """
 
         validated_data = CucmSqlSearchRemoteDestinationModel(**kwargs)
+
         sql_query = """SELECT rd.pkid,
                               rd.name,
                               rdd.destination,
@@ -1801,10 +1967,10 @@ class CucmClient(CucmSettings):
                               rdd.answertoolatetimer AS stop_ringing
                          FROM remotedestination rd
                     LEFT JOIN remotedestinationdynamic rdd ON rdd.fkremotedestination = rd.pkid
-                        WHERE LOWER({obj}) LIKE '%{val}%'
+                        WHERE LOWER({obj}) {val}
                      ORDER BY rd.name""".format(
             obj=validated_data.sql_criterion,
-            val=validated_data.value.lower()
+            val="= ''" if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
@@ -1815,15 +1981,39 @@ class CucmClient(CucmSettings):
         """
         SQL Search Object Method.
 
-        * criterion: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Called Party Transform Mask`,
-          `Prefix Digits Out`
-        * value: Search Value String
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Pattern"
+                - "Description"
+                - "Partition"
+                - "Calling Search Space"
+                - "Called Party Transform Mask"
+                - "Prefix Digits Out"
 
-        :param kwargs:  Required Fields: `kwargs = {"criterion": "Enum", "value": "str"}`
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion                     | Value = "" (empty string)                     | Value = None                                        |
+        |-------------------------------|-----------------------------------------------|-----------------------------------------------------|
+        | "Pattern"                     | Returns all records                           | Returns records without pattern                     |
+        | "Description"                 | Returns all records                           | Returns records without description                 |
+        | "Partition"                   | Returns all records with partition            | Returns records without partition                   |
+        | "Calling Search Space"        | Returns all records with calling search space | Returns records without calling search space        |
+        | "Called Party Transform Mask" | Returns all records                           | Returns records without called party transform mask |
+        | "Prefix Digits Out"           | Returns all records                           | Returns records without prefix digits out           |
+
+        :param kwargs:
         :return:
         """
 
         validated_data = CucmSqlSearchTranslationPatternModel(**kwargs)
+
+        condition_for_none = "= ''"
+        if validated_data.sql_criterion in ("rp.name", "css.name"):
+            # Search Device Without Partition, Calling Search Space
+            condition_for_none = "IS NULL"
+
         sql_query = """SELECT np.pkid,
                               np.dnorpattern AS pattern,
                               np.description,
@@ -1837,11 +2027,71 @@ class CucmClient(CucmSettings):
                     LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
                     LEFT JOIN callingsearchspace css ON css.pkid = np.fkcallingsearchspace_translation
                     LEFT JOIN typepatternrouteclass rc ON rc.enum = np.tkpatternrouteclass
-                        WHERE LOWER({obj}) LIKE '%{val}%'
+                        WHERE LOWER({obj}) {val}
                           AND np.tkpatternusage = '3'
                      ORDER BY np.dnorpattern""".format(
             obj=validated_data.sql_criterion,
-            val=validated_data.value.lower()
+            val=condition_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchUnassignedNumber(self, **kwargs: Unpack[CucmSqlSearchDirectoryNumberModel]):
+
+        """
+        SQL Search Object Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Pattern"
+                - "Description"
+                - "Partition"
+                - "Calling Search Space"
+                - "Alerting Name"
+                - "Alerting Name ASCII"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion              | Value = "" (empty string)                     | Value = None                                 |
+        |------------------------|-----------------------------------------------|----------------------------------------------|
+        | "Pattern"              | Returns all records                           | Returns none (field is required)             |
+        | "Description"          | Returns all records                           | Returns records without line description     |
+        | "Partition"            | Returns all records with partition            | Returns records without partition            |
+        | "Calling Search Space" | Returns all records with calling search space | Returns records without calling search space |
+        | "Alerting Name"        | Returns all records                           | Returns records without alerting name        |
+        | "Alerting Name ASCII"  | Returns all records                           | Returns records without alerting name ascii  |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchDirectoryNumberModel(**kwargs)
+
+        condition_for_none = "= ''"
+        if validated_data.sql_criterion in ("rp.name", "css.name"):
+            # Search Device Without Partition, Calling Search Space
+            condition_for_none = "IS NULL"
+
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS pattern,
+                              np.description,
+                              np.alertingname,
+                              np.alertingnameascii,
+                              rp.name AS partition,
+                              css.name AS css
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN callingsearchspace css ON css.pkid = np.fkcallingsearchspace_sharedlineappear
+                    LEFT JOIN devicenumplanmap dnmp ON dnmp.fknumplan = np.pkid
+                    LEFT JOIN linegroupnumplanmap lgnmp ON lgnmp.fknumplan = np.pkid
+                        WHERE dnmp.pkid IS NULL
+                          AND lgnmp.pkid IS NULL
+                          AND LOWER({obj}) {val}
+                          AND np.tkpatternusage = '2'
+                     ORDER BY np.dnorpattern""".format(
+            obj=validated_data.sql_criterion,
+            val=condition_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 

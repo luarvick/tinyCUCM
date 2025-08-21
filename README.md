@@ -1861,19 +1861,30 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
 * `Search` Methods:
   * `sqlSearchCallPickupGroup` - required keywords args: `criterion`, `value`
     * `criterion` enum: `Name`, `Description`, `Pattern`, `Member Line Number`, `Member Line Description`
+    * `value`: str | None
   * `sqlSearchDevice` - required keywords args: `criterion`, `value`
-    * `criterion` enum: `Name`, `Description`, `Line Number`, `Line Description`, `Userid`, `Device Pool`,
-      `Device Type`
+    * `criterion` enum: `Name`, `Description`, `Line Number`, `Line Description`, `Userid`, `Device Pool`, `Device Type`
+    * `value`: str | None
+  * `sqlSearchDirectoryNumber` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Alerting Name`, `Alerting Name ASCII`
+    * `value`: str | None
   * `sqlSearchEndUser` - required keywords args: `criterion`, `value`
     * `criterion` enum: `Userid`, `Display Name`, `Last Name`, `First Name`, `Phone Number`, `Mobile Number`,
       `Email`, `Directory URI`
+    * `value`: str | None
   * `sqlSearchLineGroup` - required keywords args: `criterion`, `value`
     * `criterion` enum: `Name`, `Member Line Number`, `Member Line Description`
+    * `value`: str | None
   * `sqlSearchRemoteDestination` - required keywords args: `criterion`, `value`
     * `criterion` enum: `Name`, `Destination`
+    * `value`: str | None
   * `sqlSearchTranslationPattern` - required keywords args: `criterion`, `value`
     * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Called Party Transform Mask`,
-      `Prefix Digits Out` 
+      `Prefix Digits Out`
+    * `value`: str | None
+  * `sqlSearchUnassignedNumber` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Alerting Name`, `Alerting Name ASCII`
+    * `value`: str | None
 * `Validate` Methods:
   * `sqlValidateEndUser` - required keywords args: `userid`
   * `sqlValidateLine` - required keywords args: `pattern` (Type Pattern Usage: Device Only)
