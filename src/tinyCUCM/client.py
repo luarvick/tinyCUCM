@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from datetime import datetime
 from random import choice
 from typing import Any, Dict, Optional, Tuple, Union
-from typing_extensions import Unpack
+from typing_extensions import Unpack, deprecated
 from uuid import UUID
 from zeep.helpers import serialize_object
 
@@ -11,6 +11,20 @@ from .decorators import cucm_logging
 from .settings import CucmSettings
 from .ris_models import CucmRisGetCtiModel
 from .sql_models import (
+    CucmSqlSearchCallPickupGroupsModel,
+    CucmSqlSearchDevicesModel,
+    CucmSqlSearchEndUsersModel,
+    CucmSqlSearchLineForwardsEnum,
+    CucmSqlSearchLineForwardsModel,
+    CucmSqlSearchLineGroupsModel,
+    CucmSqlSearchLineNumbersModel,
+    CucmSqlSearchPatternsEnum,
+    CucmSqlSearchPatternsModel,
+    CucmSqlSearchRemoteDestinationsModel,
+    CucmSqlSearchTranslationPatternsModel,
+)
+# TODO: Deprecated -> Remove
+from .sql_models_old import (
     CucmSqlSearchCallPickupGroupModel,
     CucmSqlSearchDeviceModel,
     CucmSqlSearchDirectoryNumberModel,
@@ -35,11 +49,62 @@ class CucmClient(CucmSettings):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.__cucm_get_collection = None
+        self.__cucm_list_collection = None
+
+        self.__cucm_define_methods_collections()
+
+    @property
+    def cucm_get_collection(self) -> Tuple[str]:
+
+        """
+        CUCM Publisher Property.
+        :return:
+        """
+
+        return tuple(self.__cucm_get_collection)
+
+    @property
+    def cucm_list_collection(self) -> Tuple[str]:
+
+        """
+        CUCM Publisher Property.
+        :return:
+        """
+
+        return tuple(self.__cucm_list_collection)
+
+    @staticmethod
+    def __cucm_sql_forward_dst_conditions(value: Optional[str]) -> str:
+
+        """
+        Normalizing Line Forward Destination Search Conditions.
+        :return:
+        """
+
+        columns = (
+            "cfd.cfadestination",
+            "np.cfbdestination",
+            "np.cfbintdestination",
+            "np.cfnadestination",
+            "np.cfnaintdestination",
+            "np.cfurdestination",
+            "np.cfurintdestination",
+        )
+
+        condition = f"LIKE '%{value}%'"
+        separator = " OR "
+        if value is None:
+            condition = "IS NULL"
+            separator = " AND "
+
+        return separator.join(f"{col} {condition}" for col in columns)
+
     @staticmethod
     def __cucm_element_list_to_tuple_of_dicts(elements: Iterable) -> tuple[dict, ...]:
 
         """
-        Normalizing `lxml.etree` items.
+        Normalizing `lxml.etree` Items.
         :param elements:    Collection of `lxml.etree` Items
         :return:
         """
@@ -89,10 +154,41 @@ class CucmClient(CucmSettings):
                 })
         return tuple(resp_result)
 
+    @staticmethod
+    def __cucm_sql_search_none_value_normalizing(
+        sql_criterion: str,
+        criterion_collection: Tuple = ("rp.name", "css.name")
+    ) -> str:
+
+        """
+        Normalizing SQL Search Condition For 'None' Value.
+        :param sql_criterion:           Search By Field Name
+        :param criterion_collection:    Criterion Collection Of Field Names For 'IS NULL' Value
+        :return:
+        """
+
+        # Search Objs Without Partition, Calling Search Space or Any Other
+        return "IS NULL" if sql_criterion in criterion_collection else "= ''"
+
+    def __cucm_define_methods_collections(self):
+
+        """
+        Define AXL Method Collections.
+        :return:
+        """
+
+        self.__cucm_get_collection = []
+        self.__cucm_list_collection = []
+        for method_name in self.axlAllMethods():
+            if "get" in method_name:
+                self.__cucm_get_collection.append(method_name)
+            elif "list" in method_name:
+                self.__cucm_list_collection.append(method_name)
+
     def __cucm_sql_serialize_to_tuple(self, resp_raw) -> Union[tuple[dict, ...], None]:
 
         """
-        Serialize collection of `lxml.etree` items from the SQL Response to the tuple of dictionaries.
+        Serialize Collection Of `lxml.etree` Items From The SQL Response To The Tuple Of dictionaries.
         :param resp_raw:    SQL Query Response (class `zeep.objects.ExecuteSQLQueryRes`)
         :return:
         """
@@ -111,7 +207,7 @@ class CucmClient(CucmSettings):
     def __cucm_sql_execute(self, sql_query: str) -> Union[tuple[dict, ...], None]:
 
         """
-        Base AXL SQL Execute method for request to the Cisco UCM DB Informix.
+        Base AXL SQL Execute Method For Request To The Cisco UCM DB Informix.
         :param sql_query:   SQL Query Expression
         :return:
         """
@@ -468,6 +564,28 @@ class CucmClient(CucmSettings):
         """
 
         return self._axl.doLdapSync(**kwargs)
+
+    @cucm_logging
+    def axlGetAny(self, method: str, **kwargs: dict):
+
+        """
+        AXL Get Any Object Method.
+        :param method:      Get Method Name
+        :param kwargs:      Get Method Payload Field:
+                            `kwargs = {"uuid": "uuid.UUID"}`
+                            or
+                            `kwargs = {"name": "str"}`
+                            or any other key for get method
+        :return:
+        """
+
+        if not method in self.__cucm_get_collection:
+            raise AttributeError(f"Method {repr(method)} is not in allowed get methods.")
+
+        get_method = getattr(self._axl, method, None)
+        if not callable(get_method):
+            raise AttributeError(f"Method {repr(method)} not found or not callable.")
+        return serialize_object(get_method(**kwargs)["return"], dict)
 
     @cucm_logging
     def axlGetCallPickupGroup(self, **kwargs: Union[dict, ...]) -> Optional[Dict[str, Any]]:
@@ -1151,7 +1269,7 @@ class CucmClient(CucmSettings):
 
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlGetDeviceEndUsersRelations(self, obj: Union[str, UUID]) -> Union[tuple[dict, ...], None]:
+    def sqlGetDeviceEndUsersRelations(self, obj: Union[str, UUID]) -> Optional[Tuple[Dict[str, Any]]]:
 
         """
         SQL Get Object Method.
@@ -1185,7 +1303,7 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
-    def sqlGetDeviceServicesSubscription(self, obj: Union[str, UUID]) -> Union[tuple[dict, ...], None]:
+    def sqlGetDeviceServicesSubscription(self, obj: Union[str, UUID]) -> Optional[Tuple[Dict[str, Any]]]:
 
         """
         SQL Get Object Method.
@@ -1194,7 +1312,8 @@ class CucmClient(CucmSettings):
         """
 
         # One Device - A lot of Services or None Services
-        sql_query = """SELECT d.name,
+        sql_query = """SELECT d.pkid,
+                              d.name,
                               d.description,  
                               d.allowhotelingflag AS em_enable,
                               tss.servicename AS service_name
@@ -1284,7 +1403,7 @@ class CucmClient(CucmSettings):
             resp_result = resp_result[0]
         return resp_result
 
-    def sqlGetEndUserDevicesRelations(self, obj: Union[str, UUID]) -> Union[tuple[dict, ...], None]:
+    def sqlGetEndUserDevicesRelations(self, obj: Union[str, UUID]) -> Optional[Tuple[Dict[str, Any]]]:
 
         """
         SQL Get Object Method.
@@ -1317,6 +1436,66 @@ class CucmClient(CucmSettings):
                      ORDER BY d.name""".format(val=str(obj).lower() if isinstance(obj, UUID) else obj.lower())
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    def sqlGetLineForwardDestinations(self, destination: str) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Get Object Method.
+        :param destination:     Line Forward Destinations Value
+        :return:
+        """
+
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description,
+                              cfd.cfavoicemailenabled AS voice_all,
+                              cfd.cfadestination AS dst_all,
+                              cfa.name AS css_primary,
+                              scfa.name AS css_secondary,
+                              np.cfbvoicemailenabled AS voice_ext_busy,
+                              np.cfbdestination AS dst_ext_busy,
+                              cfb.name AS css_ext_busy,
+                              np.cfbintvoicemailenabled AS voice_int_busy,
+                              np.cfbintdestination AS dst_int_busy,
+                              cfbint.name AS css_int_busy,
+                              np.cfnavoicemailenabled AS voice_ext_no_ans,
+                              np.cfnadestination AS dst_ext_no_ans,
+                              cfna.name AS css_ext_no_ans,
+                              np.cfnaduration AS duration_no_ans,
+                              np.cfnaintvoicemailenabled AS voice_int_no_ans,
+                              np.cfnaintdestination AS dst_int_no_ans,
+                              cfnaint.name AS css_int_no_ans,
+                              np.cfurvoicemailenabled AS voice_ext_unreg,
+                              np.cfurdestination AS dst_ext_unreg,
+                              cfur.name AS css_ext_unreg,
+                              np.cfurintvoicemailenabled AS voice_int_unreg,
+                              np.cfurintdestination AS dst_int_unreg,
+                              cfurint.name AS css_int_unreg
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN callforwarddynamic cfd ON cfd.fknumplan = np.pkid
+                    LEFT JOIN callingsearchspace cfa ON cfd.fkcallingsearchspace_cfa = cfa.pkid
+                    LEFT JOIN callingsearchspace scfa ON cfd.fkcallingsearchspace_scfa = scfa.pkid
+                    LEFT JOIN callingsearchspace cfb ON np.fkcallingsearchspace_cfb = cfb.pkid
+                    LEFT JOIN callingsearchspace cfbint ON np.fkcallingsearchspace_cfbint = cfbint.pkid
+                    LEFT JOIN callingsearchspace cfna ON np.fkcallingsearchspace_cfna = cfna.pkid
+                    LEFT JOIN callingsearchspace cfnaint ON np.fkcallingsearchspace_cfnaint = cfnaint.pkid
+                    LEFT JOIN callingsearchspace cfur ON np.fkcallingsearchspace_cfur = cfur.pkid
+                    LEFT JOIN callingsearchspace cfurint ON np.fkcallingsearchspace_cfurint = cfurint.pkid
+                        WHERE cfd.cfadestination LIKE '%{dst}%' OR 
+                              np.cfbdestination LIKE '%{dst}%' OR 
+                              np.cfbintdestination LIKE '%{dst}%' OR 
+                              np.cfnadestination LIKE '%{dst}%' OR 
+                              np.cfnaintdestination LIKE '%{dst}%' OR 
+                              np.cfurdestination LIKE '%{dst}%' OR 
+                              np.cfurintdestination LIKE '%{dst}%'
+                     ORDER BY np.dnorpattern""".format(dst=destination)
+        return self.sqlExecuteQuery(sql_query=sql_query)
+
+    @deprecated(
+        'The `sqlGetLineGroupStatus` method is deprecated; use `sqlGetLineGroupMemberStatuses` instead.',
+        category=DeprecationWarning
+    )
     def sqlGetLineGroupStatus(self, obj: Union[str, UUID]) -> Optional[Dict[str, Any]]:
 
         """
@@ -1374,7 +1553,68 @@ class CucmClient(CucmSettings):
                 item["status"] = "On-Line" if item["status"] == "t" else "Off-Line"
         return resp_result
 
-    def sqlGetRemoteDestination(self, obj: Union[str, UUID]) -> Union[tuple[dict, ...], None]:
+    def sqlGetLineGroupMemberStatuses(self, obj: Union[str, UUID]) -> Optional[Dict[str, Any]]:
+
+        """
+        SQL Get Object Method.
+        :param obj:    Object PKID or Name
+        :return:
+
+        Optional:
+        dnpm.numplanindex AS device_order
+        """
+
+        sql_query = """SELECT np.pkid AS line_pkid,
+                              lgmap.lineselectionorder AS line_index,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description,
+                              dhd.hlog AS status,
+                              d.pkid AS device_pkid,
+                              d.name AS device,
+                              d.description AS device_description,
+                              'phone' AS usage
+                         FROM linegroup lg
+                         JOIN linegroupnumplanmap lgmap ON lgmap.fklinegroup = lg.pkid
+                         JOIN numplan np ON lgmap.fknumplan = np.pkid
+                         JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                         JOIN devicenumplanmap dmap ON dmap.fknumplan = np.pkid
+                         JOIN device d ON dmap.fkdevice = d.pkid
+                    LEFT JOIN extensionmobilitydynamic emd ON emd.fkdevice_currentloginprofile = dmap.pkid
+                    LEFT JOIN device dp ON emd.fkdevice_currentloginprofile = dp.pkid
+                         JOIN devicehlogdynamic dhd ON dhd.fkdevice = d.pkid
+                        WHERE lg.pkid = '{val}'
+                           OR LOWER(lg.name) = '{val}'
+                 UNION SELECT np.pkid AS line_pkid,
+                              lgmap.lineselectionorder AS line_index,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description,
+                              dhd.hlog AS status,
+                              d.pkid AS device_pkid,
+                              d.name AS device,
+                              d.description AS device_description,
+                              'udp' AS usage
+                         FROM extensionmobilitydynamic emd
+                    LEFT JOIN device d ON d.pkid = emd.fkdevice
+                         JOIN devicenumplanmap dnpm ON dnpm.fkdevice = emd.fkdevice_currentloginprofile
+                         JOIN numplan np ON np.pkid = dnpm.fknumplan
+                         JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                         JOIN linegroupnumplanmap lgmap ON lgmap.fknumplan = np.pkid
+                         JOIN linegroup lg ON lg.pkid = lgmap.fklinegroup
+                    LEFT JOIN devicehlogdynamic dhd ON d.pkid = dhd.fkdevice
+                        WHERE lg.pkid = '{val}'
+                           OR LOWER(lg.name) = '{val}'
+                     ORDER BY lgmap.lineselectionorder, d.name""".format(
+            val=str(obj).lower() if isinstance(obj, UUID) else obj.lower()
+        )
+        resp_result = self.sqlExecuteQuery(sql_query=sql_query)
+        if resp_result:
+            for item in resp_result:
+                item["status"] = "On-Line" if item["status"] == "t" else "Off-Line"
+        return resp_result
+
+    def sqlGetRemoteDestination(self, obj: Union[str, UUID]) -> Optional[Tuple[Dict[str, Any]]]:
 
         """
         SQL Get Object Method.
@@ -1409,9 +1649,10 @@ class CucmClient(CucmSettings):
         """
 
         # No Device & Line Group Mapping
-        sql_query = """SELECT np.pkid AS line_pkid, 
+        sql_query = """SELECT np.pkid, 
                               np.dnorpattern AS line,
-                              rp.name AS line_partition
+                              rp.name AS line_partition,
+                              np.description AS line_description
                          FROM numplan np
                     LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
                     LEFT JOIN devicenumplanmap dnmp ON dnmp.fknumplan = np.pkid
@@ -1625,6 +1866,12 @@ class CucmClient(CucmSettings):
             sql_query="SELECT ucup.pkid, ucup.name, ucup.description FROM ucuserprofile ucup ORDER BY ucup.name"
         )
 
+    ####################################################################################################################
+
+    @deprecated(
+        'The `sqlSearchCallPickupGroup` method is deprecated; use `sqlSearchCallPickupGroups` instead.',
+        category=DeprecationWarning
+    )
     def sqlSearchCallPickupGroup(
         self, **kwargs: Unpack[CucmSqlSearchCallPickupGroupModel]
     ) -> Optional[Tuple[Dict[str, Any]]]:
@@ -1686,6 +1933,10 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    @deprecated(
+        'The `sqlSearchDevice` method is deprecated; use `sqlSearchDevices` instead.',
+        category=DeprecationWarning
+    )
     def sqlSearchDevice(self, **kwargs: Unpack[CucmSqlSearchDeviceModel]) -> Optional[Tuple[Dict[str, Any]]]:
 
         """
@@ -1738,7 +1989,7 @@ class CucmClient(CucmSettings):
                               tc.name AS class,
                               tm.name AS model,
                               eu.pkid AS end_user_pkid,
-                              eu.userid, 
+                              eu.userid,
                               eu.displayname AS display_name,
                               eu_rdp.pkid AS end_user_rdp_pkid,
                               eu_rdp.userid AS userid_rdp,
@@ -1762,6 +2013,10 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    @deprecated(
+        'The `sqlSearchDirectoryNumber` method is deprecated; use `sqlSearchLineNumbers` instead.',
+        category=DeprecationWarning
+    )
     def sqlSearchDirectoryNumber(
         self, **kwargs: Unpack[CucmSqlSearchDirectoryNumberModel]
     ) -> Optional[Tuple[Dict[str, Any]]]:
@@ -1820,6 +2075,10 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    @deprecated(
+        'The `sqlSearchEndUser` method is deprecated; use `sqlSearchEndUsers` instead.',
+        category=DeprecationWarning
+    )
     def sqlSearchEndUser(self, **kwargs: Unpack[CucmSqlSearchEndUserModel]) -> Optional[Tuple[Dict[str, Any]]]:
 
         """
@@ -1876,6 +2135,10 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    @deprecated(
+        'The `sqlSearchLineGroup` method is deprecated; use `sqlSearchLineGroups` instead.',
+        category=DeprecationWarning
+    )
     def sqlSearchLineGroup(self, **kwargs: Unpack[CucmSqlSearchLineGroupModel]) -> Optional[Tuple[Dict[str, Any]]]:
 
         """
@@ -1931,6 +2194,10 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    @deprecated(
+        'The `sqlSearchRemoteDestination` method is deprecated; use `sqlSearchRemoteDestinations` instead.',
+        category=DeprecationWarning
+    )
     def sqlSearchRemoteDestination(
         self, **kwargs: Unpack[CucmSqlSearchRemoteDestinationModel]
     ) -> Optional[Tuple[Dict[str, Any]]]:
@@ -1974,6 +2241,10 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    @deprecated(
+        'The `sqlSearchTranslationPattern` method is deprecated; use `sqlSearchTranslationPatterns` instead.',
+        category=DeprecationWarning
+    )
     def sqlSearchTranslationPattern(
         self, **kwargs: Unpack[CucmSqlSearchTranslationPatternModel]
     ) -> Optional[Tuple[Dict[str, Any]]]:
@@ -2035,6 +2306,10 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    @deprecated(
+        'The `sqlSearchUnassignedNumber` method is deprecated; use `sqlSearchUnassignedNumber` instead.',
+        category=DeprecationWarning
+    )
     def sqlSearchUnassignedNumber(self, **kwargs: Unpack[CucmSqlSearchDirectoryNumberModel]):
 
         """
@@ -2095,6 +2370,601 @@ class CucmClient(CucmSettings):
         )
         return self.__cucm_sql_execute(sql_query=sql_query)
 
+    ####################################################################################################################
+
+    def sqlSearchCallPickupGroups(
+        self, **kwargs: Unpack[CucmSqlSearchCallPickupGroupsModel]
+    ) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Name"
+                - "Description"
+                - "Pattern"
+                - "Line Number"
+                - "Line Description"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion          | Value = "" (empty string) | Value = None                                  |
+        |--------------------|---------------------------|-----------------------------------------------|
+        | "Name"             | Returns all records       | Returns none (field is required)              |
+        | "Description"      | Returns all records       | Returns records without CPG description       |
+        | "Pattern"          | Returns all records       | Returns none (field is required)              |
+        | "Line Number"      | Returns all records       | Returns records without members (empty group) |
+        | "Line Description" | Returns all records       | Returns records without member description    |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchCallPickupGroupsModel(**kwargs)
+        value_for_none = self.__cucm_sql_search_none_value_normalizing(
+            validated_data.sql_criterion,
+            criterion_collection=("npm.dnorpattern", "npm.description")
+        )
+        sql_query = """SELECT cpg.pkid,
+                              cpg.name,
+                              npg.description,
+                              npg.dnorpattern AS pattern,
+                              rpg.name AS partition,
+                              npm.pkid AS line_pkid,
+                              npm.dnorpattern AS line_number,
+                              rpm.name AS line_partition,
+                              npm.description AS line_description
+                         FROM pickupgroup cpg
+                    LEFT JOIN numplan npg ON npg.pkid = cpg.fknumplan_pickup
+                    LEFT JOIN routepartition rpg ON rpg.pkid = npg.fkroutepartition
+                    LEFT JOIN pickupgrouplinemap pglm ON pglm.fkpickupgroup = cpg.pkid
+                    LEFT JOIN numplan npm ON npm.pkid = pglm.fknumplan_line
+                    LEFT JOIN routepartition rpm ON rpm.pkid = npm.fkroutepartition
+                        WHERE LOWER({obj}) {val}
+                          AND npg.tkpatternusage = '4'
+                     ORDER BY cpg.name""".format(
+            obj=validated_data.sql_criterion,
+            val=value_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchDevices(self, **kwargs: Unpack[CucmSqlSearchDevicesModel]) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Name"
+                - "Description"
+                - "Line Number"
+                - "Line Description"
+                - "User ID"
+                - "Device Pool"
+                - "Device Type"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion          | Value = "" (empty string)                 | Value = None                               |
+        |--------------------|-------------------------------------------|--------------------------------------------|
+        | "Name"             | Returns all records                       | Returns none (field is required)           |
+        | "Description"      | Returns all records                       | Returns records without device description |
+        | "Line Number"      | Returns all records with line             | Returns records without line               |
+        | "Line Description" | Returns all records with line description | Returns records without line description   |
+        | "User ID"          | Returns all records with owner            | Returns records without owner              |
+        | "Device Pool"      | Returns all records with device pool      | Returns records without device pool        |
+        | "Device Type"      | Returns all records                       | Returns none (field is required)           |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchDevicesModel(**kwargs)
+        # Search Device Without Line, Userid, Device Pool
+        value_for_none = self.__cucm_sql_search_none_value_normalizing(
+            validated_data.sql_criterion,
+            criterion_collection=("np.dnorpattern", "eu.userid", "dp.name")
+        )
+        sql_query = """SELECT d.pkid,
+                              d.name,
+                              d.description,
+                              dp.name AS device_pool,
+                              np.pkid AS line_pkid,
+                              np.dnorpattern AS line_number,
+                              dnpm.numplanindex AS line_index,
+                              rp.name AS line_partition,
+                              np.description AS line_description,
+                              tc.name AS class,
+                              tm.name AS model,
+                              eu.pkid AS end_user_pkid,
+                              eu.userid,
+                              eu.displayname AS display_name,
+                              eu_rdp.pkid AS end_user_rdp_pkid,
+                              eu_rdp.userid AS userid_rdp,
+                              eu_rdp.displayname AS display_name_rdp
+                         FROM device d
+                    LEFT JOIN devicenumplanmap dnpm ON dnpm.fkdevice = d.pkid
+                    LEFT JOIN numplan np ON np.pkid = dnpm.fknumplan
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN devicepool dp ON dp.pkid = d.fkdevicepool
+                    LEFT JOIN typemodel tm ON tm.enum = d.tkmodel
+                    LEFT JOIN typeclass tc ON tc.enum = d.tkclass
+                    LEFT JOIN typeproduct tprod ON tprod.tkmodel = d.tkmodel
+                    LEFT JOIN enduser eu ON eu.pkid = d.fkenduser
+                    LEFT JOIN enduser eu_rdp ON eu_rdp.pkid = d.fkenduser_mobility
+                        WHERE LOWER({obj}) {val}
+                          AND (d.tkclass = '1' OR d.tkclass = '20' OR d.tkclass = '254')
+                          AND d.name NOT LIKE 'ModelProfile%'
+                     ORDER BY d.name, dnpm.numplanindex""".format(
+            obj=validated_data.sql_criterion,
+            val=value_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchEndUsers(self, **kwargs: Unpack[CucmSqlSearchEndUsersModel]) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "User ID"
+                - "Display Name"
+                - "Last Name"
+                - "First Name"
+                - "Phone Number"
+                - "Mobile Number"
+                - "Email"
+                - "Directory URI"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion       | Value = "" (empty string) | Value = None                          |
+        |-----------------|---------------------------|---------------------------------------|
+        | "User ID"       | Returns all records       | Returns none (field is required)      |
+        | "Display Name"  | Returns all records       | Returns records without display name  |
+        | "Last Name"     | Returns all records       | Returns none (field is required)      |
+        | "First Name"    | Returns all records       | Returns records without first name    |
+        | "Phone Number"  | Returns all records       | Returns records without phone number  |
+        | "Mobile Number" | Returns all records       | Returns records without mobile number |
+        | "Email"         | Returns all records       | Returns records without email         |
+        | "Directory URI" | Returns all records       | Returns records without directory uri |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchEndUsersModel(**kwargs)
+        sql_query = """SELECT eu.pkid,
+                              eu.userid,
+                              eu.displayname AS display_name,
+                              eu.lastname AS last_name,
+                              eu.telephonenumber AS phone_number,
+                              eu.mobile AS mobile_number,
+                              eu.mailid,
+                              eu.department,
+                              eu.title,
+                              eu.fkdirectorypluginconfig AS user_type,
+                              eu.status AS user_status
+                         FROM enduser eu
+                        WHERE LOWER({obj}) {val}
+                     ORDER BY eu.userid""".format(
+            obj=validated_data.sql_criterion,
+            val="= ''" if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchLineForwards(self, **kwargs: str) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Line Number"
+                - "Line Description"
+                - "Forward Destination"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+                Behavior per criterion and value:
+
+        | Criterion             | Value = "" (empty string) | Value = None                             |
+        |-----------------------|---------------------------|------------------------------------------|
+        | "Line Number"         | Returns all records       | Returns none (field is required)         |
+        | "Line Description"    | Returns all records       | Returns records without line description |
+        | "Forward Destination" | Returns all records       | Returns records without any forwards     |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchLineForwardsModel(**kwargs)
+
+        search_value = "= ''" if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        search_condition = f"LOWER({validated_data.sql_criterion}) {search_value}"  \
+            if validated_data.criterion != CucmSqlSearchLineForwardsEnum.forward_destination \
+            else self.__cucm_sql_forward_dst_conditions(value=validated_data.value)
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description,
+                              
+                              cfd.cfavoicemailenabled AS voice_all,
+                              cfd.cfadestination AS dst_all,
+                              cfa.name AS css_primary,
+                              scfa.name AS css_secondary,
+                              
+                              np.cfbvoicemailenabled AS voice_ext_busy,
+                              np.cfbdestination AS dst_ext_busy,
+                              cfb.name AS css_ext_busy,
+                              
+                              np.cfbintvoicemailenabled AS voice_int_busy,
+                              np.cfbintdestination AS dst_int_busy,
+                              cfbint.name AS css_int_busy,
+                              
+                              np.cfnavoicemailenabled AS voice_ext_no_ans,
+                              np.cfnadestination AS dst_ext_no_ans,
+                              cfna.name AS css_ext_no_ans,
+                              
+                              np.cfnaduration AS duration_no_ans,
+                              
+                              np.cfnaintvoicemailenabled AS voice_int_no_ans,
+                              np.cfnaintdestination AS dst_int_no_ans,
+                              cfnaint.name AS css_int_no_ans,
+                              
+                              np.cfurvoicemailenabled AS voice_ext_unreg,
+                              np.cfurdestination AS dst_ext_unreg,
+                              cfur.name AS css_ext_unreg,
+                              
+                              np.cfurintvoicemailenabled AS voice_int_unreg,
+                              np.cfurintdestination AS dst_int_unreg,
+                              cfurint.name AS css_int_unreg
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN callforwarddynamic cfd ON cfd.fknumplan = np.pkid
+                    LEFT JOIN callingsearchspace cfa ON cfd.fkcallingsearchspace_cfa = cfa.pkid
+                    LEFT JOIN callingsearchspace scfa ON cfd.fkcallingsearchspace_scfa = scfa.pkid
+                    LEFT JOIN callingsearchspace cfb ON np.fkcallingsearchspace_cfb = cfb.pkid
+                    LEFT JOIN callingsearchspace cfbint ON np.fkcallingsearchspace_cfbint = cfbint.pkid
+                    LEFT JOIN callingsearchspace cfna ON np.fkcallingsearchspace_cfna = cfna.pkid
+                    LEFT JOIN callingsearchspace cfnaint ON np.fkcallingsearchspace_cfnaint = cfnaint.pkid
+                    LEFT JOIN callingsearchspace cfur ON np.fkcallingsearchspace_cfur = cfur.pkid
+                    LEFT JOIN callingsearchspace cfurint ON np.fkcallingsearchspace_cfurint = cfurint.pkid
+                        WHERE {con}
+                          AND np.tkpatternusage = '2'
+                     ORDER BY np.dnorpattern""".format(con=search_condition)
+        return self.sqlExecuteQuery(sql_query=sql_query)
+
+    def sqlSearchLineGroups(self, **kwargs: Unpack[CucmSqlSearchLineGroupsModel]) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        * criterion: `Name`, `Line Number`, `Line Description`
+        * value: Search Value String
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Name"
+                - "Line Number"
+                - "Line Description"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion          | Value = "" (empty string)        | Value = None                                  |
+        |--------------------|----------------------------------|-----------------------------------------------|
+        | "Name"             | Returns all records              | Returns none (field is required)              |
+        | "Line Number"      | Returns all records with members | Returns records without members (empty group) |
+        | "Line Description" | Returns all records              | Returns records without member description    |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchLineGroupsModel(**kwargs)
+        value_for_none = self.__cucm_sql_search_none_value_normalizing(
+            validated_data.sql_criterion,
+            criterion_collection=("np.dnorpattern", "np.description")
+        )
+        sql_query = """SELECT lg.pkid,
+                              lg.name,
+                              tda.name AS algorithm,
+                              np.pkid AS line_pkid,
+                              np.dnorpattern AS line,
+                              rp.name AS line_partition,
+                              np.description AS line_description,
+                              lgnpm.lineselectionorder AS line_index
+                         FROM linegroup lg
+                    LEFT JOIN linegroupnumplanmap lgnpm ON lgnpm.fklinegroup = lg.pkid
+                    LEFT JOIN typedistributealgorithm tda ON tda.enum = lg.tkdistributealgorithm
+                    LEFT JOIN numplan np ON np.pkid = lgnpm.fknumplan
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                        WHERE LOWER({obj}) {val}
+                     ORDER BY lg.name, lgnpm.lineselectionorder""".format(
+            obj=validated_data.sql_criterion,
+            val=value_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchLineNumbers(
+        self, **kwargs: Unpack[CucmSqlSearchLineNumbersModel]
+    ) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Line Number"
+                - "Line Description"
+                - "Partition"
+                - "Calling Search Space"
+                - "Alerting Name"
+                - "Alerting Name ASCII"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion              | Value = "" (empty string)                     | Value = None                                 |
+        |------------------------|-----------------------------------------------|----------------------------------------------|
+        | "Line Number"          | Returns all records                           | Returns none (field is required)             |
+        | "Line Description"     | Returns all records                           | Returns records without line description     |
+        | "Partition"            | Returns all records with partition            | Returns records without partition            |
+        | "Calling Search Space" | Returns all records with calling search space | Returns records without calling search space |
+        | "Alerting Name"        | Returns all records                           | Returns records without alerting name        |
+        | "Alerting Name ASCII"  | Returns all records                           | Returns records without alerting name ascii  |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchLineNumbersModel(**kwargs)
+        value_for_none = self.__cucm_sql_search_none_value_normalizing(validated_data.sql_criterion)
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS line_number,
+                              np.description AS line_description,
+                              np.alertingname,
+                              np.alertingnameascii,
+                              rp.name AS line_partition,
+                              css.name AS line_css_sharedline
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN callingsearchspace css ON css.pkid = np.fkcallingsearchspace_sharedlineappear
+                        WHERE LOWER({obj}) {val}
+                          AND np.tkpatternusage = '2'
+                     ORDER BY np.dnorpattern""".format(
+            obj=validated_data.sql_criterion,
+            val=value_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchPatterns(self, **kwargs: Unpack[CucmSqlSearchPatternsModel]) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Pattern"
+                - "Description"
+                - "Partition"
+                - "Calling Search Space"
+                - "Pattern Usage"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion              | Value = "" (empty string)                     | Value = None                                 |
+        |------------------------|-----------------------------------------------|----------------------------------------------|
+        | "Pattern"              | Returns all records                           | Returns records without pattern              |
+        | "Description"          | Returns all records                           | Returns records without line description     |
+        | "Partition"            | Returns all records with partition            | Returns records without partition            |
+        | "Calling Search Space" | Returns all records with calling search space | Returns records without calling search space |
+        | "Pattern Usage"        | Validation Error                              | Validation Error                             |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchPatternsModel(**kwargs)
+        if validated_data.criterion == CucmSqlSearchPatternsEnum.pattern_usage:
+            # Pattern Usage Enum Value - Wildcard matching may not be used with non-character types
+            validated_value = f"= '{validated_data.value}'" # Pattern Usage Enum Value - Not None & Not Empty String
+        else:
+            if validated_data.value is None:
+                validated_value = self.__cucm_sql_search_none_value_normalizing(validated_data.sql_criterion)
+            else:
+                validated_value = f"LIKE '%{validated_data.value.lower()}%'"
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS pattern,
+                              np.description,
+                              rp.name AS partition,
+                              css.name AS css,
+                              np.tkpatternusage AS pattern_usage,
+                              tpu.name AS pattern_type
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN callingsearchspace css ON css.pkid = np.fkcallingsearchspace_translation
+                    LEFT JOIN typepatternrouteclass rc ON rc.enum = np.tkpatternrouteclass
+                    LEFT JOIN typepatternusage tpu ON tpu.enum = np.tkpatternusage
+                        WHERE {con} {val}
+                     ORDER BY np.dnorpattern, np.tkpatternusage""".format(
+            con=validated_data.sql_criterion \
+                if validated_data.criterion == CucmSqlSearchPatternsEnum.pattern_usage \
+                else f"LOWER({validated_data.sql_criterion})",
+            val=validated_value
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchRemoteDestinations(
+        self, **kwargs: Unpack[CucmSqlSearchRemoteDestinationsModel]
+    ) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Name"
+                - "Remote Destination"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion            | Value = "" (empty string) | Value = None                     |
+        |----------------------|---------------------------|----------------------------------|
+        | "Name"               | Returns all records       | Returns none (field is required) |
+        | "Remote Destination" | Returns all records       | Returns none (field is required) |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchRemoteDestinationsModel(**kwargs)
+        sql_query = """SELECT rd.pkid,
+                              rd.name,
+                              rdd.destination,
+                              rdd.enablesinglenumberreach AS snr,
+                              rdd.ismobilephone AS is_mobile,
+                              rdd.delaybeforeringingcell AS start_delay,
+                              rdd.answertoolatetimer AS stop_ringing
+                         FROM remotedestination rd
+                    LEFT JOIN remotedestinationdynamic rdd ON rdd.fkremotedestination = rd.pkid
+                        WHERE LOWER({obj}) {val}
+                     ORDER BY rd.name""".format(
+            obj=validated_data.sql_criterion,
+            val="= ''" if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchTranslationPatterns(
+        self, **kwargs: Unpack[CucmSqlSearchTranslationPatternsModel]
+    ) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Pattern"
+                - "Description"
+                - "Partition"
+                - "Calling Search Space"
+                - "Called Party Transform Mask"
+                - "Prefix Digits Out"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion                     | Value = "" (empty string)                     | Value = None                                        |
+        |-------------------------------|-----------------------------------------------|-----------------------------------------------------|
+        | "Pattern"                     | Returns all records                           | Returns records without pattern                     |
+        | "Description"                 | Returns all records                           | Returns records without description                 |
+        | "Partition"                   | Returns all records with partition            | Returns records without partition                   |
+        | "Calling Search Space"        | Returns all records with calling search space | Returns records without calling search space        |
+        | "Called Party Transform Mask" | Returns all records                           | Returns records without called party transform mask |
+        | "Prefix Digits Out"           | Returns all records                           | Returns records without prefix digits out           |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchTranslationPatternsModel(**kwargs)
+        value_for_none = self.__cucm_sql_search_none_value_normalizing(validated_data.sql_criterion)
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS pattern,
+                              np.description,
+                              rp.name AS partition,
+                              css.name AS css,
+                              np.calledpartytransformationmask AS called_tmask,
+                              np.prefixdigitsout AS called_prefix,
+                              rc.name AS route_class,
+                              np.blockenable AS block_enable
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON rp.pkid = np.fkroutepartition
+                    LEFT JOIN callingsearchspace css ON css.pkid = np.fkcallingsearchspace_translation
+                    LEFT JOIN typepatternrouteclass rc ON rc.enum = np.tkpatternrouteclass
+                        WHERE LOWER({obj}) {val}
+                          AND np.tkpatternusage = '3'
+                     ORDER BY np.dnorpattern""".format(
+            obj=validated_data.sql_criterion,
+            val=value_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    def sqlSearchUnassignedNumbers(
+        self, **kwargs: Unpack[CucmSqlSearchLineNumbersModel]
+    ) -> Optional[Tuple[Dict[str, Any]]]:
+
+        """
+        SQL Search Objects Method.
+
+        Kwargs:
+            criterion (str): One of the supported filtering fields:
+                - "Line Number"
+                - "Line Description"
+                - "Partition"
+                - "Calling Search Space"
+                - "Alerting Name"
+                - "Alerting Name ASCII"
+
+            value (str | None): The value to filter by. Special behavior applies depending on the criterion.
+
+        Behavior per criterion and value:
+
+        | Criterion              | Value = "" (empty string)                     | Value = None                                 |
+        |------------------------|-----------------------------------------------|----------------------------------------------|
+        | "Line Number"          | Returns all records                           | Returns none (field is required)             |
+        | "Line Description"     | Returns all records                           | Returns records without line description     |
+        | "Partition"            | Returns all records with partition            | Returns records without partition            |
+        | "Calling Search Space" | Returns all records with calling search space | Returns records without calling search space |
+        | "Alerting Name"        | Returns all records                           | Returns records without alerting name        |
+        | "Alerting Name ASCII"  | Returns all records                           | Returns records without alerting name ascii  |
+
+        :param kwargs:
+        :return:
+        """
+
+        validated_data = CucmSqlSearchLineNumbersModel(**kwargs)
+        value_for_none = self.__cucm_sql_search_none_value_normalizing(validated_data.sql_criterion)
+        sql_query = """SELECT np.pkid,
+                              np.dnorpattern AS line_number,
+                              np.description AS line_description,
+                              np.alertingname,
+                              np.alertingnameascii,
+                              rp.name AS line_partition,
+                              css.name AS line_css_sharedline
+                         FROM numplan np
+                    LEFT JOIN routepartition rp ON np.fkroutepartition = rp.pkid
+                    LEFT JOIN callingsearchspace css ON css.pkid = np.fkcallingsearchspace_sharedlineappear
+                    LEFT JOIN devicenumplanmap dnmp ON dnmp.fknumplan = np.pkid
+                    LEFT JOIN linegroupnumplanmap lgnmp ON lgnmp.fknumplan = np.pkid
+                        WHERE dnmp.pkid IS NULL
+                          AND lgnmp.pkid IS NULL
+                          AND LOWER({obj}) {val}
+                          AND np.tkpatternusage = '2'
+                     ORDER BY np.dnorpattern""".format(
+            obj=validated_data.sql_criterion,
+            val=value_for_none if validated_data.value is None else f"LIKE '%{validated_data.value.lower()}%'"
+        )
+        return self.__cucm_sql_execute(sql_query=sql_query)
+
+    ####################################################################################################################
+
     def sqlValidateEndUser(self, userid: str) -> Optional[Tuple[Dict[str, Any]]]:
 
         """
@@ -2105,6 +2975,7 @@ class CucmClient(CucmSettings):
 
         sql_query = """SELECT eu.pkid AS enduser_pkid,
                               eu.userid,
+                              eu.mailid,
                               eu.displayname AS enduser_displayname
                          FROM enduser eu
                         WHERE LOWER(eu.userid) = '{val}'

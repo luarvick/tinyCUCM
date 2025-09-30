@@ -821,6 +821,13 @@ print("Result:", cucm.axlDoLdapSync(**{"uuid": "........-....-....-....-........
 
 #### Get Methods
 
+* `axlGetAny`
+  <details>
+  <summary>keywords args</summary>
+  
+  * required:
+    * `method` and `uuid` or `name` or any other key for getting cucm object 
+  </details>
 * `axlGetCallPickupGroup`
   <details>
   <summary>keywords args</summary>
@@ -890,6 +897,7 @@ print("Result:", cucm.axlDoLdapSync(**{"uuid": "........-....-....-....-........
 
 ```python
 cucm = ...
+print("Result:", cucm.axlGetAny(method="getPhone", name="SEP..."))
 print("Result:", cucm.axlGetPhone(name="SEP..."))
 print("Result:", cucm.axlGetPhone(**{"uuid": "........-....-....-....-............"}))
 # Result: {
@@ -1836,7 +1844,9 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
   * `sqlGetEMSession`
   * `sqlGetEndUserDefaultDeviceProfile`
   * `sqlGetEndUserDevicesRelations`
-  * `sqlGetLineGroupStatus`
+  * `sqlGetLineForwardDestinations`
+  * `sqlGetLineGroupStatus` - <span style="color:#ff0000">**Deprecated**</span>
+  * `sqlGetLineGroupMemberStatuses`
   * `sqlGetRemoteDestination`
 * `List` Methods:
   * `sqlListCallingSearchSpace`
@@ -1859,31 +1869,37 @@ print("Result:", cucm.sqlUpdateQuery(sql_query=sql_query))
   * `sqlListUcServiceProfile`
   * `sqlListUcUserProfile`
 * `Search` Methods:
-  * `sqlSearchCallPickupGroup` - required keywords args: `criterion`, `value`
-    * `criterion` enum: `Name`, `Description`, `Pattern`, `Member Line Number`, `Member Line Description`
+  * `sqlSearchCallPickupGroups` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Name`, `Description`, `Pattern`, `Line Number`, `Line Description`
     * `value`: str | None
-  * `sqlSearchDevice` - required keywords args: `criterion`, `value`
-    * `criterion` enum: `Name`, `Description`, `Line Number`, `Line Description`, `Userid`, `Device Pool`, `Device Type`
+  * `sqlSearchDevices` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Name`, `Description`, `Line Number`, `Line Description`, `User ID`, `Device Pool`, `Device Type`
     * `value`: str | None
-  * `sqlSearchDirectoryNumber` - required keywords args: `criterion`, `value`
-    * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Alerting Name`, `Alerting Name ASCII`
-    * `value`: str | None
-  * `sqlSearchEndUser` - required keywords args: `criterion`, `value`
-    * `criterion` enum: `Userid`, `Display Name`, `Last Name`, `First Name`, `Phone Number`, `Mobile Number`,
+  * `sqlSearchEndUsers` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `User ID`, `Display Name`, `Last Name`, `First Name`, `Phone Number`, `Mobile Number`,
       `Email`, `Directory URI`
     * `value`: str | None
-  * `sqlSearchLineGroup` - required keywords args: `criterion`, `value`
-    * `criterion` enum: `Name`, `Member Line Number`, `Member Line Description`
+  * `sqlSearchLineForwards` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Line Number`, `Line Description`, `Forward Destination`
     * `value`: str | None
-  * `sqlSearchRemoteDestination` - required keywords args: `criterion`, `value`
-    * `criterion` enum: `Name`, `Destination`
+  * `sqlSearchLineGroups` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Name`, `Line Number`, `Line Description`
     * `value`: str | None
-  * `sqlSearchTranslationPattern` - required keywords args: `criterion`, `value`
+  * `sqlSearchLineNumbers` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Line Number`, `Line Description`, `Partition`, `Calling Search Space`, `Alerting Name`, `Alerting Name ASCII`
+    * `value`: str | None
+  * `sqlSearchPatterns` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Pattern Usage`
+    * `value`: str | None
+  * `sqlSearchRemoteDestinations` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Name`, `Remote Destination`
+    * `value`: str | None
+  * `sqlSearchTranslationPatterns` - required keywords args: `criterion`, `value`
     * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Called Party Transform Mask`,
       `Prefix Digits Out`
     * `value`: str | None
-  * `sqlSearchUnassignedNumber` - required keywords args: `criterion`, `value`
-    * `criterion` enum: `Pattern`, `Description`, `Partition`, `Calling Search Space`, `Alerting Name`, `Alerting Name ASCII`
+  * `sqlSearchUnassignedNumbers` - required keywords args: `criterion`, `value`
+    * `criterion` enum: `Line Number`, `Line Description`, `Partition`, `Calling Search Space`, `Alerting Name`, `Alerting Name ASCII`
     * `value`: str | None
 * `Validate` Methods:
   * `sqlValidateEndUser` - required keywords args: `userid`

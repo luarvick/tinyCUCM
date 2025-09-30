@@ -1,34 +1,78 @@
 from enum import Enum
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, model_validator
+from typing import Optional, Self
 
 
-CUCM_SQL_DEFAULT_PATTERN_CRITERIA = {
-    "Pattern": "np.dnorpattern",
-    "Description": "np.description",
-    "Partition": "rp.name",
-    "Calling Search Space": "css.name",
-}
+""" ######################################################### """
+""" ************** TINY CUCM SQL SEARCH MODELS ************** """
+""" ######################################################### """
 
 
-CUCM_SQL_SEARCH_CALL_PICKUP_GROUP_CRITERIA = {
+class CucmSqlBaseSearchModel(BaseModel):
+    value: Optional[str] = None
+
+
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_CALL_PICKUP_GROUPS_CRITERIA = {
     "Name": "cpg.name",
     "Description": "npg.description",
     "Pattern": "npg.dnorpattern",
-    "Member Line Number": "npm.dnorpattern",
-    "Member Line Description": "npm.description",
+    "Line Number": "npm.dnorpattern",
+    "Line Description": "npm.description",
 }
-CUCM_SQL_SEARCH_DEVICE_CRITERIA = {
+
+class CucmSqlSearchCallPickupGroupsEnum(str, Enum):
+    name = "Name"
+    description = "Description"
+    pattern = "Pattern"
+    line_number = "Line Number"
+    line_description = "Line Description"
+
+class CucmSqlSearchCallPickupGroupsModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchCallPickupGroupsEnum
+
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_CALL_PICKUP_GROUPS_CRITERIA[self.criterion]
+
+
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_DEVICES_CRITERIA = {
     "Name": "d.name",
     "Description": "d.description",
     "Line Number": "np.dnorpattern",
     "Line Description": "np.description",
-    "Userid": "eu.userid",
+    "User ID": "eu.userid",
     "Device Pool": "dp.name",
     "Device Type": "tprod.name",
 }
-CUCM_SQL_SEARCH_END_USER_CRITERIA = {
-    "Userid": "eu.userid",
+
+class CucmSqlSearchDevicesEnum(str, Enum):
+    name = "Name"
+    description = "Description"
+    line_number = "Line Number"
+    line_description = "Line Description"
+    user_id = "User ID"
+    device_pool = "Device Pool"
+    device_type = "Device Type"
+
+class CucmSqlSearchDevicesModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchDevicesEnum
+
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_DEVICES_CRITERIA[self.criterion]
+
+
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_END_USERS_CRITERIA = {
+    "User ID": "eu.userid",
     "Display Name": "eu.displayname",
     "Last Name": "eu.lastname",
     "First Name": "eu.firstname",
@@ -37,59 +81,9 @@ CUCM_SQL_SEARCH_END_USER_CRITERIA = {
     "Email": "eu.mailid",
     "Directory URI": "eu.directoryuri",
 }
-CUCM_SQL_SEARCH_LINE_GROUP_CRITERIA = {
-    "Name": "lg.name",
-    "Member Line Number": "np.dnorpattern",
-    "Member Line Description": "np.description",
-}
-CUCM_SQL_SEARCH_DIRECTORY_NUMBER_CRITERIA = CUCM_SQL_DEFAULT_PATTERN_CRITERIA | {
-    "Alerting Name": "np.alertingname",
-    "Alerting Name ASCII": "np.alertingnameascii",
-}
-CUCM_SQL_SEARCH_REMOTE_DESTINATION_CRITERIA = {
-    "Name": "rd.name",
-    "Destination": "rdd.destination",
-}
-CUCM_SQL_SEARCH_TRANSLATION_PATTERN_CRITERIA = CUCM_SQL_DEFAULT_PATTERN_CRITERIA | {
-    "Called Party Transform Mask": "np.calledpartytransformationmask",
-    "Prefix Digits Out": "np.prefixdigitsout",
-}
 
-
-""" ######################################################### """
-""" ****************** TINY CUCM SQL ENUMS ****************** """
-""" ######################################################### """
-
-
-class CucmSqlSearchCallPickupGroupEnum(str, Enum):
-    name = "Name"
-    description = "Description"
-    pattern = "Pattern"
-    member_line_number = "Member Line Number"
-    member_line_description = "Member Line Description"
-
-
-class CucmSqlSearchDeviceEnum(str, Enum):
-    name = "Name"
-    description = "Description"
-    line_number = "Line Number"
-    line_description = "Line Description"
-    userid = "Userid"
-    device_pool = "Device Pool"
-    device_type = "Device Type"
-
-
-class CucmSqlSearchDirectoryNumberEnum(str, Enum):
-    pattern = "Pattern"
-    description = "Description"
-    partition = "Partition"
-    css = "Calling Search Space"
-    alertingname = "Alerting Name"
-    alertingnameascii = "Alerting Name ASCII"
-
-
-class CucmSqlSearchEndUserEnum(str, Enum):
-    userid = "Userid"
+class CucmSqlSearchEndUsersEnum(str, Enum):
+    user_id = "User ID"
     display_name = "Display Name"
     last_name = "Last Name"
     first_name = "First Name"
@@ -98,19 +92,159 @@ class CucmSqlSearchEndUserEnum(str, Enum):
     email = "Email"
     directory_uri = "Directory URI"
 
+class CucmSqlSearchEndUsersModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchEndUsersEnum
 
-class CucmSqlSearchLineGroupEnum(str, Enum):
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_END_USERS_CRITERIA[self.criterion]
+
+
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_LINE_FORWARDS_CRITERIA = {
+    "Line Number": "np.dnorpattern",
+    "Line Description": "np.description",
+    "Forward Destination": "np.cf"
+}
+
+class CucmSqlSearchLineForwardsEnum(str, Enum):
+    line_number = "Line Number"
+    line_description = "Line Description"
+    forward_destination = "Forward Destination"
+
+class CucmSqlSearchLineForwardsModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchLineForwardsEnum
+
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_LINE_FORWARDS_CRITERIA[self.criterion]
+
+
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_LINE_GROUPS_CRITERIA = {
+    "Name": "lg.name",
+    "Line Number": "np.dnorpattern",
+    "Line Description": "np.description",
+}
+
+class CucmSqlSearchLineGroupsEnum(str, Enum):
     name = "Name"
-    member_line_number = "Member Line Number"
-    member_line_description = "Member Line Description"
+    line_number = "Line Number"
+    line_description = "Line Description"
+
+class CucmSqlSearchLineGroupsModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchLineGroupsEnum
+
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_LINE_GROUPS_CRITERIA[self.criterion]
 
 
-class CucmSqlSearchRemoteDestinationEnum(str, Enum):
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_LINE_NUMBERS_CRITERIA = {
+    "Line Number": "np.dnorpattern",
+    "Line Description": "np.description",
+    "Partition": "rp.name",
+    "Calling Search Space": "css.name",
+    "Alerting Name": "np.alertingname",
+    "Alerting Name ASCII": "np.alertingnameascii",
+}
+
+class CucmSqlSearchLineNumbersEnum(str, Enum):
+    line_number = "Line Number"
+    line_description = "Line Description"
+    partition = "Partition"
+    css = "Calling Search Space"
+    alertingname = "Alerting Name"
+    alertingnameascii = "Alerting Name ASCII"
+
+class CucmSqlSearchLineNumbersModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchLineNumbersEnum
+
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_LINE_NUMBERS_CRITERIA[self.criterion]
+
+
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_PATTERNS_CRITERIA = {
+    "Pattern": "np.dnorpattern",
+    "Description": "np.description",
+    "Partition": "rp.name",
+    "Calling Search Space": "css.name",
+    "Pattern Usage": "tpu.enum"
+}
+
+class CucmSqlSearchPatternsEnum(str, Enum):
+    pattern = "Pattern"
+    description = "Description"
+    partition = "Partition"
+    css = "Calling Search Space"
+    pattern_usage = "Pattern Usage"
+
+class CucmSqlSearchPatternsModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchPatternsEnum
+
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_PATTERNS_CRITERIA[self.criterion]
+
+    @model_validator(mode="after")
+    def check_pattern_usage_value(self) -> Self:
+        if self.criterion == CucmSqlSearchPatternsEnum.pattern_usage:
+            if not self.value:
+                raise ValueError("The 'value' field must be a non-empty digits string when criterion is 'Pattern Usage'.")
+
+            if not self.value.isdigit():
+                raise ValueError("The 'value' must contain only digits and be between 0-30 or equal 104 or 105.")
+
+            int_value = int(self.value)
+            if not (0 <= int_value <= 30 or int_value in (104, 105)):
+                raise ValueError("The 'value' must be between 0-30 or equal 104 or 105.")
+        return self
+
+
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_REMOTE_DESTINATIONS_CRITERIA = {
+    "Name": "rd.name",
+    "Remote Destination": "rdd.destination",
+}
+
+class CucmSqlSearchRemoteDestinationsEnum(str, Enum):
     name = "Name"
-    destination = "Destination"
+    remote_destination = "Remote Destination"
+
+class CucmSqlSearchRemoteDestinationsModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchRemoteDestinationsEnum
+
+    @property
+    def sql_criterion(self):
+        return CUCM_SQL_SEARCH_REMOTE_DESTINATIONS_CRITERIA[self.criterion]
 
 
-class CucmSqlSearchTranslationPatternEnum(str, Enum):
+########################################################################################################################
+
+
+CUCM_SQL_SEARCH_TRANSLATION_PATTERNS_CRITERIA = {
+    "Pattern": "np.dnorpattern",
+    "Description": "np.description",
+    "Partition": "rp.name",
+    "Calling Search Space": "css.name",
+    "Called Party Transform Mask": "np.calledpartytransformationmask",
+    "Prefix Digits Out": "np.prefixdigitsout",
+}
+
+class CucmSqlSearchTranslationPatternsEnum(str, Enum):
     pattern = "Pattern"
     description = "Description"
     partition = "Partition"
@@ -118,67 +252,9 @@ class CucmSqlSearchTranslationPatternEnum(str, Enum):
     cptm = "Called Party Transform Mask"
     pdo = "Prefix Digits Out"
 
-
-""" ######################################################### """
-""" ****************** TINY CUCM SQL MODELS ***************** """
-""" ######################################################### """
-
-
-class CucmSqlBaseSearchModel(BaseModel):
-    value: Optional[str] = None
-
-
-class CucmSqlSearchCallPickupGroupModel(CucmSqlBaseSearchModel):
-    criterion: CucmSqlSearchCallPickupGroupEnum
+class CucmSqlSearchTranslationPatternsModel(CucmSqlBaseSearchModel):
+    criterion: CucmSqlSearchTranslationPatternsEnum
 
     @property
     def sql_criterion(self):
-        return CUCM_SQL_SEARCH_CALL_PICKUP_GROUP_CRITERIA[self.criterion]
-
-
-class CucmSqlSearchDeviceModel(CucmSqlBaseSearchModel):
-    criterion: CucmSqlSearchDeviceEnum
-
-    @property
-    def sql_criterion(self):
-        return CUCM_SQL_SEARCH_DEVICE_CRITERIA[self.criterion]
-
-
-class CucmSqlSearchDirectoryNumberModel(CucmSqlBaseSearchModel):
-    criterion: CucmSqlSearchDirectoryNumberEnum
-
-    @property
-    def sql_criterion(self):
-        return CUCM_SQL_SEARCH_DIRECTORY_NUMBER_CRITERIA[self.criterion]
-
-
-class CucmSqlSearchEndUserModel(CucmSqlBaseSearchModel):
-    criterion: CucmSqlSearchEndUserEnum
-
-    @property
-    def sql_criterion(self):
-        return CUCM_SQL_SEARCH_END_USER_CRITERIA[self.criterion]
-
-
-class CucmSqlSearchLineGroupModel(CucmSqlBaseSearchModel):
-    criterion: CucmSqlSearchLineGroupEnum
-
-    @property
-    def sql_criterion(self):
-        return CUCM_SQL_SEARCH_LINE_GROUP_CRITERIA[self.criterion]
-
-
-class CucmSqlSearchRemoteDestinationModel(CucmSqlBaseSearchModel):
-    criterion: CucmSqlSearchRemoteDestinationEnum
-
-    @property
-    def sql_criterion(self):
-        return CUCM_SQL_SEARCH_REMOTE_DESTINATION_CRITERIA[self.criterion]
-
-
-class CucmSqlSearchTranslationPatternModel(CucmSqlBaseSearchModel):
-    criterion: CucmSqlSearchTranslationPatternEnum
-
-    @property
-    def sql_criterion(self):
-        return CUCM_SQL_SEARCH_TRANSLATION_PATTERN_CRITERIA[self.criterion]
+        return CUCM_SQL_SEARCH_TRANSLATION_PATTERNS_CRITERIA[self.criterion]

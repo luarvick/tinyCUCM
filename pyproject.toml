@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tinyCUCM"
-version = "0.2.953"
+version = "0.2.957"
 authors = [
   { name="Luarvick", email="lu.luarvick@gmail.com" },
 ]
